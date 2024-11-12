@@ -1,0 +1,81 @@
+# System plików operacyjnych
+.DS_Store
+Thumbs.db
+
+# Pliki konfiguracji środowiska
+.env
+.env.local
+.env.*.local
+
+# Pliki kompilacji oraz zależności ASP.NET Core
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+*.app
+*.so
+*.dylib
+*.log
+*.vscode/
+*.swp
+
+# Katalogi specyficzne dla Visual Studio/VS Code
+.vscode/
+.idea/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Pliki związane z migracją danych (Entity Framework)
+Migrations/
+
+# Pliki zależności frontendu
+node_modules/
+bower_components/
+
+# Folder dist zawierający pliki wygenerowane przez kompilator Vue/Vuetify
+dist/
+public/
+
+# Pliki zależności Vuetify, webpack, czy inne narzędzia frontendowe
+*.log
+*.lock
+yarn-error.log
+pnpm-debug.log
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Pliki produkcyjne generowane przez Webpack lub inny bundler
+*.cache
+*.temp
+*.tmp
+build/
+
+# Pliki testowe i raporty
+coverage/
+*.cover
+*.lcov
+test-results/
+tests-output/
+
+# Pliki tymczasowe
+*.tmp
+*.bak
+*.old
+*~
+
+# Pliki konfiguracji IDE
+.vscode/
+.idea/
+*.code-workspace
+*.njsproj
+*.sln.ide
+
+# Konfiguracje dodatkowych narzędzi
+npm-debug.log*
+config/
+
