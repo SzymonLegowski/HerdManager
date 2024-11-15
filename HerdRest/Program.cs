@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
@@ -29,7 +30,9 @@ app.UseHttpsRedirection();
 //     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 // };
 //app.MapGet("/api/test", () => "Hello, World!");
+
 app.MapControllers();
+
 // app.MapGet("/weatherforecast", () =>
 // {
 //     var forecast =  Enumerable.Range(1, 5).Select(index =>
