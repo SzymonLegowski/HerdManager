@@ -17,5 +17,8 @@ namespace HerdRest.Data
             options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
         }
         public DbSet<Miot> Mioty { get; set; }
+        public DbSet<Krycie> Krycia { get; set; }
+        public DbSet<Wydarzenie> Wydarzenia { get; set; }
+        public DbSet<Locha> Lochy { get; set; }
     }
 }
