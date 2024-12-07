@@ -46,5 +46,12 @@ namespace HerdRest.Controllers
 
             return CreatedAtAction(nameof(GetLocha), new { id = newLocha.Id }, newLocha);
         }
+
+        // [HttpPut("{id}")]
+        // public async Task<IActionResult> UpdateLocha([FromBody] Locha newLocha, int id)
+        // {
+            
+
+        // }
     }
 }
