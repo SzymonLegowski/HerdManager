@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace HerdRest.Controllers
+namespace HerdRest.Controller
 {
     [Route("api/test")]
     [ApiController]
