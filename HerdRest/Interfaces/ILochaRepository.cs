@@ -1,9 +1,12 @@
+using HerdRest.Dto;
 using HerdRest.Model;
 
 namespace HerdRest.Interfaces
 {
     public interface ILochaRepository
     {
+        LochaDto MapToDto(Locha locha);
+        List<LochaDto> MapToDtoList(List<Locha> lochy);
         bool CreateLocha(Locha locha);
         ICollection<Locha> GetLochy();
         Locha GetLocha(int lochaId);

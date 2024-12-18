@@ -1,12 +1,12 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace HerdRest.Model
+namespace HerdRest.Dto
 {
-    public class Miot
+    public class MiotDto
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public int UrodzoneZywe { get; set; }
         public int UrodzoneMartwe { get; set; }
@@ -15,7 +15,7 @@ namespace HerdRest.Model
         public int Ocena { get; set;}
         public DateTime DataCzasUtworzenia { get; set; }
         public DateTime DataCzasModyfikacji { get; set; }
-        public Locha Locha {get; set;}
-        public ICollection<WydarzenieMiot>? WydarzeniaMiotu { get; set; }
+        public int LochaId {get; set;}
+        public List<int>? WydarzeniaMiotuId { get; set; }
     }
 }

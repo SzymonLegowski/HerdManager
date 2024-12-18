@@ -1,6 +1,8 @@
 using HerdRest.Data;
+using HerdRest.Dto;
 using HerdRest.Interfaces;
 using HerdRest.Model;
+using Npgsql.Internal;
 
 namespace HerdRest.Repository
 {
@@ -11,6 +13,24 @@ namespace HerdRest.Repository
         public LochaRepository(DataContext context)
         {
             _context = context;
+        }
+        public LochaDto MapToDto(Locha locha)
+        {
+            return new LochaDto
+            {   
+                Id = locha.Id,
+                NumerLochy = locha.NumerLochy,
+                Status = locha.Status,
+                IndeksProdukcji365Dni = locha.IndeksProdukcji365Dni,
+                DataCzasUtworzenia = locha.DataCzasUtworzenia,
+                DataCzasModyfikacji = locha.DataCzasModyfikacji,
+                MiotyId = locha.Mioty?.Select(m => m.Id).ToList() ?? [],
+                WydarzeniaLochId = locha.WydarzeniaLoch?.Select(w => w.WydarzenieId).ToList() ?? []
+            };
+        }
+        public List<LochaDto> MapToDtoList(List<Locha> lochy)
+        {
+            return lochy.Select(MapToDto).ToList();
         }
         public bool CreateLocha(Locha locha)
         {

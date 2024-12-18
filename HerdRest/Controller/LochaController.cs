@@ -50,12 +50,13 @@ namespace HerdRest.Controller
         [ProducesResponseType(200, Type = typeof(IEnumerable<Locha>))]
         public IActionResult GetLochy()
         {
-            var lochy = _lochaRepository.GetLochy();
+            var lochy = _lochaRepository.GetLochy().ToList();
+            var dtos = _lochaRepository.MapToDtoList(lochy);
 
              if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(lochy);
+            return Ok(dtos);
         }
 
         [HttpGet("{lochaId}")]
@@ -67,11 +68,12 @@ namespace HerdRest.Controller
                 return NotFound();
             
             var locha = _lochaRepository.GetLocha(lochaId);
+            var dto = _lochaRepository.MapToDto(locha);
 
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(locha);
+            return Ok(dto);
         }
 
         [HttpPut("{lochaId}")]
@@ -98,7 +100,32 @@ namespace HerdRest.Controller
                     return StatusCode(500, ModelState);
                 }
 
-            return NoContent();
+            return Ok("Zapisano pomyślnie!");
         }
+        
+        [HttpDelete("{lochaId}")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public IActionResult DeleteLocha(int lochaId)
+        {
+            if(!_lochaRepository.LochaExists(lochaId))
+            {
+                return NotFound();
+            }
+
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var lochaToDelete = _lochaRepository.GetLocha(lochaId);
+
+            if(!_lochaRepository.DeleteLocha(lochaToDelete))
+            {
+                ModelState.AddModelError("", "Coś poszło nie tak przy usuwaniu");
+            }
+
+            return Ok("Usunięto pomyślnie!");
+        }
+    
     }
 }

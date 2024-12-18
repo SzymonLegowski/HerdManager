@@ -1,13 +1,13 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using HerdRest.Enums;
 
-namespace HerdRest.Model
+namespace HerdRest.Dto
 {
-    public class Wydarzenie
+    public class WydarzenieDto
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public TypWydarzenia TypWydarzenia { get; set; }
         public string Uwagi { get; set; }
@@ -15,8 +15,7 @@ namespace HerdRest.Model
         public DateOnly DataWykonania { get; set; }
         public DateTime DataCzasUtworzenia { get; set; }
         public DateTime DataCzasModyfikacji { get; set; }
-        public ICollection<WydarzenieLocha>? WydarzeniaLoch { get; set;}
-        public ICollection<WydarzenieMiot>? WydarzeniaMioty {get; set;}
-
+        public List<int>? WydarzeniaLochId { get; set;}
+        public List<int>? WydarzeniaMiotyId {get; set;}
     }
 }

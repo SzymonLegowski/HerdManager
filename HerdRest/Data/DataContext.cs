@@ -6,15 +6,21 @@ namespace HerdRest.Data
     public class DataContext : DbContext
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
-        {
-
-        }
+        {}
         public DbSet<Miot> Mioty { get; set; }
         public DbSet<Wydarzenie> Wydarzenia { get; set; }
         public DbSet<Locha> Lochy { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Locha>()
+                .Property(l => l.DataCzasModyfikacji)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
+                .ValueGeneratedOnAddOrUpdate();
+            modelBuilder.Entity<Locha>()
+                .Property(l => l.DataCzasUtworzenia)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
+                .ValueGeneratedOnAdd();
+
             modelBuilder.Entity<WydarzenieLocha>()
                 .HasKey(wl => new { wl.WydarzenieId, wl.LochaId});
             modelBuilder.Entity<WydarzenieLocha>()
@@ -36,7 +42,6 @@ namespace HerdRest.Data
                 .HasOne(m => m.Miot)
                 .WithMany(wm => wm.WydarzeniaMiotu)
                 .HasForeignKey(m => m.MiotId);
-
         }
     }
 
