@@ -7,6 +7,7 @@ namespace HerdRest.Interfaces
     {
         LochaDto MapToDto(Locha locha);
         List<LochaDto> MapToDtoList(List<Locha> lochy);
+        Locha MapToModel(LochaDto lochaDto);
         bool CreateLocha(Locha locha);
         ICollection<Locha> GetLochy();
         Locha GetLocha(int lochaId);

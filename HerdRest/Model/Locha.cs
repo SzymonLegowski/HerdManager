@@ -13,10 +13,11 @@ namespace HerdRest.Model
         public int NumerLochy { get; set; } 
         public StatusLochy Status { get; set; }
         public int IndeksProdukcji365Dni { get; set; }
-        public DateTime DataCzasUtworzenia { get; set; }
-        public DateTime DataCzasModyfikacji { get; set; }
+        [Column(TypeName = "timestamp without time zone")]
+        public DateTime? DataCzasUtworzenia { get; set; }
+        [Column(TypeName = "timestamp without time zone")]
+        public DateTime? DataCzasModyfikacji { get; set; }
         public ICollection<Miot>? Mioty { get; set; }
         public ICollection<WydarzenieLocha>? WydarzeniaLoch { get; set; }
-
     }
 }

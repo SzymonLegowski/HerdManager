@@ -10,9 +10,8 @@ namespace HerdRest.Interfaces
         bool CreateWydarzenie(Wydarzenie wydarzenie, int? miotId, int? lochaId);
         ICollection<Wydarzenie> GetWydarzenia();
         Wydarzenie GetWydarzenie(int wydarzenieId);
-        // bool UpdateWydarzenie(Wydarzenie wydarzenie, int? miotId, int? lochaId);
-        ICollection<Wydarzenie> GetWydarzeniaLochy(int lochaId);
-        ICollection<Wydarzenie> GetWydarzeniaMiotu(int miotId);
+        // ICollection<Wydarzenie> GetWydarzeniaLochy(int lochaId);
+        // ICollection<Wydarzenie> GetWydarzeniaMiotu(int miotId);
         bool UpdateWydarzenie(Wydarzenie wydarzenie);
         bool DeleteWydarzenie(Wydarzenie wydarzenie);
         bool Save();

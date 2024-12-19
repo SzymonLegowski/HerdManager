@@ -15,7 +15,7 @@ namespace HerdRest.Dto
         public DateOnly DataWykonania { get; set; }
         public DateTime DataCzasUtworzenia { get; set; }
         public DateTime DataCzasModyfikacji { get; set; }
-        public List<int>? WydarzeniaLochId { get; set;}
-        public List<int>? WydarzeniaMiotyId {get; set;}
+        public List<int>? LochyId { get; set;}
+        public List<int>? MiotyId {get; set;}
     }
 }

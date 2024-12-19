@@ -5,8 +5,7 @@ namespace HerdRest.Data
 {
     public class DataContext : DbContext
     {
-        public DataContext(DbContextOptions<DataContext> options) : base(options)
-        {}
+        public DataContext(DbContextOptions<DataContext> options) : base(options){}
         public DbSet<Miot> Mioty { get; set; }
         public DbSet<Wydarzenie> Wydarzenia { get; set; }
         public DbSet<Locha> Lochy { get; set; }
@@ -15,9 +14,27 @@ namespace HerdRest.Data
             modelBuilder.Entity<Locha>()
                 .Property(l => l.DataCzasModyfikacji)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
-                .ValueGeneratedOnAddOrUpdate();
+                .ValueGeneratedOnAdd();
             modelBuilder.Entity<Locha>()
                 .Property(l => l.DataCzasUtworzenia)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Wydarzenie>()
+                .Property(w => w.DataCzasModyfikacji)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
+                .ValueGeneratedOnAddOrUpdate();
+            modelBuilder.Entity<Wydarzenie>()
+                .Property(w => w.DataCzasUtworzenia)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
+                .ValueGeneratedOnAdd();
+                
+            modelBuilder.Entity<Miot>()
+                .Property(m => m.DataCzasModyfikacji)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
+                .ValueGeneratedOnAddOrUpdate();
+            modelBuilder.Entity<Miot>()
+                .Property(m => m.DataCzasUtworzenia)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
                 .ValueGeneratedOnAdd();
 

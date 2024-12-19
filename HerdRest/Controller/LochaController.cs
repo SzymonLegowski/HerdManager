@@ -1,6 +1,8 @@
+using HerdRest.Dto;
 using HerdRest.Interfaces;
 using HerdRest.Model;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Update.Internal;
 
 namespace HerdRest.Controller
 {
@@ -18,13 +20,13 @@ namespace HerdRest.Controller
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateLocha([FromBody] Locha lochaCreate)
+        public IActionResult CreateLocha([FromBody] LochaDto lochaCreateDto)
         {
-            if(lochaCreate == null)
+            if(lochaCreateDto == null)
                 return BadRequest(ModelState);
 
             var locha = _lochaRepository.GetLochy()
-                .Where(l => l.NumerLochy == lochaCreate.NumerLochy && l.Status == 0)
+                .Where(l => l.NumerLochy == lochaCreateDto.NumerLochy && l.Status == 0)
                 .FirstOrDefault();
 
             if(locha != null)
@@ -35,6 +37,8 @@ namespace HerdRest.Controller
 
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            var lochaCreate = _lochaRepository.MapToModel(lochaCreateDto);
 
             if(!_lochaRepository.CreateLocha(lochaCreate))
             {
@@ -47,7 +51,7 @@ namespace HerdRest.Controller
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Locha>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<LochaDto>))]
         public IActionResult GetLochy()
         {
             var lochy = _lochaRepository.GetLochy().ToList();
@@ -60,7 +64,7 @@ namespace HerdRest.Controller
         }
 
         [HttpGet("{lochaId}")]
-        [ProducesResponseType(200, Type = typeof(Locha))]
+        [ProducesResponseType(200, Type = typeof(LochaDto))]
         [ProducesResponseType(400)]
         public IActionResult GetLocha(int lochaId)
         {
@@ -80,19 +84,21 @@ namespace HerdRest.Controller
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateLocha(int lochaId, [FromBody]Locha updatedLocha)
+        public IActionResult UpdateLocha(int lochaId, [FromBody]LochaDto updatedLochaDto)
         {
-            if(updatedLocha == null)
-                return BadRequest(ModelState);
-
-            if(lochaId != updatedLocha.Id)
+            if(updatedLochaDto == null)
                 return BadRequest(ModelState);
 
             if(!_lochaRepository.LochaExists(lochaId))
                 return NotFound();
 
+            if(lochaId != updatedLochaDto.Id)
+                return BadRequest();
+
             if(!ModelState.IsValid)
                 return BadRequest();
+            
+            var updatedLocha = _lochaRepository.MapToModel(updatedLochaDto);
             
             if(!_lochaRepository.UpdateLocha(updatedLocha))
                 {

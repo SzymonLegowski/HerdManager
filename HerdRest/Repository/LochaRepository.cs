@@ -2,6 +2,7 @@ using HerdRest.Data;
 using HerdRest.Dto;
 using HerdRest.Interfaces;
 using HerdRest.Model;
+using Microsoft.EntityFrameworkCore;
 using Npgsql.Internal;
 
 namespace HerdRest.Repository
@@ -32,6 +33,20 @@ namespace HerdRest.Repository
         {
             return lochy.Select(MapToDto).ToList();
         }
+        public Locha MapToModel(LochaDto lochaDto)
+        {
+            return new Locha
+            {
+                Id = lochaDto.Id,
+                NumerLochy = lochaDto.NumerLochy,
+                Status = lochaDto.Status,
+                IndeksProdukcji365Dni = lochaDto.IndeksProdukcji365Dni,
+                DataCzasUtworzenia = lochaDto.DataCzasUtworzenia,
+                DataCzasModyfikacji = lochaDto.DataCzasModyfikacji,
+                Mioty = lochaDto.MiotyId?.Select(id => new Miot { Id = id }).ToList(),
+                WydarzeniaLoch = lochaDto.WydarzeniaLochId?.Select(id => new WydarzenieLocha { WydarzenieId = id }).ToList()
+            };
+        }
         public bool CreateLocha(Locha locha)
         {
             _context.Add(locha);
@@ -50,6 +65,8 @@ namespace HerdRest.Repository
 
         public bool UpdateLocha(Locha locha)
         {
+            locha.DataCzasModyfikacji = DateTime.Now;
+            locha.DataCzasUtworzenia = _context.Lochy.Where(l => l.Id == locha.Id).Select(l => l.DataCzasUtworzenia).FirstOrDefault();
             _context.Update(locha);
             return Save();
         }

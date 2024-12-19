@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using HerdRest.Dto;
 using HerdRest.Interfaces;
 using HerdRest.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -11,27 +10,27 @@ namespace HerdRest.Controller
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class WydarzenieController : ControllerBase
+    public class MiotController : ControllerBase
     {
-        private readonly IWydarzenieRepository _wydarzenieRepository;
-        private readonly ILochaRepository _lochaRepository;
-        public WydarzenieController(IWydarzenieRepository wydarzenieRepository, ILochaRepository lochaRepository)
+        private readonly IMiotRepository _miotRepository;
+
+        public MiotController(IMiotRepository miotRepository)
         {
-            _wydarzenieRepository = wydarzenieRepository;
-            _lochaRepository = lochaRepository;
+            _miotRepository = miotRepository;
         }
-         [HttpPost]
+
+        [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateWydarzenie([FromBody] Wydarzenie wydarzenieCreate, int? miotId, int? lochaId)
+        public IActionResult CreateMiot([FromBody] Miot miotCreate)
         {
-            if(wydarzenieCreate == null)
+            if(miotCreate == null)
                 return BadRequest(ModelState);
 
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if(!_wydarzenieRepository.CreateWydarzenie(wydarzenieCreate, miotId, lochaId))
+            if(!_miotRepository.CreateMiot(miotCreate))
             {
                 ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu.");
                 return StatusCode(500, ModelState);
@@ -42,11 +41,11 @@ namespace HerdRest.Controller
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<WydarzenieDto>))]
-        public IActionResult GetLochy()
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Miot>))]
+        public IActionResult GetMioty()
         {
-            var wydarzenia = _wydarzenieRepository.GetWydarzenia().ToList();
-            var dtos = _wydarzenieRepository.MapToDtoList(wydarzenia);
+            var lochy = _miotRepository.GetMioty().ToList();
+            var dtos = _miotRepository.MapToDtoList(lochy);
 
              if(!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -54,16 +53,16 @@ namespace HerdRest.Controller
             return Ok(dtos);
         }
 
-        [HttpGet("{wydarzenieId}")]
-        [ProducesResponseType(200, Type = typeof(WydarzenieDto))]
+        [HttpGet("{miotId}")]
+        [ProducesResponseType(200, Type = typeof(Miot))]
         [ProducesResponseType(400)]
-        public IActionResult GetWydarzenie(int wydarzenieId)
+        public IActionResult GetMiot(int miotId)
         {
-            if(!_wydarzenieRepository.WydarzenieExists(wydarzenieId))
+            if(!_miotRepository.MiotExists(miotId))
                 return NotFound();
             
-            var wydarzenie = _wydarzenieRepository.GetWydarzenie(wydarzenieId);
-            var dto = _wydarzenieRepository.MapToDto(wydarzenie);
+            var miot = _miotRepository.GetMiot(miotId);
+            var dto = _miotRepository.MapToDto(miot);
 
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -71,25 +70,25 @@ namespace HerdRest.Controller
             return Ok(dto);
         }
 
-        [HttpPut("{wydarzenieId}")]
+        [HttpPut("{miotId}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateWydarzenie(int wydarzenieId, [FromBody]Wydarzenie updatedWydarzenie)
+        public IActionResult UpdateMiot(int miotId, [FromBody]Miot updatedMiot)
         {
-            if(updatedWydarzenie == null)
+            if(updatedMiot == null)
                 return BadRequest(ModelState);
 
-            if(wydarzenieId != updatedWydarzenie.Id)
+            if(miotId != updatedMiot.Id)
                 return BadRequest(ModelState);
 
-            if(!_wydarzenieRepository.WydarzenieExists(wydarzenieId))
+            if(!_miotRepository.MiotExists(miotId))
                 return NotFound();
 
             if(!ModelState.IsValid)
                 return BadRequest();
             
-            if(!_wydarzenieRepository.UpdateWydarzenie(updatedWydarzenie))
+            if(!_miotRepository.UpdateMiot(updatedMiot))
                 {
                     ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu zmian.");
                     return StatusCode(500, ModelState);
@@ -98,13 +97,13 @@ namespace HerdRest.Controller
             return Ok("Zapisano pomyślnie!");
         }
         
-        [HttpDelete("{wydarzenieId}")]
+        [HttpDelete("{miotId}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult DeleteWydarzenie(int wydarzenieId)
+        public IActionResult DeleteMiot(int miotId)
         {
-            if(!_wydarzenieRepository.WydarzenieExists(wydarzenieId))
+            if(!_miotRepository.MiotExists(miotId))
             {
                 return NotFound();
             }
@@ -112,9 +111,9 @@ namespace HerdRest.Controller
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var wydarzenieToDelete = _wydarzenieRepository.GetWydarzenie(wydarzenieId);
+            var miotToDelete = _miotRepository.GetMiot(miotId);
 
-            if(!_wydarzenieRepository.DeleteWydarzenie(wydarzenieToDelete))
+            if(!_miotRepository.DeleteMiot(miotToDelete))
             {
                 ModelState.AddModelError("", "Coś poszło nie tak przy usuwaniu");
             }
