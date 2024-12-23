@@ -17,7 +17,7 @@ namespace HerdRest.Model
         public DateTime DataCzasUtworzenia { get; set; }
         [Column(TypeName = "timestamp without time zone")]
         public DateTime DataCzasModyfikacji { get; set; }
-        public Locha Locha {get; set;}
-        public ICollection<WydarzenieMiot>? WydarzeniaMiotu { get; set; }
+        public virtual Locha Locha {get; set;}
+        public virtual ICollection<WydarzenieMiot> WydarzeniaMiotu { get; set; }
     }
 }

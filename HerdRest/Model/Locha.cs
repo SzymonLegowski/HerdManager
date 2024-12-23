@@ -12,12 +12,13 @@ namespace HerdRest.Model
         public int Id { get; set; }
         public int NumerLochy { get; set; } 
         public StatusLochy Status { get; set; }
+        [NotMapped]
         public int IndeksProdukcji365Dni { get; set; }
         [Column(TypeName = "timestamp without time zone")]
         public DateTime? DataCzasUtworzenia { get; set; }
         [Column(TypeName = "timestamp without time zone")]
         public DateTime? DataCzasModyfikacji { get; set; }
-        public ICollection<Miot>? Mioty { get; set; }
-        public ICollection<WydarzenieLocha>? WydarzeniaLoch { get; set; }
+        public virtual ICollection<Miot> Mioty { get; set; }
+        public virtual ICollection<WydarzenieLocha> WydarzeniaLoch { get; set; }
     }
 }

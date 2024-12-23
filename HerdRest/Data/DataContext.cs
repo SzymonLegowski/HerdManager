@@ -9,6 +9,8 @@ namespace HerdRest.Data
         public DbSet<Miot> Mioty { get; set; }
         public DbSet<Wydarzenie> Wydarzenia { get; set; }
         public DbSet<Locha> Lochy { get; set; }
+        public DbSet<WydarzenieLocha> WydarzeniaLochy { get; set; }
+        public DbSet<WydarzenieMiot> WydarzeniaMiotu { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Locha>()

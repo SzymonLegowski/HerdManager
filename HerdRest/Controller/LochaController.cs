@@ -26,7 +26,7 @@ namespace HerdRest.Controller
                 return BadRequest(ModelState);
 
             var locha = _lochaRepository.GetLochy()
-                .Where(l => l.NumerLochy == lochaCreateDto.NumerLochy && l.Status == 0)
+                .Where(l => l.NumerLochy == lochaCreateDto.NumerLochy && lochaCreateDto.Status == 0)
                 .FirstOrDefault();
 
             if(locha != null)
@@ -40,7 +40,7 @@ namespace HerdRest.Controller
 
             var lochaCreate = _lochaRepository.MapToModel(lochaCreateDto);
 
-            if(!_lochaRepository.CreateLocha(lochaCreate))
+            if(!_lochaRepository.CreateLocha(lochaCreate, lochaCreateDto.WydarzeniaLochyId))
             {
                 ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu.");
                 return StatusCode(500, ModelState);
@@ -100,7 +100,7 @@ namespace HerdRest.Controller
             
             var updatedLocha = _lochaRepository.MapToModel(updatedLochaDto);
             
-            if(!_lochaRepository.UpdateLocha(updatedLocha))
+            if(!_lochaRepository.UpdateLocha(updatedLocha, updatedLochaDto.WydarzeniaLochyId))
                 {
                     ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu zmian.");
                     return StatusCode(500, ModelState);

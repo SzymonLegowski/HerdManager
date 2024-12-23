@@ -10,7 +10,7 @@ namespace HerdRest.Dto
     {
         public int Id { get; set; }
         public TypWydarzenia TypWydarzenia { get; set; }
-        public string Uwagi { get; set; }
+        public string? Uwagi { get; set; }
         public DateOnly DataWydarzenia { get; set; }
         public DateOnly DataWykonania { get; set; }
         public DateTime DataCzasUtworzenia { get; set; }

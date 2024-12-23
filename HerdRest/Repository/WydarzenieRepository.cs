@@ -4,20 +4,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using HerdRest.Data;
 using HerdRest.Dto;
+using HerdRest.Enums;
 using HerdRest.Interfaces;
 using HerdRest.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace HerdRest.Repository
 {
-    public class WydarzenieRepository : IWydarzenieRepository
+    public class WydarzenieRepository(DataContext context) : IWydarzenieRepository
     {
-        private readonly DataContext _context;
+        private readonly DataContext _context = context;
 
-        public WydarzenieRepository(DataContext context)
-        {
-            _context = context;
-        }
         public WydarzenieDto MapToDto(Wydarzenie wydarzenie)
         {
             return new WydarzenieDto
@@ -29,15 +26,14 @@ namespace HerdRest.Repository
                 DataWykonania = wydarzenie.DataWykonania,
                 DataCzasUtworzenia = wydarzenie.DataCzasUtworzenia,
                 DataCzasModyfikacji = wydarzenie.DataCzasModyfikacji,
-                LochyId = wydarzenie.WydarzeniaLoch?.Select(wl => wl.LochaId).ToList() ?? [],
-                MiotyId = wydarzenie.WydarzeniaMioty?.Select(wm => wm.MiotId).ToList() ?? []
+                LochyId = wydarzenie.WydarzeniaLoch.Select(l => l.LochaId).ToList() ?? [],
+                MiotyId = wydarzenie.WydarzeniaMioty.Select(m => m.MiotId).ToList() ?? []
             };
         }
         public List<WydarzenieDto> MapToDtoList(List<Wydarzenie> wydarzenia)
         {
             return wydarzenia.Select(MapToDto).ToList();
         }
-
         public Wydarzenie MapToModel(WydarzenieDto wydarzenieDto)
         {
             return new Wydarzenie
@@ -49,50 +45,103 @@ namespace HerdRest.Repository
                 DataWykonania = wydarzenieDto.DataWykonania,
                 DataCzasUtworzenia = wydarzenieDto.DataCzasUtworzenia,
                 DataCzasModyfikacji = wydarzenieDto.DataCzasModyfikacji,
-                WydarzeniaLoch = wydarzenieDto.LochyId?.Select(id => new WydarzenieLocha { LochaId = id }).ToList(),
-                WydarzeniaMioty = wydarzenieDto.MiotyId?.Select(id => new WydarzenieMiot { MiotId = id }).ToList()
+                WydarzeniaLoch = _context.WydarzeniaLochy.Where(w => w.WydarzenieId == wydarzenieDto.Id).ToList() ?? [],
+                WydarzeniaMioty = _context.WydarzeniaMiotu.Where(w => w.WydarzenieId == wydarzenieDto.Id).ToList() ?? []
             };
         }
-        public bool CreateWydarzenie(Wydarzenie wydarzenie, int? miotId, int? wydarzenieId)
+        public bool CreateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
         {
             if(miotId != null)
             {
-                var wydarzenieMiotEntity = _context.Mioty.Where(a => a.Id == miotId).FirstOrDefault();
-                var wydarzenieMiot = new WydarzenieMiot()
+                foreach(var id in miotId)
                 {
-                    Miot = wydarzenieMiotEntity,
-                    Wydarzenie = wydarzenie,
-                };
-                _context.Add(wydarzenieMiot);
+                    var wydarzenieMiotEntity = _context.Mioty.Where(a => a.Id == id).FirstOrDefault();
+                    var wydarzenieMiot = new WydarzenieMiot()
+                    {
+                        Miot = wydarzenieMiotEntity,
+                        Wydarzenie = wydarzenie,
+                    };
+                    _context.Add(wydarzenieMiot);
+                }
             }
 
-            if(wydarzenieId != null)
+            if(lochaId != null)
             {
-                var wydarzenieLochaEntity = _context.Lochy.Where(a => a.Id == wydarzenieId).FirstOrDefault();
-                var wydarzenieLocha = new WydarzenieLocha()
+               foreach(var id in lochaId)
                 {
-                    Locha = wydarzenieLochaEntity,
-                    Wydarzenie = wydarzenie,
-                };
-                _context.Add(wydarzenieLocha);
+                    var wydarzenieLochaEntity = _context.Lochy
+                    .Where(a => a.Id == id).FirstOrDefault();
+                    var wydarzenieLocha = new WydarzenieLocha()
+                    {
+                        Locha = wydarzenieLochaEntity,
+                        Wydarzenie = wydarzenie,
+                    };
+                    _context.Add(wydarzenieLocha);
+                }
             }
-
+            if(wydarzenie.DataWykonania == default)
+            {
+                wydarzenie.DataWykonania = wydarzenie.DataWydarzenia;
+            }
             _context.Add(wydarzenie);
             return Save();
-
         }
         
         public ICollection<Wydarzenie> GetWydarzenia()
         {
-            return [.. _context.Wydarzenia.OrderBy(w => w.Id)];
+            return [.. _context.Wydarzenia
+                .Include(w => w.WydarzeniaLoch)
+                .ThenInclude(wl => wl.Locha)
+                .Include(w => w.WydarzeniaMioty)
+                .ThenInclude(wm => wm.Miot)
+                .OrderBy(w => w.Id)];
         }
 
         public Wydarzenie GetWydarzenie(int wydarzenieId)
         {
-            return _context.Wydarzenia.Where(w => w.Id == wydarzenieId).FirstOrDefault();
+            var wydarzenie = _context.Wydarzenia.Where(w => w.Id == wydarzenieId)
+                .Include(w => w.WydarzeniaLoch)
+                .ThenInclude(wl => wl.Locha)
+                .Include(w => w.WydarzeniaMioty)
+                .ThenInclude(wm => wm.Miot)
+                .FirstOrDefault() ?? throw new InvalidOperationException("Wydarzenie nie istnieje.");
+            return wydarzenie;
         }
-        public bool UpdateWydarzenie(Wydarzenie wydarzenie)
+        public bool UpdateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
         {
+            if(miotId != null)
+            {
+                foreach(var id in miotId)
+                {
+                    if(_context.WydarzeniaMiotu.Where(wm => wm.MiotId == id && wm.WydarzenieId == wydarzenie.Id).FirstOrDefault() == null)
+                        {
+                        var wydarzenieMiotEntity = _context.Mioty.Where(a => a.Id == id).FirstOrDefault();
+                        var wydarzenieMiot = new WydarzenieMiot()
+                        {
+                            Miot = wydarzenieMiotEntity,
+                            Wydarzenie = wydarzenie,
+                        };
+                        _context.Add(wydarzenieMiot);
+                    }
+               }
+            }
+
+            if(lochaId != null)
+            {
+                foreach(var id in lochaId)
+                {
+                    if(_context.WydarzeniaLochy.Where(wl => wl.LochaId == id && wl.WydarzenieId == wydarzenie.Id).FirstOrDefault() == null)
+                    {
+                        var wydarzenieLochaEntity = _context.Lochy.Where(a => a.Id == id).FirstOrDefault();
+                        var wydarzenieLocha = new WydarzenieLocha()
+                        {
+                            Locha = wydarzenieLochaEntity,
+                            Wydarzenie = wydarzenie,
+                        };
+                        _context.Add(wydarzenieLocha);
+                    }
+                }
+            }
             wydarzenie.DataCzasModyfikacji = DateTime.Now;
             wydarzenie.DataCzasUtworzenia = _context.Wydarzenia.Where(l => l.Id == wydarzenie.Id)
                 .Select(l => l.DataCzasUtworzenia)
@@ -104,7 +153,8 @@ namespace HerdRest.Repository
 
         public bool DeleteWydarzenie(Wydarzenie wydarzenie)
         {
-             _context.Remove(wydarzenie);
+            
+            _context.Remove(wydarzenie);
             return Save();
         }
 
@@ -116,7 +166,7 @@ namespace HerdRest.Repository
 
         public bool WydarzenieExists(int wydarzenieId)
         {
-            return _context.Lochy.Any(w => w.Id == wydarzenieId);
+            return _context.Wydarzenia.Any(w => w.Id == wydarzenieId);
         }
     }
 }
