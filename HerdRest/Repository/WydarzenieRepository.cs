@@ -24,8 +24,8 @@ namespace HerdRest.Repository
                 Uwagi = wydarzenie.Uwagi,
                 DataWydarzenia = wydarzenie.DataWydarzenia,
                 DataWykonania = wydarzenie.DataWykonania,
-                DataCzasUtworzenia = wydarzenie.DataCzasUtworzenia,
-                DataCzasModyfikacji = wydarzenie.DataCzasModyfikacji,
+                DataCzasUtworzenia = wydarzenie.DataCzasUtworzenia.ToString("yyyy-MM-dd HH:mm:ss"),
+                DataCzasModyfikacji = wydarzenie.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
                 LochyId = wydarzenie.WydarzeniaLoch.Select(l => l.LochaId).ToList() ?? [],
                 MiotyId = wydarzenie.WydarzeniaMioty.Select(m => m.MiotId).ToList() ?? []
             };
@@ -43,8 +43,8 @@ namespace HerdRest.Repository
                 Uwagi = wydarzenieDto.Uwagi,
                 DataWydarzenia = wydarzenieDto.DataWydarzenia,
                 DataWykonania = wydarzenieDto.DataWykonania,
-                DataCzasUtworzenia = wydarzenieDto.DataCzasUtworzenia,
-                DataCzasModyfikacji = wydarzenieDto.DataCzasModyfikacji,
+                DataCzasUtworzenia = DateTime.Now,
+                DataCzasModyfikacji = DateTime.Now,
                 WydarzeniaLoch = _context.WydarzeniaLochy.Where(w => w.WydarzenieId == wydarzenieDto.Id).ToList() ?? [],
                 WydarzeniaMioty = _context.WydarzeniaMiotu.Where(w => w.WydarzenieId == wydarzenieDto.Id).ToList() ?? []
             };
@@ -109,6 +109,25 @@ namespace HerdRest.Repository
         }
         public bool UpdateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
         {
+            wydarzenie.DataCzasModyfikacji = DateTime.Now;
+            wydarzenie.DataCzasUtworzenia = _context.Wydarzenia.Where(l => l.Id == wydarzenie.Id)
+                .Select(l => l.DataCzasUtworzenia)
+                .FirstOrDefault();
+
+            foreach(var wydarzenieMiot in wydarzenie.WydarzeniaMioty)
+            {
+                if(miotId == null || !miotId.Contains(wydarzenieMiot.MiotId))
+                {
+                    _context.Remove(wydarzenieMiot);
+                }
+            }
+            foreach(var wydarzenieLocha in wydarzenie.WydarzeniaLoch)
+            {
+                if(lochaId == null || !lochaId.Contains(wydarzenieLocha.LochaId))
+                {
+                    _context.Remove(wydarzenieLocha);
+                }
+            }
             if(miotId != null)
             {
                 foreach(var id in miotId)
@@ -142,11 +161,11 @@ namespace HerdRest.Repository
                     }
                 }
             }
-            wydarzenie.DataCzasModyfikacji = DateTime.Now;
-            wydarzenie.DataCzasUtworzenia = _context.Wydarzenia.Where(l => l.Id == wydarzenie.Id)
-                .Select(l => l.DataCzasUtworzenia)
-                .FirstOrDefault();
-
+            if(wydarzenie.DataWykonania == default)
+            {
+                wydarzenie.DataWykonania = wydarzenie.DataWydarzenia;
+            }
+            
             _context.Update(wydarzenie);
             return Save();
         }

@@ -25,7 +25,7 @@ namespace HerdRest.Data
             modelBuilder.Entity<Wydarzenie>()
                 .Property(w => w.DataCzasModyfikacji)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
-                .ValueGeneratedOnAddOrUpdate();
+                .ValueGeneratedOnAdd();
             modelBuilder.Entity<Wydarzenie>()
                 .Property(w => w.DataCzasUtworzenia)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
@@ -34,7 +34,7 @@ namespace HerdRest.Data
             modelBuilder.Entity<Miot>()
                 .Property(m => m.DataCzasModyfikacji)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
-                .ValueGeneratedOnAddOrUpdate();
+                .ValueGeneratedOnAdd();
             modelBuilder.Entity<Miot>()
                 .Property(m => m.DataCzasUtworzenia)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")

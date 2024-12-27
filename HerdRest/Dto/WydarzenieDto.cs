@@ -13,8 +13,8 @@ namespace HerdRest.Dto
         public string? Uwagi { get; set; }
         public DateOnly DataWydarzenia { get; set; }
         public DateOnly DataWykonania { get; set; }
-        public DateTime DataCzasUtworzenia { get; set; }
-        public DateTime DataCzasModyfikacji { get; set; }
+        public string? DataCzasUtworzenia { get; set; }
+        public string? DataCzasModyfikacji { get; set; }
         public List<int>? LochyId { get; set;}
         public List<int>? MiotyId {get; set;}
     }

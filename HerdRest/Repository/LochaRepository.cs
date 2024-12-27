@@ -23,7 +23,6 @@ namespace HerdRest.Repository
             IndeksProdukcji365Dni = _context.Mioty.Where(m => m.Locha.Id == locha.Id).Select(m => m.Odsadzone).Sum(),
             DataCzasUtworzenia = locha.DataCzasUtworzenia,
             DataCzasModyfikacji = locha.DataCzasModyfikacji,
-            //MiotyId = _context.Mioty.Where(m => m.Locha.Id == locha.Id).Select(m => m.Id).ToList() ?? [],
             MiotyId = locha.Mioty.Select(m => m.Id).ToList() ?? [],
             WydarzeniaLochyId = _context.WydarzeniaLochy.Where(w => w.LochaId == locha.Id).Select(w => w.WydarzenieId).ToList() ?? []
         };
@@ -36,7 +35,6 @@ namespace HerdRest.Repository
             Id = lochaDto.Id,
             NumerLochy = lochaDto.NumerLochy,
             Status = lochaDto.Status,
-            //IndeksProdukcji365Dni = lochaDto.IndeksProdukcji365Dni,
             DataCzasUtworzenia = lochaDto.DataCzasUtworzenia,
             DataCzasModyfikacji = lochaDto.DataCzasModyfikacji,
             Mioty = _context.Mioty.Where(m => m.Locha.Id == lochaDto.Id).ToList() ?? [],
@@ -87,7 +85,9 @@ namespace HerdRest.Repository
         public bool UpdateLocha(Locha locha, List<int>? wydarzenieId)
         {
             locha.DataCzasModyfikacji = DateTime.Now;
-            locha.DataCzasUtworzenia = _context.Lochy.Where(l => l.Id == locha.Id).Select(l => l.DataCzasUtworzenia).FirstOrDefault();
+            locha.DataCzasUtworzenia = _context.Lochy.Where(l => l.Id == locha.Id)
+                .Select(l => l.DataCzasUtworzenia)
+                .FirstOrDefault();
             
             if(wydarzenieId != null)
             {
