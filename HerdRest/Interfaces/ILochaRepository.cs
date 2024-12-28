@@ -11,7 +11,6 @@ namespace HerdRest.Interfaces
         bool CreateLocha(Locha locha, List<int>? wydarzenieId);
         ICollection<Locha> GetLochy();
         Locha GetLocha(int lochaId);
-        ICollection<Wydarzenie> GetWydarzeniaLochy(int lochaId);
         bool UpdateLocha(Locha locha, List<int>? wydarzenieId);
         bool DeleteLocha(Locha locha);
         bool Save();

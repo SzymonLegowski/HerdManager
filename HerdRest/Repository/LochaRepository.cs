@@ -3,7 +3,6 @@ using HerdRest.Dto;
 using HerdRest.Interfaces;
 using HerdRest.Model;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.Internal;
 
 namespace HerdRest.Repository
 {
@@ -20,11 +19,11 @@ namespace HerdRest.Repository
             Id = locha.Id,
             NumerLochy = locha.NumerLochy,
             Status = locha.Status,
-            IndeksProdukcji365Dni = _context.Mioty.Where(m => m.Locha.Id == locha.Id).Select(m => m.Odsadzone).Sum(),
+            IndeksProdukcji365Dni = locha.IndeksProdukcji365Dni,
             DataCzasUtworzenia = locha.DataCzasUtworzenia,
             DataCzasModyfikacji = locha.DataCzasModyfikacji,
-            MiotyId = locha.Mioty.Select(m => m.Id).ToList() ?? [],
-            WydarzeniaLochyId = _context.WydarzeniaLochy.Where(w => w.LochaId == locha.Id).Select(w => w.WydarzenieId).ToList() ?? []
+            MiotyId = locha.Mioty?.Select(m => m.Id).ToList() ?? [],
+            WydarzeniaLochyId = locha.WydarzeniaLochy?.Select(w => w.WydarzenieId).ToList() ?? []
         };
         public List<LochaDto> MapToDtoList(List<Locha> lochy)
         {
@@ -38,7 +37,7 @@ namespace HerdRest.Repository
             DataCzasUtworzenia = lochaDto.DataCzasUtworzenia,
             DataCzasModyfikacji = lochaDto.DataCzasModyfikacji,
             Mioty = _context.Mioty.Where(m => m.Locha.Id == lochaDto.Id).ToList() ?? [],
-            WydarzeniaLoch = _context.WydarzeniaLochy.Where(w => w.LochaId == lochaDto.Id).ToList() ?? []
+            WydarzeniaLochy = _context.WydarzeniaLochy.Where(w => w.LochaId == lochaDto.Id).ToList() ?? []
         };
         public bool CreateLocha(Locha locha, List<int>? wydarzenieId)
         {
@@ -62,26 +61,20 @@ namespace HerdRest.Repository
 
         public ICollection<Locha> GetLochy()
         {
-            var lochy = _context.Lochy.OrderBy(p => p.Id).ToList();
-            foreach(var locha in lochy)
-            {
-                locha.Mioty = [.. _context.Mioty.Where(m => m.Locha.Id == locha.Id)];
-            }
+            var lochy = _context.Lochy.OrderBy(p => p.Id)
+                            .Include(l => l.Mioty)
+                            .Include(l => l.WydarzeniaLochy!)
+                            .ToList();
             return lochy;
         }
 
         public Locha GetLocha(int lochaId)
         {
-            var locha = _context.Lochy.Where(l => l.Id == lochaId).FirstOrDefault();
-            locha.Mioty = [.. _context.Mioty.Where(m => m.Locha.Id == locha.Id)];
+            var locha = _context.Lochy.Include(l => l.Mioty)
+                    .Include(l => l.WydarzeniaLochy)
+                    .FirstOrDefault(l => l.Id == lochaId) ?? throw new InvalidOperationException("Locha nie istnieje.");
             return locha;
         }
-
-        public ICollection<Wydarzenie> GetWydarzeniaLochy(int lochaId)
-        {
-            return [.. _context.WydarzeniaLochy.Where(w => w.LochaId == lochaId).Select(w => w.Wydarzenie)];
-        }
-
         public bool UpdateLocha(Locha locha, List<int>? wydarzenieId)
         {
             locha.DataCzasModyfikacji = DateTime.Now;

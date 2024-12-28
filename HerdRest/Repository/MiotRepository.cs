@@ -115,16 +115,16 @@ namespace HerdRest.Repository
         }
         public ICollection<Miot> GetMioty()
         {
-            return [.. _context.Mioty
+            var mioty = _context.Mioty
                 .Include(m => m.Locha)
                 .Include(m => m.WydarzeniaMiotu)
                 .ThenInclude(m => m.Wydarzenie)
-                .OrderBy(m => m.Id)];
+                .ToList();
+            return mioty;
         }
         public Miot GetMiot(int miotId)
         {
-            var miot = _context.Mioty
-                .Include(m => m.Locha)
+            var miot = _context.Mioty.Include(m => m.Locha)
                 .Include(m => m.WydarzeniaMiotu)
                 .ThenInclude(m => m.Wydarzenie)
                 .FirstOrDefault(m => m.Id == miotId) ?? throw new InvalidOperationException("Miot nie istnieje.");

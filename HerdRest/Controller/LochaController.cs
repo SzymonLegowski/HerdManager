@@ -1,21 +1,17 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using HerdRest.Dto;
 using HerdRest.Interfaces;
 using HerdRest.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Update.Internal;
 
 namespace HerdRest.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LochaController : ControllerBase  // Użyj 'ControllerBase', nie 'Controller' w przypadku Web API
+    public class LochaController(ILochaRepository lochaRepository) : ControllerBase  // Użyj 'ControllerBase', nie 'Controller' w przypadku Web API
     {
-        private readonly ILochaRepository _lochaRepository;
-
-        public LochaController(ILochaRepository lochaRepository)
-        {
-            _lochaRepository = lochaRepository;
-        }
+        private readonly ILochaRepository _lochaRepository = lochaRepository;
 
         [HttpPost]
         [ProducesResponseType(204)]

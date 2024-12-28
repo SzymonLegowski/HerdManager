@@ -48,7 +48,7 @@ namespace HerdRest.Data
                 .HasForeignKey(w => w.WydarzenieId);
             modelBuilder.Entity<WydarzenieLocha>()
                 .HasOne(w => w.Locha)
-                .WithMany(wl => wl.WydarzeniaLoch)
+                .WithMany(wl => wl.WydarzeniaLochy)
                 .HasForeignKey(l => l.LochaId);
 
             modelBuilder.Entity<WydarzenieMiot>()
