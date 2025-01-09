@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Frozen;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using HerdRest.Dto;
 using HerdRest.Interfaces;
-using HerdRest.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HerdRest.Controller

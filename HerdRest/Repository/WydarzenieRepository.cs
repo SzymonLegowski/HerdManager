@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using HerdRest.Data;
 using HerdRest.Dto;
-using HerdRest.Enums;
 using HerdRest.Interfaces;
 using HerdRest.Model;
 using Microsoft.EntityFrameworkCore;
@@ -26,8 +21,8 @@ namespace HerdRest.Repository
                 DataWykonania = wydarzenie.DataWykonania,
                 DataCzasUtworzenia = wydarzenie.DataCzasUtworzenia.ToString("yyyy-MM-dd HH:mm:ss"),
                 DataCzasModyfikacji = wydarzenie.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
-                LochyId = wydarzenie.WydarzeniaLoch.Select(l => l.LochaId).ToList() ?? [],
-                MiotyId = wydarzenie.WydarzeniaMioty.Select(m => m.MiotId).ToList() ?? []
+                LochyId = wydarzenie.WydarzeniaLoch?.Select(l => l.LochaId).ToList() ?? [],
+                MiotyId = wydarzenie.WydarzeniaMioty?.Select(m => m.MiotId).ToList() ?? []
             };
         }
         public List<WydarzenieDto> MapToDtoList(List<Wydarzenie> wydarzenia)
@@ -51,6 +46,7 @@ namespace HerdRest.Repository
         }
         public bool CreateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
         {
+            wydarzenie.Uwagi ??= "brak";
             if(miotId != null)
             {
                 foreach(var id in miotId)
@@ -58,7 +54,7 @@ namespace HerdRest.Repository
                     var wydarzenieMiotEntity = _context.Mioty.Where(a => a.Id == id).FirstOrDefault();
                     var wydarzenieMiot = new WydarzenieMiot()
                     {
-                        Miot = wydarzenieMiotEntity,
+                        Miot = wydarzenieMiotEntity ?? throw new InvalidOperationException("Miot nie istnieje."),
                         Wydarzenie = wydarzenie,
                     };
                     _context.Add(wydarzenieMiot);
@@ -73,7 +69,7 @@ namespace HerdRest.Repository
                     .Where(a => a.Id == id).FirstOrDefault();
                     var wydarzenieLocha = new WydarzenieLocha()
                     {
-                        Locha = wydarzenieLochaEntity,
+                        Locha = wydarzenieLochaEntity ?? throw new InvalidOperationException("Locha nie istnieje."),
                         Wydarzenie = wydarzenie,
                     };
                     _context.Add(wydarzenieLocha);
@@ -109,6 +105,7 @@ namespace HerdRest.Repository
         }
         public bool UpdateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
         {
+            wydarzenie.Uwagi ??= "brak";
             wydarzenie.DataCzasModyfikacji = DateTime.Now;
             wydarzenie.DataCzasUtworzenia = _context.Wydarzenia.Where(l => l.Id == wydarzenie.Id)
                 .Select(l => l.DataCzasUtworzenia)
@@ -154,7 +151,7 @@ namespace HerdRest.Repository
                         var wydarzenieLochaEntity = _context.Lochy.Where(a => a.Id == id).FirstOrDefault();
                         var wydarzenieLocha = new WydarzenieLocha()
                         {
-                            Locha = wydarzenieLochaEntity,
+                            Locha = wydarzenieLochaEntity ?? throw new InvalidOperationException("Locha nie istnieje."),
                             Wydarzenie = wydarzenie,
                         };
                         _context.Add(wydarzenieLocha);

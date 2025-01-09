@@ -1,11 +1,20 @@
 <template>
-    <v-navigation-drawer :width="200">
-      <v-list-item title="Menedżer stada"></v-list-item>
-      <v-divider></v-divider>
+  
+  <LochyGrid v-if="showGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLocha"/>
+    
+  <v-navigation-drawer :width="200">
+    
+    <v-list-item title="Menedżer stada"></v-list-item>
+      
+    <v-divider></v-divider>
+      
       <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
       <v-list-item :to="{ path: '/wydarzenia' }" link title="Wydarzenia"></v-list-item>
+    
     </v-navigation-drawer>
-    <v-app-bar title="Karta lochy nr:">
+    
+    <v-app-bar title="Karta lochy nr:" class="appBar">
+      
       <v-autocomplete
         class="autocompleteNrLochy"
         :items="numeryLoch"
@@ -14,88 +23,89 @@
         item-value="numerLochy"
         v-model="selectedLocha"
         width="100"
-      ></v-autocomplete>
+        ></v-autocomplete>
+        
+      <v-btn icon size-adjustable class="gridButton" @click="gridButtonClick">
+        <v-icon size="large">mdi-grid</v-icon>
+      </v-btn>
+      
       <v-btn class="AddButton" variant="outlined">
         Dodaj
       </v-btn>
+      
       <v-btn class="DeleteButton" variant="outlined">
         Usuń
       </v-btn>
+    
     </v-app-bar>
+    
     <v-data-table
       class="KartaLochy"
       :headers="headers"
-      :items="combinedItems"
+      :items="Mioty"
       item-key="id"
       items-per-page="5"
       :pageText="'{0}-{1} z {2}'"
       items-per-page-text="Elementów na stronę"
-    ></v-data-table>
+    >
+    
+    <template v-slot:item.actions="{ item }">
+      <v-btn
+        class="me-2"
+        style="min-width: 0; width: 10px; background-color: #d67804;"
+        size="small"
+        @click="editItem(item)"
+      >
+        <v-icon>mdi-pencil</v-icon>
+      </v-btn>
+      <v-btn
+        style="min-width: 0; width: 10px; background-color: red;"
+        size="small"
+        @click="deleteItem(item)"
+      >
+        <v-icon>mdi-delete</v-icon>
+      </v-btn>
+    </template>
+    <template v-slot:no-data></template>
+
+    <!-- <template v-slot:body.append>
+      
+      <v-btn
+        style="min-width: 0; width: 150px; background-color: green; margin: 10px; position:absolute; transform: translate(300px, 0px);"
+        size="small"
+        @click="addItem(item)"
+      >dodaj proszenie</v-btn>
+    
+    </template> -->
+    
+  </v-data-table>
+  
   </template>
   
   <script setup>
   import { ref, onMounted } from "vue";
   import apiClient from "@/plugins/axios";
-  
+  import LochyGrid from "@/components/LochyGrid.vue";
+
   const Lochy = ref([]);
   const numeryLoch = ref([]);
-  const WydarzeniaLochy = ref([]);
   const Mioty = ref([]);
   const error = ref(null);
   const selectedLocha = ref(null);
-  
-  const combinedItems = computed(() => {
-  const combined = [];
+  const showGrid = ref(false);
 
-  Mioty.value.forEach(miot => {
-    const combinedItem = {
-      id: miot.id,
-      urodzoneZywe: miot.urodzoneZywe,
-      urodzoneMartwe: miot.urodzoneMartwe,
-      przygniecone: miot.przygniecone,
-      odsadzone: miot.odsadzone,
-      ocena: miot.ocena,
-    };
-
-    miot.wydarzeniaMiotuId?.forEach(wydarzenieId => {
-      const wydarzenie = WydarzeniaLochy.value.find(w => w.id === wydarzenieId);
-      if (wydarzenie) {
-        switch (wydarzenie.typWydarzenia) {
-          case "Krycie":
-            combinedItem.dataKrycia = wydarzenie.dataWydarzenia;
-            break;
-          case "PrzewidywaneProszenie":
-            combinedItem.dataPrzewidywanegoProszenia = wydarzenie.dataWydarzenia;
-            break;
-          case "Proszenie":
-            combinedItem.dataProszenia = wydarzenie.dataWydarzenia;
-            break;
-          case "Odsadzanie":
-            combinedItem.dataOdsadzania = wydarzenie.dataWydarzenia;
-            break;
-        }
-      }
-    });
-
-    combined.push(combinedItem);
-  });
-
-  return combined;
-});
-
-  const headers = [
+  const baseHeaders = [
     {
-      title: "Nr miotu",
+      title: "Miot",
       value: "id",
     },
     {
       title: "Data",
       align: "center",
       children: [
-        { title: "Pokrycia", value: "dataKrycia" },
         { title: "Przew. oproszenia", value: "dataPrzewidywanegoProszenia" },
         { title: "Oproszenia", value: "dataProszenia" },
-        { title: "Odsadzenia", value: "dataOdsadzania" }
+        { title: "Odsadzenia", value: "dataOdsadzenia" }
       ]
     },
     {
@@ -107,57 +117,100 @@
         { title: "Przygnieconych", value: "przygniecone" },
         { title: "Odsadzonych", value: "odsadzone" }
       ]
-    }
+    },
+    {title: "Działania", key: "actions", sortable: false, align: "center"}
   ];
-
   
+  const headers = ref(JSON.parse(JSON.stringify(baseHeaders)));
+
   onMounted(async () => {
-  try {
-    const lochyResponse = await apiClient.get("/Locha");
-    console.log("Dane lochy:", lochyResponse.data); // Debugowanie
-    Lochy.value = Array.isArray(lochyResponse.data) ? lochyResponse.data : [];
-    numeryLoch.value = Lochy.value.map(locha => locha.numerLochy).sort((a, b) => a - b); // Dopasuj klucz do struktury danych
-    console.log("Numery loch:", numeryLoch.value);
-  } catch (e) {
-    console.error("Błąd podczas pobierania danych:", e);
-    error.value = e;
-  }
+    getData();
 });
 
 watch(selectedLocha, async (newValue, oldValue) => {
-  console.log("Selected locha zmieniona z:", oldValue, "na:", newValue);
-  if (newValue !== null) {
-    try {
-      const selected = Lochy.value.find(locha => locha.numerLochy === newValue);
-    if(selected)
+  let ostatniIndeksWydarzenia = 0;
+  let najwiekszaLiczbaKrycMiotu = 0;
+  Mioty.value = [];
+  headers.value = JSON.parse(JSON.stringify(baseHeaders));
+  console.log("Selected locha zmieniona z:", oldValue, "na:", newValue); //Debugowanie
+  console.log("HeadersValue:", headers); // Debugowanie
+  if (newValue !== null) 
+  {
+    try 
     {
-      console.log("Dane lochy:", selected); // Debugowanie
-      if (selected.wydarzeniaLochyId) {
-      console.log(`WydarzeniaLochyId dla lochy ${newValue}:`);
-      selected.wydarzeniaLochyId.forEach(async wydarzenieId => {
-        const wydarzenie = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
-        console.log("Wydarzenie:", wydarzenie.data); // Debugowanie
-        WydarzeniaLochy.value.push(wydarzenie.data);
-      });
-      console.log("Wydarzenia lochy:", WydarzeniaLochy.value);
-    } else {
-      console.log(`Brak Wydarzeń dla lochy ${newValue}`);
-    }
+      const selected = Lochy.value.find(locha => locha.numerLochy === newValue);
       if (selected.miotyId)
       {
-        console.log(`MiotyId dla lochy ${newValue}:`);
-        selected.miotyId.forEach(async miotId => {
-          const miot = await apiClient.get(`/Miot/${miotId}`);
-          console.log("Miot:", miot.data); // Debugowanie
-          Mioty.value.push(miot.data);
-        });
-        console.log("Mioty:", Mioty.value);
-        console.log("Combined items:", combinedItems.value);
+        console.log(`MiotyId dla lochy ${newValue}:`); //Debugowanie
+        for (let indeksMiotu = 0; indeksMiotu < selected.miotyId.length; indeksMiotu++) 
+        { 
+          const miotId = selected.miotyId[indeksMiotu];
+          const miotResponse = await apiClient.get(`/Miot/${miotId}`);
+          const miot = miotResponse.data;
+          miot.datyKrycia = [];
+
+          for (let indeksWydarzenia = ostatniIndeksWydarzenia; indeksWydarzenia < selected.wydarzeniaLochyId.length; indeksWydarzenia++) 
+          {
+            const wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
+            const wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
+            const wydarzenie = wydarzenieResponse.data;
+
+            if (new Date(wydarzenie.dataWydarzenia).getTime() < new Date(miot.dataPrzewidywanegoProszenia).getTime()) 
+            {
+              miot.datyKrycia.push(wydarzenie.dataWydarzenia);
+              ostatniIndeksWydarzenia++;
+              console.log("Indeks wydarzenia:", indeksWydarzenia);  // Debugowanie
+              if (najwiekszaLiczbaKrycMiotu < miot.datyKrycia.length) 
+              {
+                najwiekszaLiczbaKrycMiotu = miot.datyKrycia.length;
+              }
+            } 
+            else 
+            {
+              break;
+            }
+          }
+          console.log("wydarzeniaLochyId:", selected.wydarzeniaLochyId); // Debugowanie
+          console.log("ostatniIndeksWydarzenia:", ostatniIndeksWydarzenia); // Debugowanie
+          Mioty.value.push(miot);
+          console.log("NajwiekszaLiczbaKrycMiotu:", najwiekszaLiczbaKrycMiotu); // Debugowanie
+        }
+
+        for (let newHeader = 0; newHeader < najwiekszaLiczbaKrycMiotu; newHeader++) 
+        {
+          headers.value[1].children.splice(-3, 0, { title: `Krycia nr ${newHeader + 1}`, value: `datyKrycia[${newHeader}]` });
+        }
+
+        if (ostatniIndeksWydarzenia < selected.wydarzeniaLochyId.length) 
+        {
+          Mioty.value.push({id:Mioty.value.length+1});
+          Mioty.value[Mioty.value.length-1].datyKrycia = [];
+          if(selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia > 0)
+          {
+            console.log("Dodawanie dat krycia dla ostatniego miotu"); // Debugowanie
+            for (let newHeader = najwiekszaLiczbaKrycMiotu; newHeader < selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia; newHeader++) 
+            {
+              headers.value[1].children.splice(-3, 0, { title: `Krycia nr ${newHeader + 1}`, value: `datyKrycia[${newHeader}]` });
+            }
+          }
+          for (let indeksWydarzenia = ostatniIndeksWydarzenia; indeksWydarzenia < selected.wydarzeniaLochyId.length; indeksWydarzenia++) 
+          {
+            const wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
+            const wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
+            const wydarzenie = wydarzenieResponse.data;
+
+            Mioty.value[Mioty.value.length-1].datyKrycia.push(wydarzenie.dataWydarzenia);
+
+          }
+        }
+
+        console.log("Headers:", headers.value[1].children); // Debugowanie
+        console.log("BaseHeaders:", baseHeaders); // Debugowanie
+        console.log("Mioty:", Mioty.value); // Debugowanie
       }
       else {
         console.log(`Brak Miotów dla lochy ${newValue}`);
       }
-    }
     } catch (e) {
       console.error("Błąd podczas pobierania danych wybranej lochy:", e);
       error.value = e;
@@ -165,17 +218,37 @@ watch(selectedLocha, async (newValue, oldValue) => {
   }
 });
 
-  </script>
+const getData = async () => {
+  try {
+    const response = await apiClient.get("/Locha");
+    console.log("Dane lochy:", response.data); // Debugowanie
+    Lochy.value = Array.isArray(response.data) ? response.data : [];
+    numeryLoch.value = Lochy.value.filter(locha => locha.status == "Aktywna").map(locha => locha.numerLochy).sort((a, b) => a - b); // Dopasuj klucz do struktury danych
+    console.log("Numery loch:", numeryLoch.value);
+  } catch (e) {
+    console.error("Błąd podczas pobierania danych:", e);
+    error.value = e;
+  }
+};
+
+const gridButtonClick = () => {
+  console.log("Grid button clicked");
+  showGrid.value = !showGrid.value;
+};
+
+const updateSelectedLocha = (number) => {
+  selectedLocha.value = number;
+  showGrid.value = !showGrid.value;
+};
+
+</script>
   
-  <style>
+  <style lang="scss">
+  
   .autocompleteNrLochy {
     min-width: 130px;
     position: absolute;
-    left: auto;
     transform: translate(160px, 10px);
-  }
-  .KartaLochy {
-    border-color: blue;
   }
   .AddButton {
     transform: translate(-30px, 0px);
@@ -186,6 +259,16 @@ watch(selectedLocha, async (newValue, oldValue) => {
   th {
     border-style: solid;
     border-color: #1a1a1a;
+    border-width: 2px;
+  }
+  td {
+    border-style: solid;
+    border-color: #1a1a1a;
+    border-width: 2px;
+  }
+.gridButton {
+    position: absolute;
+    transform: translate(300px, 0px);
   }
   </style>
   

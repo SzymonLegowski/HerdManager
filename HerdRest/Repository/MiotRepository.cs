@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using HerdRest.Data;
 using HerdRest.Dto;
+using HerdRest.Enums;
 using HerdRest.Interfaces;
 using HerdRest.Model;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +21,9 @@ namespace HerdRest.Repository
                 Przygniecone = miot.Przygniecone,
                 Odsadzone = miot.Odsadzone,
                 Ocena = miot.Ocena,
+                DataProszenia = miot.DataProszenia,
+                DataOdsadzenia = miot.DataOdsadzenia,
+                DataPrzewidywanegoProszenia = miot.DataPrzewidywanegoProszenia,
                 DataCzasUtworzenia = miot.DataCzasUtworzenia,
                 DataCzasModyfikacji = miot.DataCzasModyfikacji,
                 LochaId = miot.Locha.Id,
@@ -47,70 +47,28 @@ namespace HerdRest.Repository
                 Przygniecone = miotDto.Przygniecone,
                 Odsadzone = miotDto.Odsadzone,
                 Ocena = miotDto.Ocena,
+                DataPrzewidywanegoProszenia = miotDto.DataPrzewidywanegoProszenia,
+                DataProszenia = miotDto.DataProszenia,
+                DataOdsadzenia = miotDto.DataOdsadzenia,
                 DataCzasUtworzenia = miotDto.DataCzasUtworzenia,
                 DataCzasModyfikacji = miotDto.DataCzasModyfikacji,
-                Locha = _context.Lochy.Where(l => l.Id == miotDto.LochaId).FirstOrDefault(),
+                Locha = _context.Lochy.Where(l => l.Id == miotDto.LochaId).FirstOrDefault() ?? throw new InvalidOperationException("Podany Miot nie ma lochy."),
                 WydarzeniaMiotu = [.. _context.WydarzeniaMiotu.Where(w => w.MiotId == miotDto.Id)]
             };
         }
 
-        public bool CreateMiot(Miot miot, int wydarzenieKrycie)
+        public bool CreateMiot(Miot miot, int wydarzenieKrycieId)
         {
-            var wydarzenieMiotEntity = _context.Wydarzenia.Where(a => a.Id == wydarzenieKrycie).FirstOrDefault();
+            var wydarzenieMiotEntity = _context.Wydarzenia.Where(a => a.Id == wydarzenieKrycieId).FirstOrDefault();
             var wydarzenieMiot = new WydarzenieMiot
             {
                 Miot = miot,
-                Wydarzenie = wydarzenieMiotEntity 
+                Wydarzenie = wydarzenieMiotEntity ?? throw new InvalidOperationException("Wydarzenie nie istnieje.") 
             };
-            
-            var PrzewidywaneProszenie = new Wydarzenie
-            {
-                TypWydarzenia = Enums.TypWydarzenia.PrzewidywaneProszenie,
-                DataWydarzenia = wydarzenieMiotEntity.DataWydarzenia.AddDays(114),
-                DataCzasUtworzenia = DateTime.Now,
-                DataCzasModyfikacji = DateTime.Now
-            };
+            miot.DataPrzewidywanegoProszenia = wydarzenieMiotEntity.DataWydarzenia.AddDays(114);
 
-            var Odsadzanie = new Wydarzenie
-            {
-                TypWydarzenia = Enums.TypWydarzenia.Odsadzanie,
-                DataWydarzenia = wydarzenieMiotEntity.DataWydarzenia.AddDays(35),
-                DataCzasUtworzenia = DateTime.Now,
-                DataCzasModyfikacji = DateTime.Now
-            };
-
-            var PrzewidywaneProszenieLocha = new WydarzenieLocha
-            {
-                Locha = miot.Locha,
-                Wydarzenie = PrzewidywaneProszenie
-            };
-
-            var OdsadzanieLocha = new WydarzenieLocha
-            {
-                Locha = miot.Locha,
-                Wydarzenie = Odsadzanie
-            };
-
-            var PrzewidywaneProszenieMiot = new WydarzenieMiot
-            {
-                Miot = miot,
-                Wydarzenie = PrzewidywaneProszenie
-            };
-
-            var OdsadzanieMiot = new WydarzenieMiot
-            {
-                Miot = miot,
-                Wydarzenie = Odsadzanie
-            };  
-            
-            _context.Add(miot);
             _context.Add(wydarzenieMiot);
-            _context.Add(PrzewidywaneProszenie);
-            _context.Add(Odsadzanie);
-            _context.Add(PrzewidywaneProszenieMiot);
-            _context.Add(OdsadzanieMiot);
-            _context.Add(PrzewidywaneProszenieLocha);
-            _context.Add(OdsadzanieLocha);
+            _context.Add(miot);
             return Save();
         }
         public ICollection<Miot> GetMioty()
@@ -132,15 +90,37 @@ namespace HerdRest.Repository
         }
         public bool UpdateMiot(Miot miot, List<int> wydarzeniaMiotuId)
         {
+            if (wydarzeniaMiotuId != null)
             foreach(var wydarzenieId in wydarzeniaMiotuId)
             {
-                var wydarzenieMiotEntity = _context.Wydarzenia.Where(a => a.Id == wydarzenieId).FirstOrDefault();
-                var wydarzenieMiot = new WydarzenieMiot
+                var CzyIstnieje = _context.WydarzeniaMiotu.Where(wm => wm.WydarzenieId == wydarzenieId && wm.MiotId == miot.Id).FirstOrDefault();
+                if(CzyIstnieje == null)
                 {
-                    Miot = miot,
-                    Wydarzenie = wydarzenieMiotEntity 
-                };
-                _context.Add(wydarzenieMiot);
+                    var wydarzenieMiotEntity = _context.Wydarzenia.Where(a => a.Id == wydarzenieId).FirstOrDefault();
+                    var wydarzenieMiot = new WydarzenieMiot
+                    {
+                        Miot = miot,
+                        Wydarzenie = wydarzenieMiotEntity ?? throw new InvalidOperationException("Wydarzenie nie istnieje.")
+                    };
+                    
+                    _context.Add(wydarzenieMiot);
+
+                    if(wydarzenieMiotEntity?.TypWydarzenia == TypWydarzenia.Krycie)
+                    {
+                        miot.DataPrzewidywanegoProszenia = wydarzenieMiotEntity.DataWydarzenia.AddDays(114);
+                    }   
+                }
+                else
+                {
+                    _context.WydarzeniaMiotu.Remove(CzyIstnieje);
+                }
+
+            }
+            if(wydarzeniaMiotuId.Count == 0)
+            {
+                miot.DataPrzewidywanegoProszenia = _context.Mioty.Where(m => m.Id == miot.Id)
+                    .Select(m => m.DataPrzewidywanegoProszenia)
+                    .FirstOrDefault();
             }
 
             miot.DataCzasModyfikacji = DateTime.Now;

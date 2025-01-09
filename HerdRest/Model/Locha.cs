@@ -12,7 +12,7 @@ namespace HerdRest.Model
         public int Id { get; set; }
         public int NumerLochy { get; set; } 
         public StatusLochy Status { get; set; }
-         [NotMapped]
+        [NotMapped]
         public int IndeksProdukcji365Dni
         {
             get

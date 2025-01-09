@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using HerdRest.Dto;
 using HerdRest.Interfaces;
-using HerdRest.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HerdRest.Controller
@@ -20,6 +15,9 @@ namespace HerdRest.Controller
         [ProducesResponseType(400)]
         public IActionResult CreateWydarzenie([FromBody] WydarzenieDto wydarzenieCreateDto)
         {
+            if((wydarzenieCreateDto.LochyId == null && wydarzenieCreateDto.MiotyId == null) || (wydarzenieCreateDto.LochyId?.Count == 0 && wydarzenieCreateDto.MiotyId?.Count == 0))
+                return BadRequest("Wydarzenie musi być przypisane do co najmniej jednej lochy lub miotu.");
+
             if(wydarzenieCreateDto == null)
                 return BadRequest(ModelState);
 

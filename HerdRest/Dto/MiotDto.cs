@@ -13,6 +13,9 @@ namespace HerdRest.Dto
         public int Przygniecone { get; set; }
         public int Odsadzone { get; set; }
         public int Ocena { get; set;}
+        public DateOnly DataPrzewidywanegoProszenia { get; set; }
+        public DateOnly? DataProszenia { get; set; }
+        public DateOnly? DataOdsadzenia { get; set; }
         public DateTime DataCzasUtworzenia { get; set; }
         public DateTime DataCzasModyfikacji { get; set; }
         public int LochaId {get; set;}
