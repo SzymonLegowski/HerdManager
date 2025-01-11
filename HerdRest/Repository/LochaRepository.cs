@@ -1,5 +1,6 @@
 using HerdRest.Data;
 using HerdRest.Dto;
+using HerdRest.Enums;
 using HerdRest.Interfaces;
 using HerdRest.Model;
 using Microsoft.EntityFrameworkCore;
@@ -65,6 +66,16 @@ namespace HerdRest.Repository
                             .Include(l => l.Mioty)
                             .Include(l => l.WydarzeniaLochy!)
                             .ToList();
+            return lochy;
+        }
+
+        public ICollection<Locha> GetLochyByStatus(int status)
+        {
+            var lochy = _context.Lochy
+                .Where(l => l.Status == (StatusLochy)status)
+                .Include(l => l.Mioty)
+                .Include(l => l.WydarzeniaLochy)
+                .ToList();
             return lochy;
         }
 

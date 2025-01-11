@@ -2,7 +2,7 @@
 
 <AddWydarzenie 
 :addWydarzenieDialog="addWydarzenieDialog" 
-@update:addWydarzenieDialog="addWydarzenieDialog = $event" />
+@update:addWydarzenieDialog="addWydarzenieDialog = $event"/>
 
   <v-navigation-drawer :width="200">
     <v-list-item title="Menedżer stada"></v-list-item>
@@ -25,7 +25,6 @@
     :headers="headers"
     :items="Wydarzenia"
     item-key="id"
-    
     :pageText="'{0}-{1} z {2}'"
     items-per-page-text="Elementów na stronę"
   >
@@ -61,6 +60,11 @@ const addWydarzenieDialog = ref(false);
 const headers = 
 [
   {
+    title: "Id",
+    value: "id",
+    sortable: true,
+  },
+  {
     title: "Typ",
     value: "typWydarzenia",
     sortable: true,
@@ -86,12 +90,12 @@ const headers =
     sortable: true,
   },
   {
-    title: "Lochy",
+    title: "Lochy(numery)",
     value: "numeryLoch",
     sortable: true,
   },
   {
-    title: "Mioty",
+    title: "Mioty(id)",
     value: "miotyId",
     sortable: true,
   },

@@ -59,6 +59,19 @@ namespace HerdRest.Controller
             return Ok(dtos);
         }
 
+        [HttpGet("status/{status}")]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<LochaDto>))]
+        public IActionResult GetLochyByStatus(int status)
+        {
+            var lochy = _lochaRepository.GetLochyByStatus(status).ToList();
+            var dtos = _lochaRepository.MapToDtoList(lochy);
+
+             if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(dtos);
+        }
+
         [HttpGet("{lochaId}")]
         [ProducesResponseType(200, Type = typeof(LochaDto))]
         [ProducesResponseType(400)]
