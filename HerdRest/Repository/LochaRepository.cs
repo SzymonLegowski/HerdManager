@@ -21,8 +21,8 @@ namespace HerdRest.Repository
             NumerLochy = locha.NumerLochy,
             Status = locha.Status,
             IndeksProdukcji365Dni = locha.IndeksProdukcji365Dni,
-            DataCzasUtworzenia = locha.DataCzasUtworzenia,
-            DataCzasModyfikacji = locha.DataCzasModyfikacji,
+            DataCzasUtworzenia = locha.DataCzasUtworzenia.ToString("yyyy-MM-dd HH:mm:ss"),
+            DataCzasModyfikacji = locha.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
             MiotyId = locha.Mioty?.Select(m => m.Id).ToList() ?? [],
             WydarzeniaLochyId = locha.WydarzeniaLochy?.Select(w => w.WydarzenieId).ToList() ?? []
         };
@@ -35,8 +35,8 @@ namespace HerdRest.Repository
             Id = lochaDto.Id,
             NumerLochy = lochaDto.NumerLochy,
             Status = lochaDto.Status,
-            DataCzasUtworzenia = lochaDto.DataCzasUtworzenia,
-            DataCzasModyfikacji = lochaDto.DataCzasModyfikacji,
+            DataCzasUtworzenia = DateTime.Now,
+            DataCzasModyfikacji = DateTime.Now,
             Mioty = _context.Mioty.Where(m => m.Locha.Id == lochaDto.Id).ToList() ?? [],
             WydarzeniaLochy = _context.WydarzeniaLochy.Where(w => w.LochaId == lochaDto.Id).ToList() ?? []
         };

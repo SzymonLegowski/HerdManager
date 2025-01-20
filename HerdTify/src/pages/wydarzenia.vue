@@ -1,8 +1,10 @@
 <template>
 
 <AddWydarzenie 
-:addWydarzenieDialog="addWydarzenieDialog" 
-@update:addWydarzenieDialog="addWydarzenieDialog = $event"/>
+  :addWydarzenieDialog="addWydarzenieDialog" 
+  @update:addWydarzenieDialog="addWydarzenieDialog = $event"
+  @save-wydarzenie="handleSaveWydarzenie"
+/>
 
   <v-navigation-drawer :width="200">
     <v-list-item title="Menedżer stada"></v-list-item>
@@ -10,6 +12,8 @@
     <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
 
     <v-list-item :to="{ path: '/wydarzenia' }" link title="Wydarzenia"></v-list-item>
+
+    <v-list-item :to="{ path: '/stado' }" link title="Stado"></v-list-item>
   </v-navigation-drawer>
 
   <v-app-bar title="Wydarzenia">
@@ -17,7 +21,7 @@
         style="min-width: 0; width: 150px; background-color: green; margin-right: 40px; "
         size="small"
         @click="addItem()"
-      >dodaj nowe</v-btn>  
+      >Dodaj wydarzenie</v-btn>  
   </v-app-bar>
 
   <v-data-table
@@ -70,6 +74,10 @@ const headers =
     sortable: true,
   },
   {
+    title: "Uwagi",
+    value: "uwagi",
+  },
+  {
     title: "Data wydarzenia",
     value: "dataWydarzenia",
     sortable: true,
@@ -119,7 +127,7 @@ onMounted(async () => {
       for (let indeksLochy = 0; indeksLochy < Wydarzenia.value[indeksWydarzenia].lochyId.length; indeksLochy++)
       {
         const responseLocha = await apiClient.get("/Locha/" + Wydarzenia.value[indeksWydarzenia].lochyId[indeksLochy]);
-          numeryLochWydarzenia.push(responseLocha.data.numerLochy);
+        numeryLochWydarzenia.push(responseLocha.data.numerLochy);
       }
       
       Wydarzenia.value[indeksWydarzenia].numeryLoch = numeryLochWydarzenia;
@@ -145,6 +153,17 @@ const deleteItem = (item) => {
   Wydarzenia.value = Wydarzenia.value.filter((wydarzenie) => wydarzenie.id !== item.id);
 };
 
+const handleSaveWydarzenie = (noweWydarzenie) => {
+  const teraz = new Date();
+  const padZero = (num) => String(num).padStart(2, '0');
+  const sformatowanaData = 
+    `${teraz.getFullYear()}-${padZero(teraz.getMonth() + 1)}-${padZero(teraz.getDate())} ` +
+    `${padZero(teraz.getHours())}:${padZero(teraz.getMinutes())}:${padZero(teraz.getSeconds())}`;
+  noweWydarzenie.dataCzasUtworzenia = sformatowanaData
+  noweWydarzenie.dataCzasModyfikacji = sformatowanaData
+  noweWydarzenie.id = Wydarzenia.value.length + 2;
+  Wydarzenia.value.push(noweWydarzenie);
+};
 </script>
 <style lang="scss">
 

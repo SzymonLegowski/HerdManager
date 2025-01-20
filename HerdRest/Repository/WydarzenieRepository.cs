@@ -10,21 +10,18 @@ namespace HerdRest.Repository
     {
         private readonly DataContext _context = context;
 
-        public WydarzenieDto MapToDto(Wydarzenie wydarzenie)
+        public WydarzenieDto MapToDto(Wydarzenie wydarzenie) => new WydarzenieDto
         {
-            return new WydarzenieDto
-            {
-                Id = wydarzenie.Id,
-                TypWydarzenia = wydarzenie.TypWydarzenia,
-                Uwagi = wydarzenie.Uwagi,
-                DataWydarzenia = wydarzenie.DataWydarzenia,
-                DataWykonania = wydarzenie.DataWykonania,
-                DataCzasUtworzenia = wydarzenie.DataCzasUtworzenia.ToString("yyyy-MM-dd HH:mm:ss"),
-                DataCzasModyfikacji = wydarzenie.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
-                LochyId = wydarzenie.WydarzeniaLoch?.Select(l => l.LochaId).ToList() ?? [],
-                MiotyId = wydarzenie.WydarzeniaMioty?.Select(m => m.MiotId).ToList() ?? []
-            };
-        }
+            Id = wydarzenie.Id,
+            TypWydarzenia = wydarzenie.TypWydarzenia,
+            Uwagi = wydarzenie.Uwagi,
+            DataWydarzenia = wydarzenie.DataWydarzenia,
+            DataWykonania = wydarzenie.DataWykonania,
+            DataCzasUtworzenia = wydarzenie.DataCzasUtworzenia.ToString("yyyy-MM-dd HH:mm:ss"),
+            DataCzasModyfikacji = wydarzenie.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
+            LochyId = wydarzenie.WydarzeniaLoch?.Select(l => l.LochaId).ToList() ?? [],
+            MiotyId = wydarzenie.WydarzeniaMioty?.Select(m => m.MiotId).ToList() ?? []
+        };
         public List<WydarzenieDto> MapToDtoList(List<Wydarzenie> wydarzenia)
         {
             return wydarzenia.Select(MapToDto).ToList();

@@ -10,8 +10,9 @@
       
       <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
       <v-list-item :to="{ path: '/wydarzenia' }" link title="Wydarzenia"></v-list-item>
+      <v-list-item :to="{ path: '/stado' }" link title="Stado"></v-list-item>
     
-    </v-navigation-drawer>
+  </v-navigation-drawer>
     
     <v-app-bar title="Karta lochy nr:" class="appBar">
       
@@ -29,13 +30,11 @@
         <v-icon size="large">mdi-grid</v-icon>
       </v-btn>
       
-      <v-btn class="AddButton" variant="outlined">
-        Dodaj
-      </v-btn>
-      
-      <v-btn class="DeleteButton" variant="outlined">
-        Usuń
-      </v-btn>
+      <v-btn
+        style="min-width: 0; width: 150px; background-color: green; margin-right: 40px; "
+        size="small"
+        @click="addItem()"
+      >Dodaj miot</v-btn> 
     
     </v-app-bar>
     
