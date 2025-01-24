@@ -1,8 +1,8 @@
 <template>
-     <v-navigation-drawer :width="200">
-    
+
+<AddLocha :addLochaDialog="addLochaDialog" @update:addLochaDialog="addLochaDialog = $event" @save-locha="handleSaveLocha"/>
+  <v-navigation-drawer :width="200">  
     <v-list-item title="Menedżer stada"></v-list-item>
-      
     <v-divider></v-divider>
       
       <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
@@ -16,7 +16,7 @@
         style="min-width: 0; width: 100px; background-color: green; margin-right: 40px; "
         size="small"
         @click="addItem()"
-      >Nowa</v-btn>  
+      >Dodaj</v-btn>  
   </v-app-bar>
 
   <v-data-table
@@ -47,6 +47,7 @@
   </v-data-table>
 </template>
 <script setup>
+import AddLocha from '@/components/AddLocha.vue';
 import apiClient from '@/plugins/axios';
 import { onMounted, ref } from 'vue';
 
@@ -63,6 +64,11 @@ const headers =
   {
     title: "Numer",
     value: "numerLochy",
+    sortable: true,
+  },
+  {
+    title: "Status",
+    value: "status",
     sortable: true,
   },
   {
@@ -100,13 +106,26 @@ const addItem = () => {
 };
 
 const editItem = (item) => {
-  console.log("Edytuj wydarzenie o id:"); //Debugowanie
+  console.log("Edytuj lochę o id:"); //Debugowanie
 };
 
 const deleteItem = (item) => {
-  console.log("Usuń wydarzenie o id:"); //Debugowanie
-  apiClient.delete("/Wydarzenie/" + item.id);
-  Wydarzenia.value = Wydarzenia.value.filter((wydarzenie) => wydarzenie.id !== item.id);
+  console.log("Usuń lochę o id:"); //Debugowanie
+  apiClient.delete("/Locha/" + item.id);
+  locha.value = locha.value.filter((locha) => locha.id !== item.id);
+};
+
+const handleSaveLocha = (locha) => {
+  const teraz = new Date();
+  const padZero = (num) => String(num).padStart(2, '0');
+  const sformatowanaData = 
+    `${teraz.getFullYear()}-${padZero(teraz.getMonth() + 1)}-${padZero(teraz.getDate())} ` +
+    `${padZero(teraz.getHours())}:${padZero(teraz.getMinutes())}:${padZero(teraz.getSeconds())}`;
+  locha.dataCzasUtworzenia = sformatowanaData;
+  locha.dataCzasModyfikacji = sformatowanaData;
+  locha.indeksProdukcji365Dni = 0;
+  locha.id = Lochy.value[Lochy.value.length-1].id + 1;
+  Lochy.value.push(locha);
 };
 
 onMounted(async () => {

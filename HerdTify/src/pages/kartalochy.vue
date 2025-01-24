@@ -1,11 +1,11 @@
 <template>
   
   <LochyGrid v-if="showGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLocha"/>
-    
+  <AddMiot :addMiotDialog="addMiotDialog" :nrLochy="selectedLocha" :krycieId="ostatnieKrycieId" @update:addMiotDialog="addMiotDialog = $event"/>
+  
+
   <v-navigation-drawer :width="200">
-    
     <v-list-item title="Menedżer stada"></v-list-item>
-      
     <v-divider></v-divider>
       
       <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
@@ -31,10 +31,10 @@
       </v-btn>
       
       <v-btn
-        style="min-width: 0; width: 150px; background-color: green; margin-right: 40px; "
+        style="min-width: 0; width: 100px; background-color: green; margin-right: 40px; "
         size="small"
         @click="addItem()"
-      >Dodaj miot</v-btn> 
+      >Dodaj</v-btn>  
     
     </v-app-bar>
     
@@ -66,17 +66,7 @@
       </v-btn>
     </template>
     <template v-slot:no-data></template>
-
-    <!-- <template v-slot:body.append>
-      
-      <v-btn
-        style="min-width: 0; width: 150px; background-color: green; margin: 10px; position:absolute; transform: translate(300px, 0px);"
-        size="small"
-        @click="addItem(item)"
-      >dodaj proszenie</v-btn>
-    
-    </template> -->
-    
+   
   </v-data-table>
   
   </template>
@@ -85,6 +75,7 @@
   import { ref, onMounted } from "vue";
   import apiClient from "@/plugins/axios";
   import LochyGrid from "@/components/LochyGrid.vue";
+  import AddMiot from "@/components/AddMiot.vue";
 
   const Lochy = ref([]);
   const numeryLoch = ref([]);
@@ -92,6 +83,8 @@
   const error = ref(null);
   const selectedLocha = ref(null);
   const showGrid = ref(false);
+  const addMiotDialog = ref(false);
+  const ostatnieKrycieId = ref(null);
 
   const baseHeaders = [
     {
@@ -170,6 +163,7 @@ watch(selectedLocha, async (newValue, oldValue) => {
             }
           }
           console.log("wydarzeniaLochyId:", selected.wydarzeniaLochyId); // Debugowanie
+          ostatnieKrycieId.value = selected.wydarzeniaLochyId[selected.wydarzeniaLochyId.length - 1];
           console.log("ostatniIndeksWydarzenia:", ostatniIndeksWydarzenia); // Debugowanie
           Mioty.value.push(miot);
           console.log("NajwiekszaLiczbaKrycMiotu:", najwiekszaLiczbaKrycMiotu); // Debugowanie
@@ -197,7 +191,7 @@ watch(selectedLocha, async (newValue, oldValue) => {
             const wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
             const wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
             const wydarzenie = wydarzenieResponse.data;
-
+            
             Mioty.value[Mioty.value.length-1].datyKrycia.push(wydarzenie.dataWydarzenia);
 
           }
@@ -238,6 +232,34 @@ const gridButtonClick = () => {
 const updateSelectedLocha = (number) => {
   selectedLocha.value = number;
   showGrid.value = !showGrid.value;
+};
+
+const addItem = () => {
+  addMiotDialog.value = true;
+};
+
+const editItem = (item) => {
+  console.log("Edytuj Miot o id:"); //Debugowanie
+};
+
+const deleteItem = (item) => {
+  console.log("Usuń Miot o id:"); //Debugowanie
+  apiClient.delete("/Miot/" + item.id);
+  Mioty.value = Mioty.value.filter((Miot) => Miot.id !== Miot.id);
+};
+
+const handleSaveMiot = (nowyMiot) => {
+  const teraz = new Date();
+  const padZero = (num) => String(num).padStart(2, '0');
+  const sformatowanaData = 
+    `${teraz.getFullYear()}-${padZero(teraz.getMonth() + 1)}-${padZero(teraz.getDate())} ` +
+    `${padZero(teraz.getHours())}:${padZero(teraz.getMinutes())}:${padZero(teraz.getSeconds())}`;
+  Mioty.value[Mioty.value.length-1].dataCzasUtworzenia = sformatowanaData;
+  Mioty.value[Mioty.value.length-1].dataCzasModyfikacji = sformatowanaData;
+  Mioty.value[Mioty.value.length-1].urodzoneZywe = nowyMiot.urodzoneZywe;
+  Mioty.value[Mioty.value.length-1].urodzoneMartwe = nowyMiot.urodzoneMartwe;
+  Mioty.value[Mioty.value.length-1].przygniecone = nowyMiot.przygniecone;
+  Mioty.value[Mioty.value.length-1].odsadzone = nowyMiot.odsadzone;
 };
 
 </script>

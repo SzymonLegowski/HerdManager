@@ -51,9 +51,7 @@
                 ></v-text-field>
               </v-col>
               <v-textarea label="Uwagi" v-model="noweWydarzenie.uwagi" style="width: 100%;"></v-textarea>
-             
-              <!-- <v-btn class="AddButton" variant="outlined" text="Wybierz mioty" @click="selectMioty">
-                </v-btn> -->
+            
               <v-btn class="AddButton" variant="outlined" text="Wybierz lochy" @click="selectLochy"></v-btn>
               <v-col>
                 <h5 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left: 2%;">Wybrane lochy:{{ noweWydarzenie.lochyId }}</h5>
@@ -97,7 +95,7 @@
   </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref} from 'vue';
 import apiClient from "@/plugins/axios";
 import LochyGrid from './LochyGrid.vue';
 
@@ -219,6 +217,7 @@ const mapNoweWydarzenieTemp = () => {
 
 <style scoped>
 .AddButton {
+  margin-left: 30px;
   margin-bottom: 30px;
 }
 .shift-left {

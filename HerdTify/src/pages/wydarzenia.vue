@@ -1,27 +1,22 @@
 <template>
 
-<AddWydarzenie 
-  :addWydarzenieDialog="addWydarzenieDialog" 
-  @update:addWydarzenieDialog="addWydarzenieDialog = $event"
-  @save-wydarzenie="handleSaveWydarzenie"
-/>
-
+<AddWydarzenie :addWydarzenieDialog="addWydarzenieDialog" @update:addWydarzenieDialog="addWydarzenieDialog = $event" @save-wydarzenie="handleSaveWydarzenie"/>
   <v-navigation-drawer :width="200">
     <v-list-item title="Menedżer stada"></v-list-item>
     <v-divider></v-divider>
+
     <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
-
     <v-list-item :to="{ path: '/wydarzenia' }" link title="Wydarzenia"></v-list-item>
-
     <v-list-item :to="{ path: '/stado' }" link title="Stado"></v-list-item>
+ 
   </v-navigation-drawer>
-
   <v-app-bar title="Wydarzenia">
+
     <v-btn
-        style="min-width: 0; width: 150px; background-color: green; margin-right: 40px; "
+        style="min-width: 0; width: 100px; background-color: green; margin-right: 40px; "
         size="small"
         @click="addItem()"
-      >Dodaj wydarzenie</v-btn>  
+      >Dodaj</v-btn>   
   </v-app-bar>
 
   <v-data-table
@@ -159,9 +154,9 @@ const handleSaveWydarzenie = (noweWydarzenie) => {
   const sformatowanaData = 
     `${teraz.getFullYear()}-${padZero(teraz.getMonth() + 1)}-${padZero(teraz.getDate())} ` +
     `${padZero(teraz.getHours())}:${padZero(teraz.getMinutes())}:${padZero(teraz.getSeconds())}`;
-  noweWydarzenie.dataCzasUtworzenia = sformatowanaData
-  noweWydarzenie.dataCzasModyfikacji = sformatowanaData
-  noweWydarzenie.id = Wydarzenia.value.length + 2;
+  noweWydarzenie.dataCzasUtworzenia = sformatowanaData;
+  noweWydarzenie.dataCzasModyfikacji = sformatowanaData;
+  noweWydarzenie.id = Wydarzenia.value[Wydarzenia.value.length-1].id + 1;
   Wydarzenia.value.push(noweWydarzenie);
 };
 </script>
