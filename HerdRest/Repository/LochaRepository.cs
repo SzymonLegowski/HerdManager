@@ -20,6 +20,7 @@ namespace HerdRest.Repository
             Id = locha.Id,
             NumerLochy = locha.NumerLochy,
             Status = locha.Status,
+            Uwagi = locha.Uwagi,
             IndeksProdukcji365Dni = locha.IndeksProdukcji365Dni,
             DataCzasUtworzenia = locha.DataCzasUtworzenia.ToString("yyyy-MM-dd HH:mm:ss"),
             DataCzasModyfikacji = locha.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -35,6 +36,7 @@ namespace HerdRest.Repository
             Id = lochaDto.Id,
             NumerLochy = lochaDto.NumerLochy,
             Status = lochaDto.Status,
+            Uwagi = lochaDto.Uwagi,
             DataCzasUtworzenia = DateTime.Now,
             DataCzasModyfikacji = DateTime.Now,
             Mioty = _context.Mioty.Where(m => m.Locha.Id == lochaDto.Id).ToList() ?? [],
@@ -57,6 +59,32 @@ namespace HerdRest.Repository
                 }
             }
             _context.Add(locha);
+            return Save();
+        }
+
+        public bool ImportLochyFromFile(string FilePath)
+        {
+            if(!File.Exists(FilePath))
+                return false;
+
+            List<Locha> lochy = [];
+            string[] lines = File.ReadAllLines(FilePath);
+            foreach(string line in lines){
+                string[] parts = line.Split(';');
+                if(parts.Length == 4){
+                    Locha locha = new()
+                    {
+                        Id = int.Parse(parts[0]),
+                        NumerLochy = int.Parse(parts[1]),
+                        Status = (StatusLochy)Enum.Parse(typeof(StatusLochy), parts[2]),
+                        DataCzasUtworzenia = DateTime.Now,
+                        DataCzasModyfikacji = DateTime.Now,
+                        Uwagi = parts[3]
+                    };
+                    lochy.Add(locha);
+                }
+            }
+            _context.AddRange(lochy);
             return Save();
         }
 

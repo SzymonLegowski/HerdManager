@@ -1,5 +1,6 @@
 using HerdRest.Dto;
 using HerdRest.Interfaces;
+using HerdRest.PublicClasses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HerdRest.Controller
@@ -37,6 +38,18 @@ namespace HerdRest.Controller
 
 
             return Ok("Dodano pomyślnie!");
+        }
+
+        [HttpPost("import")]
+        public IActionResult ImportMiotyFromFile(IFormFile file)
+        {
+            string uploadOutput = new UploadHandler().Upload(file);
+            if(!_miotRepository.ImportMiotyFromFile(Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Mioty.csv")))
+            {
+                ModelState.AddModelError("", "Coś poszło nie tak przy importowaniu danych.");
+                return StatusCode(500, ModelState);
+            }
+            return Ok(uploadOutput + " i zaimportowany pomyślnie!");
         }
 
         [HttpGet]

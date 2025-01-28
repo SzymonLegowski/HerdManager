@@ -9,6 +9,7 @@ namespace HerdRest.Interfaces
         List<WydarzenieDto> MapToDtoList(List<Wydarzenie> wydarzenia);
         Wydarzenie MapToModel(WydarzenieDto wydarzenieDto);
         bool CreateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId);
+        bool ImportWydarzeniaFromFile(string FilePath);
         ICollection<Wydarzenie> GetWydarzenia();
         Wydarzenie GetWydarzenie(int wydarzenieId);
         bool UpdateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId);

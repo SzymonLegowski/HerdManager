@@ -71,6 +71,45 @@ namespace HerdRest.Repository
             _context.Add(miot);
             return Save();
         }
+
+          public bool ImportMiotyFromFile(string FilePath)
+        {
+            if(!File.Exists(FilePath))
+                return false;
+
+            List<Miot> Mioty = [];
+            string[] lines = File.ReadAllLines(FilePath);
+            foreach(string line in lines){
+                string[] parts = line.Split(';');
+                if(parts.Length == 9){
+                    Miot Miot = new()
+                    {
+                        UrodzoneZywe = int.Parse(parts[2]),
+                        UrodzoneMartwe = int.Parse(parts[3]),
+                        Przygniecone = int.Parse(parts[4]),
+                        Odsadzone = int.Parse(parts[5]),
+                        Ocena = int.Parse(parts[6]),
+                        DataProszenia = DateOnly.Parse(parts[0]),
+                        Locha = _context.Lochy.Where(l => l.Id == int.Parse(parts[7])).FirstOrDefault() ?? throw new InvalidOperationException("Podana locha nie istnieje.")
+                    };
+                    if(parts[1] != "0")
+                    {
+                        Miot.DataOdsadzenia = DateOnly.Parse(parts[1]);
+                    }
+                    var krycie = _context.Wydarzenia.Where(w => w.Id == int.Parse(parts[8])).FirstOrDefault() ?? throw new InvalidOperationException("Podane wydarzenie nie istnieje.");
+                    var wydarzenieMiot = new WydarzenieMiot()
+                    {
+                        Miot = Miot,
+                        Wydarzenie = krycie
+                    };
+                    Miot.DataPrzewidywanegoProszenia = krycie.DataWydarzenia.AddDays(114);
+                    Mioty.Add(Miot);
+                    _context.Add(wydarzenieMiot);
+                }
+            }
+            _context.AddRange(Mioty);
+            return Save();
+        }
         public ICollection<Miot> GetMioty()
         {
             var mioty = _context.Mioty

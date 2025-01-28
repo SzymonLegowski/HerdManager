@@ -1,9 +1,8 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using HerdRest.Dto;
 using HerdRest.Interfaces;
-using HerdRest.Model;
+using HerdRest.Enums;
 using Microsoft.AspNetCore.Mvc;
+using HerdRest.PublicClasses;
 
 namespace HerdRest.Controller
 {
@@ -22,7 +21,7 @@ namespace HerdRest.Controller
                 return BadRequest(ModelState);
 
             var locha = _lochaRepository.GetLochy()
-                .Where(l => l.NumerLochy == lochaCreateDto.NumerLochy && lochaCreateDto.Status == 0)
+                .Where(l => l.NumerLochy == lochaCreateDto.NumerLochy && (lochaCreateDto.Status == StatusLochy.Wolna || lochaCreateDto.Status == StatusLochy.Pokryta || lochaCreateDto.Status == StatusLochy.Karmiaca))
                 .FirstOrDefault();
 
             if(locha != null)
@@ -44,6 +43,17 @@ namespace HerdRest.Controller
 
 
             return Ok("Dodano pomyślnie!");
+        }
+        [HttpPost("import")]
+        public IActionResult ImportLochyFromFile(IFormFile file)
+        {
+            string uploadOutput = new UploadHandler().Upload(file);
+            if(!_lochaRepository.ImportLochyFromFile(Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Lochy.csv")))
+            {
+                ModelState.AddModelError("", "Coś poszło nie tak przy importowaniu danych.");
+                return StatusCode(500, ModelState);
+            }
+            return Ok(uploadOutput + " i zaimportowany pomyślnie!");
         }
 
         [HttpGet]

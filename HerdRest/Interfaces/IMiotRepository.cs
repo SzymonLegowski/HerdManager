@@ -13,6 +13,7 @@ namespace HerdRest.Interfaces
         List<MiotDto> MapToDtoList(List<Miot> mioty);
         Miot MapToModel(MiotDto miotDto);
         bool CreateMiot(Miot miot, int wydarzenieKrycie);
+        bool ImportMiotyFromFile(string FilePath);
         ICollection<Miot> GetMioty();
         Miot GetMiot(int miotId);
         bool UpdateMiot(Miot miot, List<int> wydarzeniaMiotuId);

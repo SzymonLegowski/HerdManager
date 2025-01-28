@@ -12,13 +12,12 @@ namespace HerdRest.Model
         public TypWydarzenia TypWydarzenia { get; set; }
         public string? Uwagi { get; set; }
         public DateOnly DataWydarzenia { get; set; }
-        public DateOnly DataWykonania { get; set; }
         [Column(TypeName = "timestamp without time zone")]
         public DateTime DataCzasUtworzenia { get; set; }
         [Column(TypeName = "timestamp without time zone")]
         public DateTime DataCzasModyfikacji { get; set; }
-        public virtual ICollection<WydarzenieLocha>? WydarzeniaLoch { get; set;}
-        public virtual ICollection<WydarzenieMiot>? WydarzeniaMioty {get; set;}
+        public ICollection<WydarzenieLocha>? WydarzeniaLoch { get; set;}
+        public ICollection<WydarzenieMiot>? WydarzeniaMioty {get; set;}
 
     }
 }

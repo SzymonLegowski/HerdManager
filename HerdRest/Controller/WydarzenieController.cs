@@ -1,5 +1,6 @@
 using HerdRest.Dto;
 using HerdRest.Interfaces;
+using HerdRest.PublicClasses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HerdRest.Controller
@@ -24,9 +25,6 @@ namespace HerdRest.Controller
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (wydarzenieCreateDto.DataWykonania == default)
-                wydarzenieCreateDto.DataWykonania = wydarzenieCreateDto.DataWydarzenia;
-
             var wydarzenieCreate = _wydarzenieRepository.MapToModel(wydarzenieCreateDto);
 
             if(!_wydarzenieRepository.CreateWydarzenie(wydarzenieCreate, wydarzenieCreateDto.MiotyId, wydarzenieCreateDto.LochyId))
@@ -36,6 +34,17 @@ namespace HerdRest.Controller
             }
 
             return Ok("Dodano pomyślnie!");
+        }
+        [HttpPost("import")]
+        public IActionResult ImportWydarzeniaFromFile(IFormFile file)
+        {
+            string uploadOutput = new UploadHandler().Upload(file);
+            if(!_wydarzenieRepository.ImportWydarzeniaFromFile(Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Wydarzenia.csv")))
+            {
+                ModelState.AddModelError("", "Coś poszło nie tak przy importowaniu danych.");
+                return StatusCode(500, ModelState);
+            }
+            return Ok(uploadOutput + " i zaimportowany pomyślnie!");
         }
 
         [HttpGet]

@@ -1,5 +1,6 @@
 using HerdRest.Data;
 using HerdRest.Dto;
+using HerdRest.Enums;
 using HerdRest.Interfaces;
 using HerdRest.Model;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,6 @@ namespace HerdRest.Repository
             TypWydarzenia = wydarzenie.TypWydarzenia,
             Uwagi = wydarzenie.Uwagi,
             DataWydarzenia = wydarzenie.DataWydarzenia,
-            DataWykonania = wydarzenie.DataWykonania,
             DataCzasUtworzenia = wydarzenie.DataCzasUtworzenia.ToString("yyyy-MM-dd HH:mm:ss"),
             DataCzasModyfikacji = wydarzenie.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
             LochyId = wydarzenie.WydarzeniaLoch?.Select(l => l.LochaId).ToList() ?? [],
@@ -34,7 +34,6 @@ namespace HerdRest.Repository
                 TypWydarzenia = wydarzenieDto.TypWydarzenia,
                 Uwagi = wydarzenieDto.Uwagi,
                 DataWydarzenia = wydarzenieDto.DataWydarzenia,
-                DataWykonania = wydarzenieDto.DataWykonania,
                 DataCzasUtworzenia = DateTime.Now,
                 DataCzasModyfikacji = DateTime.Now,
                 WydarzeniaLoch = _context.WydarzeniaLochy.Where(w => w.WydarzenieId == wydarzenieDto.Id).ToList() ?? [],
@@ -72,11 +71,40 @@ namespace HerdRest.Repository
                     _context.Add(wydarzenieLocha);
                 }
             }
-            if(wydarzenie.DataWykonania == default)
-            {
-                wydarzenie.DataWykonania = wydarzenie.DataWydarzenia;
-            }
             _context.Add(wydarzenie);
+            return Save();
+        }
+
+        public bool ImportWydarzeniaFromFile(string FilePath)
+        {
+            if(!File.Exists(FilePath))
+                return false;
+
+            List<Wydarzenie> Wydarzenia = [];
+            string[] lines = File.ReadAllLines(FilePath);
+            foreach(string line in lines){
+                string[] parts = line.Split(';');
+                int[] idLoch = Array.ConvertAll(parts[3].Split(','), int.Parse);
+                if(parts.Length == 4){
+                    Wydarzenie Wydarzenie = new()
+                    {
+                        Id = int.Parse(parts[0]),
+                        TypWydarzenia = (TypWydarzenia)Enum.Parse(typeof(TypWydarzenia), parts[1]),
+                        DataWydarzenia = DateOnly.Parse(parts[2]),
+                    };
+                    Wydarzenia.Add(Wydarzenie);
+                    foreach(var id in idLoch)
+                    {
+                        var wydarzenieLocha = new WydarzenieLocha()
+                        {
+                            Locha = _context.Lochy.Where(l => l.Id == id).FirstOrDefault() ?? throw new InvalidOperationException("Locha nie istnieje."),
+                            Wydarzenie = Wydarzenie,
+                        };
+                        _context.Add(wydarzenieLocha);
+                    }
+                }
+            }
+            _context.AddRange(Wydarzenia);
             return Save();
         }
         
@@ -155,11 +183,6 @@ namespace HerdRest.Repository
                     }
                 }
             }
-            if(wydarzenie.DataWykonania == default)
-            {
-                wydarzenie.DataWykonania = wydarzenie.DataWydarzenia;
-            }
-            
             _context.Update(wydarzenie);
             return Save();
         }

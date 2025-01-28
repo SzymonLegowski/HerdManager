@@ -8,6 +8,7 @@
       <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
       <v-list-item :to="{ path: '/wydarzenia' }" link title="Wydarzenia"></v-list-item>
       <v-list-item :to="{ path: '/stado' }" link title="Stado"></v-list-item>
+      <v-list-item :to="{ path: '/import' }" link title="Importuj dane"></v-list-item>
     
   </v-navigation-drawer>
 
