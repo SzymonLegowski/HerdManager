@@ -84,13 +84,12 @@ namespace HerdRest.Repository
             string[] lines = File.ReadAllLines(FilePath);
             foreach(string line in lines){
                 string[] parts = line.Split(';');
-                int[] idLoch = Array.ConvertAll(parts[3].Split(','), int.Parse);
-                if(parts.Length == 4){
+                int[] idLoch = Array.ConvertAll(parts[2].Split(','), int.Parse);
+                if(parts.Length == 3){
                     Wydarzenie Wydarzenie = new()
                     {
-                        Id = int.Parse(parts[0]),
-                        TypWydarzenia = (TypWydarzenia)Enum.Parse(typeof(TypWydarzenia), parts[1]),
-                        DataWydarzenia = DateOnly.Parse(parts[2]),
+                        TypWydarzenia = (TypWydarzenia)Enum.Parse(typeof(TypWydarzenia), parts[0]),
+                        DataWydarzenia = DateOnly.Parse(parts[1]),
                     };
                     Wydarzenia.Add(Wydarzenie);
                     foreach(var id in idLoch)

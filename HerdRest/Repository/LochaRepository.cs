@@ -71,15 +71,14 @@ namespace HerdRest.Repository
             string[] lines = File.ReadAllLines(FilePath);
             foreach(string line in lines){
                 string[] parts = line.Split(';');
-                if(parts.Length == 4){
+                if(parts.Length == 3){
                     Locha locha = new()
                     {
-                        Id = int.Parse(parts[0]),
-                        NumerLochy = int.Parse(parts[1]),
-                        Status = (StatusLochy)Enum.Parse(typeof(StatusLochy), parts[2]),
+                        NumerLochy = int.Parse(parts[0]),
+                        Status = (StatusLochy)Enum.Parse(typeof(StatusLochy), parts[1]),
                         DataCzasUtworzenia = DateTime.Now,
                         DataCzasModyfikacji = DateTime.Now,
-                        Uwagi = parts[3]
+                        Uwagi = parts[2]
                     };
                     lochy.Add(locha);
                 }
@@ -91,27 +90,28 @@ namespace HerdRest.Repository
         public ICollection<Locha> GetLochy()
         {
             var lochy = _context.Lochy.OrderBy(p => p.Id)
-                            .Include(l => l.Mioty)
-                            .Include(l => l.WydarzeniaLochy!)
-                            .ToList();
+                        .Include(l => l.Mioty)
+                        .Include(l => l.WydarzeniaLochy!)
+                        .AsSingleQuery()
+                        .ToList();
             return lochy;
         }
 
         public ICollection<Locha> GetLochyByStatus(int status)
         {
             var lochy = _context.Lochy
-                .Where(l => l.Status == (StatusLochy)status)
-                .Include(l => l.Mioty)
-                .Include(l => l.WydarzeniaLochy)
-                .ToList();
+                        .Where(l => l.Status == (StatusLochy)status)
+                        .Include(l => l.Mioty)
+                        .Include(l => l.WydarzeniaLochy)
+                        .ToList();
             return lochy;
         }
 
         public Locha GetLocha(int lochaId)
         {
             var locha = _context.Lochy.Include(l => l.Mioty)
-                    .Include(l => l.WydarzeniaLochy)
-                    .FirstOrDefault(l => l.Id == lochaId) ?? throw new InvalidOperationException("Locha nie istnieje.");
+                        .Include(l => l.WydarzeniaLochy)
+                        .FirstOrDefault(l => l.Id == lochaId) ?? throw new InvalidOperationException("Locha nie istnieje.");
             return locha;
         }
         public bool UpdateLocha(Locha locha, List<int>? wydarzenieId)

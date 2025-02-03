@@ -38,8 +38,12 @@
     position: absolute;
     background-color: #101010;
     transform: translate(100px, 5px);
+    padding: 10px;
+    border-radius: 10px;
+    border-style: solid;
+    border-color: #06838f;
   }
-  
+
   .grid-item {
     display: flex;
     align-items: center;

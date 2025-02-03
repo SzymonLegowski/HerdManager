@@ -13,43 +13,20 @@
         >
           <v-card-text>
             <v-row dense>
-              <v-col
-                cols="12"
-                md="4"
-                sm="6"
-              >
               <v-autocomplete
                   :items="['Krycie', 'Szczepienie']"
                   label="Typ"
                   auto-select-first
                   v-model:="noweWydarzenie.typWydarzenia"
+                  style = "margin-right: 10px;"
                 ></v-autocomplete>
-              </v-col>
-  
-              <v-col
-                cols="12"
-                md="4"
-                sm="6"
-              >
-                <v-text-field
+              <v-text-field
                   hint="rrrr-mm-dd"
                   label="Data Wydarzenia*"
                   v-model="noweWydarzenie.dataWydarzenia"
                   required
+                  style = "margin-left: 10px;"
                 ></v-text-field>
-              </v-col>
-  
-              <v-col
-                cols="12"
-                md="4"
-                sm="6"
-              >
-                <v-text-field
-                  hint="rrrr-mm-dd"
-                  label="Data Wykonania"
-                  v-model="noweWydarzenie.dataWykonania"
-                ></v-text-field>
-              </v-col>
               <v-textarea label="Uwagi" v-model="noweWydarzenie.uwagi" style="width: 100%;"></v-textarea>
             
               <v-btn class="AddButton" variant="outlined" text="Wybierz lochy" @click="selectLochy"></v-btn>
@@ -107,6 +84,9 @@ const props = defineProps({
 });
 
 const numeryLoch = ref([]);
+const lochyWolne = ref([]);
+const lochyPokryte = ref([]);
+const lochyKarmiace = ref([]);
 const lochy = ref([]);
 const showLochyGrid = ref(false); 
 let noweWydarzenie = ref({
@@ -181,8 +161,13 @@ const wybraneMiotyEmpty = () => {
 
 onMounted(async () => {
   try {
-    const response = await apiClient.get(`/Locha/status/0`);
-    lochy.value = response.data
+    const responseA = await apiClient.get(`/Locha/status/0`);
+    const responseB = await apiClient.get(`/Locha/status/1`);
+    const responseC = await apiClient.get(`/Locha/status/2`);
+    lochyWolne.value = responseA.data
+    lochyPokryte.value = responseB.data
+    lochyKarmiace.value = responseC.data
+    lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyWolne.value);
     numeryLoch.value = lochy.value.map(lochy => lochy.numerLochy);
     console.log("numeryLoch", numeryLoch); //Debugowanie
   } catch (e) {
@@ -227,6 +212,7 @@ const mapNoweWydarzenieTemp = () => {
 
 .lochyGridDialog {
   position: absolute;
+  top: 10%;
   left: 70%;
 }
 h5 {

@@ -26,7 +26,7 @@ namespace HerdRest.Controller
 
             if(locha != null)
             {
-                ModelState.AddModelError("", "Istnieje już aktywna locha o podanym numerze.");
+                ModelState.AddModelError("e", "Istnieje już aktywna locha o podanym numerze.");
                 return StatusCode(422, ModelState);
             }
 
@@ -37,7 +37,7 @@ namespace HerdRest.Controller
 
             if(!_lochaRepository.CreateLocha(lochaCreate, lochaCreateDto.WydarzeniaLochyId))
             {
-                ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu.");
+                ModelState.AddModelError("e", "Coś poszło nie tak przy zapisywaniu.");
                 return StatusCode(500, ModelState);
             }
 
@@ -65,7 +65,7 @@ namespace HerdRest.Controller
 
              if(!ModelState.IsValid)
                 return BadRequest(ModelState);
-
+ 
             return Ok(dtos);
         }
 
