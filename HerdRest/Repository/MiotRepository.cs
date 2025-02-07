@@ -79,17 +79,17 @@ namespace HerdRest.Repository
 
             List<Miot> Mioty = [];
             string[] lines = File.ReadAllLines(FilePath);
-            foreach(string line in lines){
+            foreach(string line in lines.Skip(1)){
                 string[] parts = line.Split(';');
                 if(parts.Length == 9){
                     Miot Miot = new()
                     {
+                        DataProszenia = DateOnly.Parse(parts[0]),
                         UrodzoneZywe = int.Parse(parts[2]),
                         UrodzoneMartwe = int.Parse(parts[3]),
                         Przygniecone = int.Parse(parts[4]),
                         Odsadzone = int.Parse(parts[5]),
                         Ocena = int.Parse(parts[6]),
-                        DataProszenia = DateOnly.Parse(parts[0]),
                         Locha = _context.Lochy.Where(l => l.Id == int.Parse(parts[7])).FirstOrDefault() ?? throw new InvalidOperationException("Podana locha nie istnieje.")
                     };
                     if(parts[1] != "0")
@@ -127,39 +127,34 @@ namespace HerdRest.Repository
                 .FirstOrDefault(m => m.Id == miotId) ?? throw new InvalidOperationException("Miot nie istnieje.");
             return miot;
         }
-        public bool UpdateMiot(Miot miot, List<int> wydarzeniaMiotuId)
+        public bool UpdateMiot(Miot miot, List<int>? wydarzeniaMiotuId)
         {
-            if (wydarzeniaMiotuId != null)
-            foreach(var wydarzenieId in wydarzeniaMiotuId)
-            {
-                var CzyIstnieje = _context.WydarzeniaMiotu.Where(wm => wm.WydarzenieId == wydarzenieId && wm.MiotId == miot.Id).FirstOrDefault();
-                if(CzyIstnieje == null)
+            if (wydarzeniaMiotuId?.Count > 0){
+                foreach(var wydarzenieId in wydarzeniaMiotuId)
                 {
-                    var wydarzenieMiotEntity = _context.Wydarzenia.Where(a => a.Id == wydarzenieId).FirstOrDefault();
-                    var wydarzenieMiot = new WydarzenieMiot
+                    var CzyIstnieje = _context.WydarzeniaMiotu.Where(wm => wm.WydarzenieId == wydarzenieId && wm.MiotId == miot.Id).FirstOrDefault();
+                    if(CzyIstnieje == null)
                     {
-                        Miot = miot,
-                        Wydarzenie = wydarzenieMiotEntity ?? throw new InvalidOperationException("Wydarzenie nie istnieje.")
-                    };
-                    
-                    _context.Add(wydarzenieMiot);
+                        var wydarzenieMiotEntity = _context.Wydarzenia.Where(a => a.Id == wydarzenieId).FirstOrDefault();
+                        var wydarzenieMiot = new WydarzenieMiot
+                        {
+                            Miot = miot,
+                            Wydarzenie = wydarzenieMiotEntity ?? throw new InvalidOperationException("Wydarzenie nie istnieje.")
+                        };
+                        
+                        _context.Add(wydarzenieMiot);
 
-                    if(wydarzenieMiotEntity?.TypWydarzenia == TypWydarzenia.Krycie)
+                        if(wydarzenieMiotEntity?.TypWydarzenia == TypWydarzenia.Krycie)
+                        {
+                            miot.DataPrzewidywanegoProszenia = wydarzenieMiotEntity.DataWydarzenia.AddDays(114);
+                        }   
+                    }
+                    else
                     {
-                        miot.DataPrzewidywanegoProszenia = wydarzenieMiotEntity.DataWydarzenia.AddDays(114);
-                    }   
-                }
-                else
-                {
-                    _context.WydarzeniaMiotu.Remove(CzyIstnieje);
-                }
+                        _context.WydarzeniaMiotu.Remove(CzyIstnieje);
+                    }
 
-            }
-            if(wydarzeniaMiotuId.Count == 0)
-            {
-                miot.DataPrzewidywanegoProszenia = _context.Mioty.Where(m => m.Id == miot.Id)
-                    .Select(m => m.DataPrzewidywanegoProszenia)
-                    .FirstOrDefault();
+                }
             }
 
             miot.DataCzasModyfikacji = DateTime.Now;

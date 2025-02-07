@@ -129,6 +129,12 @@ namespace HerdRest.Repository
         }
         public bool UpdateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
         {
+            if(wydarzenie.DataWydarzenia == default)
+                {
+                    wydarzenie.DataWydarzenia = _context.Wydarzenia.Where(l => l.Id == wydarzenie.Id)
+                    .Select(l => l.DataWydarzenia)
+                    .FirstOrDefault();
+                }
             wydarzenie.Uwagi ??= "brak";
             wydarzenie.DataCzasModyfikacji = DateTime.Now;
             wydarzenie.DataCzasUtworzenia = _context.Wydarzenia.Where(l => l.Id == wydarzenie.Id)

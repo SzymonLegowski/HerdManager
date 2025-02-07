@@ -100,12 +100,6 @@ namespace HerdRest.Controller
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            if (updatedMiotDto.WydarzeniaMiotuId == null)
-            {
-                ModelState.AddModelError("", "WydarzeniaMiotuId nie może być puste.");
-                return BadRequest(ModelState);
-            }
-
             var updatedMiot = _miotRepository.MapToModel(updatedMiotDto);
 
             if (!_miotRepository.UpdateMiot(updatedMiot, updatedMiotDto.WydarzeniaMiotuId))

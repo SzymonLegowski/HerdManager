@@ -1,7 +1,8 @@
 <template>
   
   <LochyGrid v-if="showGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLocha"/>
-  <AddMiot :addMiotDialog="addMiotDialog" :nrLochy="selectedLocha" :krycieId="ostatnieKrycieId" @update:addMiotDialog="addMiotDialog = $event"/>
+  <AddMiot :addMiotDialog="addMiotDialog" :idLochy="idLochy" :krycieId="ostatnieKrycieId" @update:addMiotDialog="addMiotDialog = $event"/>
+  <EditMiot :editMiotDialog="editMiotDialog" :miot="selectedMiot" @update:editMiotDialog="editMiotDialog = $event" />
   
 
   <v-navigation-drawer :width="200">
@@ -77,20 +78,24 @@
   import apiClient from "@/plugins/axios";
   import LochyGrid from "@/components/LochyGrid.vue";
   import AddMiot from "@/components/AddMiot.vue";
+  import EditMiot from "@/components/EditMiot.vue";
 
   const Lochy = ref([]);
   const numeryLoch = ref([]);
   const Mioty = ref([]);
   const error = ref(null);
   const selectedLocha = ref(null);
+  const selectedMiot = ref(null);
   const showGrid = ref(false);
   const addMiotDialog = ref(false);
+  const editMiotDialog = ref(false);
   const ostatnieKrycieId = ref(null);
+  const idLochy = ref(null);
 
   const baseHeaders = [
     {
       title: "Miot",
-      value: "id",
+      value: "nr",
     },
     {
       title: "Data",
@@ -125,22 +130,19 @@ watch(selectedLocha, async (newValue, oldValue) => {
   let najwiekszaLiczbaKrycMiotu = 0;
   Mioty.value = [];
   headers.value = JSON.parse(JSON.stringify(baseHeaders));
-  console.log("Selected locha zmieniona z:", oldValue, "na:", newValue); //Debugowanie
-  console.log("HeadersValue:", headers); // Debugowanie
   if (newValue !== null) 
   {
     try 
     {
       const selected = Lochy.value.find(locha => locha.numerLochy === newValue);
-      if (selected.miotyId)
-      {
-        console.log(`MiotyId dla lochy ${newValue}:`); //Debugowanie
+      idLochy.value = selected.id;
         for (let indeksMiotu = 0; indeksMiotu < selected.miotyId.length; indeksMiotu++) 
         { 
           const miotId = selected.miotyId[indeksMiotu];
           const miotResponse = await apiClient.get(`/Miot/${miotId}`);
           const miot = miotResponse.data;
           miot.datyKrycia = [];
+          miot.nr = indeksMiotu + 1;
 
           for (let indeksWydarzenia = ostatniIndeksWydarzenia; indeksWydarzenia < selected.wydarzeniaLochyId.length; indeksWydarzenia++) 
           {
@@ -152,7 +154,6 @@ watch(selectedLocha, async (newValue, oldValue) => {
             {
               miot.datyKrycia.push(wydarzenie.dataWydarzenia);
               ostatniIndeksWydarzenia++;
-              console.log("Indeks wydarzenia:", indeksWydarzenia);  // Debugowanie
               if (najwiekszaLiczbaKrycMiotu < miot.datyKrycia.length) 
               {
                 najwiekszaLiczbaKrycMiotu = miot.datyKrycia.length;
@@ -163,13 +164,9 @@ watch(selectedLocha, async (newValue, oldValue) => {
               break;
             }
           }
-          console.log("wydarzeniaLochyId:", selected.wydarzeniaLochyId); // Debugowanie
-          ostatnieKrycieId.value = selected.wydarzeniaLochyId[selected.wydarzeniaLochyId.length - 1];
-          console.log("ostatniIndeksWydarzenia:", ostatniIndeksWydarzenia); // Debugowanie
           Mioty.value.push(miot);
-          console.log("NajwiekszaLiczbaKrycMiotu:", najwiekszaLiczbaKrycMiotu); // Debugowanie
         }
-
+        ostatnieKrycieId.value = selected.wydarzeniaLochyId[selected.wydarzeniaLochyId.length - 1];
         for (let newHeader = 0; newHeader < najwiekszaLiczbaKrycMiotu; newHeader++) 
         {
           headers.value[1].children.splice(-3, 0, { title: `Krycia nr ${newHeader + 1}`, value: `datyKrycia[${newHeader}]` });
@@ -177,7 +174,7 @@ watch(selectedLocha, async (newValue, oldValue) => {
 
         if (ostatniIndeksWydarzenia < selected.wydarzeniaLochyId.length) 
         {
-          Mioty.value.push({id:Mioty.value.length+1});
+          Mioty.value.push({nr:Mioty.value.length+1});
           Mioty.value[Mioty.value.length-1].datyKrycia = [];
           if(selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia > 0)
           {
@@ -192,19 +189,10 @@ watch(selectedLocha, async (newValue, oldValue) => {
             const wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
             const wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
             const wydarzenie = wydarzenieResponse.data;
-            
             Mioty.value[Mioty.value.length-1].datyKrycia.push(wydarzenie.dataWydarzenia);
 
           }
         }
-
-        console.log("Headers:", headers.value[1].children); // Debugowanie
-        console.log("BaseHeaders:", baseHeaders); // Debugowanie
-        console.log("Mioty:", Mioty.value); // Debugowanie
-      }
-      else {
-        console.log(`Brak Miotów dla lochy ${newValue}`);
-      }
     } catch (e) {
       console.error("Błąd podczas pobierania danych wybranej lochy:", e);
       error.value = e;
@@ -240,13 +228,13 @@ const addItem = () => {
 };
 
 const editItem = (item) => {
-  console.log("Edytuj Miot o id:"); //Debugowanie
+  editMiotDialog.value = true;
+  selectedMiot.value = item;
 };
 
 const deleteItem = (item) => {
-  console.log("Usuń Miot o id:"); //Debugowanie
   apiClient.delete("/Miot/" + item.id);
-  Mioty.value = Mioty.value.filter((Miot) => Miot.id !== Miot.id);
+  Mioty.value.splice(Mioty.value.indexOf(item), 1);
 };
 
 const handleSaveMiot = (nowyMiot) => {

@@ -79,8 +79,22 @@
 <script setup>
 import apiClient from '@/plugins/axios';
 
-
-let newMiot = ref({
+const props = defineProps({
+addMiotDialog: {
+  type: Boolean,
+  required: true
+},
+idLochy: {
+    type: Number,
+    required: true
+},
+krycieId: {
+    type: Number,
+    required: true
+}
+});
+const { idLochy, krycieId } = toRefs(props);
+const newMiot = ref({
     urodzoneZywe: "",
     urodzoneMartwe: "",
     przygniecone: "",
@@ -88,27 +102,14 @@ let newMiot = ref({
     ocena: "",
     dataProszenia: "",
     dataOdsadzenia: "",
-    ocena: "",
-    lochaId: "",
-});
-
-const props = defineProps({
-addMiotDialog: {
-  type: Boolean,
-  required: true
-},
-nrLochy: {
-    required: false
-},
-krycieId: {
-    required: false
-}
+    lochaId: idLochy,
+    wydarzeniaMiotuId: krycieId,
 });
 
 const emit = defineEmits(['update:addMiotDialog', 'save-miot']);
 
 const closeDialog = () => {
-  emit('update:addMiotDialog', false);
+    emit('update:addMiotDialog', false);
 };
 
 const saveDialog = () => {
@@ -126,6 +127,8 @@ const clearNewMiot = () => {
         dataProszenia: "",
         dataOdsadzenia: "",
         ocena: "",
+        lochaId: "",
+        wydarzeniaMiotuId: "",
     };
 };
 

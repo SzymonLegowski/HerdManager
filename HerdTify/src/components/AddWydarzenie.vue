@@ -5,7 +5,7 @@
         max-width="600"
         persistent
       >
-        <LochyGrid v-if="showLochyGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLocha" class="lochyGridDialog"/>
+        <LochyGrid v-if="showLochyGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLochy" class="lochyGridDialog"/>
         <v-card
           prepend-icon="mdi-plus"
           title="Nowe Wydarzenie"
@@ -175,7 +175,7 @@ onMounted(async () => {
   }
 });
 
-const updateSelectedLocha = (number) => {
+const updateSelectedLochy = (number) => {
   if(!noweWydarzenie.value.lochyId.includes(number)){
     noweWydarzenie.value.lochyId.push(number);
   }

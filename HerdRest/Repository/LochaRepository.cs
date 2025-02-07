@@ -91,7 +91,7 @@ namespace HerdRest.Repository
         {
             var lochy = _context.Lochy.OrderBy(p => p.Id)
                         .Include(l => l.Mioty)
-                        .Include(l => l.WydarzeniaLochy!)
+                        .Include(l => l.WydarzeniaLochy)
                         .AsSingleQuery()
                         .ToList();
             return lochy;

@@ -117,7 +117,7 @@ const ImportLochy = async () => {
 };
 
 const ImportMioty = async () => {
-  if (!selectedFileLochy.value) return;
+  if (!selectedFileMioty.value) return;
 
 const formData = new FormData();
 formData.append("file", selectedFileMioty.value);

@@ -1,6 +1,8 @@
 <template>
 
-<AddWydarzenie :addWydarzenieDialog="addWydarzenieDialog" @update:addWydarzenieDialog="addWydarzenieDialog = $event" @save-wydarzenie="handleSaveWydarzenie"/>
+<AddWydarzenie :addWydarzenieDialog="addWydarzenieDialog" @update:addWydarzenieDialog="addWydarzenieDialog = $event" @save-wydarzenie="handleSaveWydarzenie" />
+<EditWydarzenie :editWydarzenieDialog="editWydarzenieDialog" :wydarzenie="selectedWydarzenie" @update:editWydarzenieDialog="editWydarzenieDialog = $event" @update-wydarzenie="handleUpdateWydarzenie" />
+
   <v-navigation-drawer :width="200">
     <v-list-item title="Menedżer stada"></v-list-item>
     <v-divider></v-divider>
@@ -53,11 +55,14 @@
 import { ref, onMounted } from "vue";
 import apiClient from "@/plugins/axios";
 import AddWydarzenie from "@/components/AddWydarzenie.vue";
+import EditWydarzenie from "@/components/EditWydarzenie.vue";
 
 const Wydarzenia = ref([]);
 const error = ref(null);
 const addWydarzenieDialog = ref(false);
-const headers = 
+const editWydarzenieDialog = ref(false);
+const selectedWydarzenie = ref(null);
+const headers = ref(
 [
   {
     title: "Id",
@@ -103,7 +108,7 @@ const headers =
     key: "actions", 
     sortable: false, 
     align: "center"}
-];  
+]);  
 
 onMounted(async () => {
   try {
@@ -136,6 +141,8 @@ const addItem = () => {
 
 const editItem = (item) => {
   console.log("Edytuj wydarzenie o id:"); //Debugowanie
+  editWydarzenieDialog.value = true;
+  selectedWydarzenie.value = item;
 };
 
 const deleteItem = (item) => {
@@ -155,6 +162,17 @@ const handleSaveWydarzenie = (noweWydarzenie) => {
   noweWydarzenie.id = Wydarzenia.value[Wydarzenia.value.length-1].id + 1;
   Wydarzenia.value.push(noweWydarzenie);
 };
+
+const handleUpdateWydarzenie = (editedWydarzenie) => {
+  const teraz = new Date();
+  const padZero = (num) => String(num).padStart(2, '0');
+  const sformatowanaData = 
+    `${teraz.getFullYear()}-${padZero(teraz.getMonth() + 1)}-${padZero(teraz.getDate())} ` +
+    `${padZero(teraz.getHours())}:${padZero(teraz.getMinutes())}:${padZero(teraz.getSeconds())}`;
+  editedWydarzenie.dataCzasModyfikacji = sformatowanaData;
+  const index = Wydarzenia.value.findIndex((wydarzenie) => wydarzenie.id === editedWydarzenie.id);
+  Wydarzenia.value[index] = editedWydarzenie;
+}
 </script>
 <style lang="scss">
 

@@ -83,6 +83,9 @@ namespace HerdRest.Controller
         [ProducesResponseType(404)]
         public IActionResult UpdateWydarzenie(int wydarzenieId, [FromBody]WydarzenieDto updatedWydarzenieDto)
         {
+             if((updatedWydarzenieDto.LochyId == null && updatedWydarzenieDto.MiotyId == null) || (updatedWydarzenieDto.LochyId?.Count == 0 && updatedWydarzenieDto.MiotyId?.Count == 0))
+                return BadRequest("Wydarzenie musi być przypisane do co najmniej jednej lochy lub miotu.");
+
             if(updatedWydarzenieDto == null)
                 return BadRequest(ModelState);
 
