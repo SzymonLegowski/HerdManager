@@ -44,7 +44,7 @@
           
             <v-btn class="AddButton" variant="outlined" text="Wybierz lochy" @click="selectLochy"></v-btn>
             <v-col>
-              <h5 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left: 2%;">Wybrane lochy:{{ editedWydarzenie.numeryLoch }}</h5>
+              <h5 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left: 10px;">Wybrane lochy:{{ editedWydarzenie.numeryLoch }}</h5>
             </v-col>
                         
           </v-row>
@@ -172,7 +172,10 @@ try {
   lochyPokryte.value = responseB.data
   lochyKarmiace.value = responseC.data
   lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyWolne.value);
-  numeryLoch.value = lochy.value.map(lochy => lochy.numerLochy);
+  numeryLoch.value = lochy.value.map(locha => ({
+        numerLochy: locha.numerLochy,
+        statusLochy: locha.status
+      }));
   console.log("numeryLoch", numeryLoch); //Debugowanie
 } catch (e) {
   console.error(e);
@@ -205,7 +208,7 @@ const editedToSent = () => {
 
 <style scoped>
 .AddButton {
-margin-bottom: 30px;
+  margin-bottom: 30px;
 }
 .shift-left {
 transform: translateX(-220px);

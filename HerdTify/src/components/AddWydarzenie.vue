@@ -31,7 +31,7 @@
             
               <v-btn class="AddButton" variant="outlined" text="Wybierz lochy" @click="selectLochy"></v-btn>
               <v-col>
-                <h5 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left: 2%;">Wybrane lochy:{{ noweWydarzenie.lochyId }}</h5>
+                <h5 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left: 10px;">Wybrane lochy:{{ noweWydarzenie.lochyId }}</h5>
               </v-col>
                           
             </v-row>
@@ -168,7 +168,10 @@ onMounted(async () => {
     lochyPokryte.value = responseB.data
     lochyKarmiace.value = responseC.data
     lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyWolne.value);
-    numeryLoch.value = lochy.value.map(lochy => lochy.numerLochy);
+    numeryLoch.value = lochy.value.map(locha => ({
+        numerLochy: locha.numerLochy,
+        statusLochy: locha.status
+      }));
     console.log("numeryLoch", numeryLoch); //Debugowanie
   } catch (e) {
     console.error(e);
@@ -178,6 +181,10 @@ onMounted(async () => {
 const updateSelectedLochy = (number) => {
   if(!noweWydarzenie.value.lochyId.includes(number)){
     noweWydarzenie.value.lochyId.push(number);
+  } else
+  {
+    let index = noweWydarzenie.value.lochyId.indexOf(number);
+    noweWydarzenie.value.lochyId.splice(index, 1);
   }
   console.log("wybrane lochy:", noweWydarzenie); //Debugowanie  
 };
@@ -202,7 +209,6 @@ const mapNoweWydarzenieTemp = () => {
 
 <style scoped>
 .AddButton {
-  margin-left: 30px;
   margin-bottom: 30px;
 }
 .shift-left {

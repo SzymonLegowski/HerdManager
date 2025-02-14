@@ -20,7 +20,7 @@
       
       <v-autocomplete
         class="autocompleteNrLochy"
-        :items="numeryLoch"
+        :items="numeryLoch.map(locha => locha.numerLochy)"
         label="Nr Lochy"
         item-text="numerLochy"
         item-value="numerLochy"
@@ -205,7 +205,17 @@ const getData = async () => {
     const response = await apiClient.get("/Locha");
     console.log("Dane lochy:", response.data); // Debugowanie
     Lochy.value = Array.isArray(response.data) ? response.data : [];
-    numeryLoch.value = Lochy.value.filter(locha => locha.status == "Karmiaca" || locha.status == "Wolna" || locha.status == "Pokryta").map(locha => locha.numerLochy).sort((a, b) => a - b); // Dopasuj klucz do struktury danych
+    numeryLoch.value = Lochy.value
+      .filter(locha => 
+        locha.status == "Karmiaca" || 
+        locha.status == "Wolna" || 
+        locha.status == "Pokryta"
+      )
+      .map(locha => ({
+        numerLochy: locha.numerLochy,
+        statusLochy: locha.status
+      }))
+      .sort((a, b) => a - b); // Dopasuj klucz do struktury danych
     console.log("Numery loch:", numeryLoch.value);
   } catch (e) {
     console.error("Błąd podczas pobierania danych:", e);
