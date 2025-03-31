@@ -10,7 +10,6 @@ namespace HerdRest.Repository
     public class LochaRepository : ILochaRepository
     {
         private readonly DataContext _context;
-        
         public LochaRepository(DataContext context)
         {
             _context = context;

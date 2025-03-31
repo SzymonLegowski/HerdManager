@@ -5,7 +5,6 @@
         :key="number"
         class="grid-item" 
         :class="getColorClass(number)"
-        :disabled="!items.map(locha => locha.numerLochy).includes(number)"
         @click="handleClick(number)"
         outlined
       >
@@ -44,8 +43,10 @@
   const emit = defineEmits(['update:selectedLocha']);
   
   const handleClick = (number) => {
-    console.log(`Button ${number} clicked`);
-    emit('update:selectedLocha', number);
+    
+    if(!props.items.map(locha => locha.numerLochy).includes(number))
+      {console.log(`Button ${number} clicked`);}
+    //emit('update:selectedLocha', number);
   };
   </script>
   
@@ -73,7 +74,7 @@
     background: #ab6a08;
   }
   .bg-default {
-    background: #101010;
+    background: #353535;
   }
 
   .grid-item {
