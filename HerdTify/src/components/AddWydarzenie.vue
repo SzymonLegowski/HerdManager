@@ -29,7 +29,7 @@
                 ></v-text-field>
               <v-textarea label="Uwagi" v-model="noweWydarzenie.uwagi" style="width: 100%;"></v-textarea>
             
-              <v-btn class="AddButton" variant="outlined" text="Wybierz lochy" @click="selectLochy"></v-btn>
+              <v-btn class="addButton" variant="outlined" text="Wybierz lochy" @click="selectLochy"></v-btn>
               <v-col>
                 <h5 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left: 10px;">Wybrane lochy:{{ noweWydarzenie.lochyId }}</h5>
               </v-col>
@@ -208,8 +208,9 @@ const mapNoweWydarzenieTemp = () => {
 </script>
 
 <style scoped>
-.AddButton {
+.addButton {
   margin-bottom: 30px;
+  
 }
 .shift-left {
   transform: translateX(-220px);
