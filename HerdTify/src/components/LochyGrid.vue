@@ -44,9 +44,9 @@
   
   const handleClick = (number) => {
     
-    if(!props.items.map(locha => locha.numerLochy).includes(number))
+    if(props.items.map(locha => locha.numerLochy).includes(number))
       {console.log(`Button ${number} clicked`);}
-    //emit('update:selectedLocha', number);
+    emit('update:selectedLocha', number);
   };
   </script>
   

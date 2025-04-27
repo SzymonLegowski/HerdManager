@@ -33,6 +33,12 @@
       </v-btn>
       
       <v-btn
+        style="min-width: 0; width: 100px; background-color: blue; margin-right: 40px; "
+        size="small"
+        @click="exportToPdf()"
+      >Eksportuj</v-btn>
+
+      <v-btn
         style="min-width: 0; width: 100px; background-color: green; margin-right: 40px; "
         size="small"
         @click="addItem()"
@@ -75,10 +81,12 @@
   
   <script setup>
   import { ref, onMounted } from "vue";
+  import { useMiotyStore } from "@/stores/miotyStore";
   import apiClient from "@/plugins/axios";
   import LochyGrid from "@/components/LochyGrid.vue";
   import AddMiot from "@/components/AddMiot.vue";
   import EditMiot from "@/components/EditMiot.vue";
+
 
   const Lochy = ref([]);
   const numeryLoch = ref([]);
@@ -91,6 +99,7 @@
   const editMiotDialog = ref(false);
   const ostatnieKrycieId = ref(null);
   const idLochy = ref(null);
+  const miotyStore = useMiotyStore();
 
   const baseHeaders = [
     {
@@ -245,6 +254,13 @@ const editItem = (item) => {
 const deleteItem = (item) => {
   apiClient.delete("/Miot/" + item.id);
   Mioty.value.splice(Mioty.value.indexOf(item), 1);
+};
+
+const exportToPdf = () => {
+  miotyStore.setMiotyStore(Mioty, selectedLocha);
+  window.open('/exportpdf', '_blank')
+  console.log("Mioty:", miotyStore.mioty); //Debugowanie
+  console.log("NrLochyMiotStore", miotyStore.nrLochy);
 };
 
 const handleSaveMiot = (nowyMiot) => {
