@@ -14,6 +14,8 @@
   </template>
   
   <script setup>
+import apiClient from '@/plugins/axios';
+
   
   const props = defineProps({
     items: {
@@ -45,8 +47,20 @@
   const handleClick = (number) => {
     
     if(props.items.map(locha => locha.numerLochy).includes(number))
-      {console.log(`Button ${number} clicked`);}
-    emit('update:selectedLocha', number);
+      {
+        emit('update:selectedLocha', number);
+      } 
+    else
+      {
+        const newLocha = {numerLochy: number,
+                        status: "Wolna",
+                        wydarzeniaLochyId: [],
+                        miotyId: []
+        };
+        console.log(props.items,"test"); //Debugowanie
+        props.items.push({numerLochy: number, statusLochy: "Wolna"})
+        //apiClient.post('/Locha', newLocha);
+      }
   };
   </script>
   

@@ -21,7 +21,10 @@ namespace HerdRest.Controller
                 return BadRequest(ModelState);
 
             var locha = _lochaRepository.GetLochy()
-                .Where(l => l.NumerLochy == lochaCreateDto.NumerLochy && (lochaCreateDto.Status == StatusLochy.Wolna || lochaCreateDto.Status == StatusLochy.Pokryta || lochaCreateDto.Status == StatusLochy.Karmiaca))
+                .Where(l => l.NumerLochy == lochaCreateDto.NumerLochy && 
+                                            (l.Status == StatusLochy.Wolna || 
+                                             l.Status == StatusLochy.Pokryta || 
+                                             l.Status == StatusLochy.Karmiaca))
                 .FirstOrDefault();
 
             if(locha != null)

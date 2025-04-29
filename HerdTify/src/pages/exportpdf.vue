@@ -4,13 +4,12 @@
   <table id="Pdf-Table" class="PdfTable">
     <thead class="PdfTableHead">
       <tr>
-        <th :colspan="colspanValue + 8">NR LOCHY</th>
+        <th :colspan="colspanValue + 7">NR LOCHY</th>
         <th > {{ miotyStore.nrLochy }}  </th>
       </tr>
       <tr>
         <th :colspan="colspanValue + 1">Sektor krycia</th>
         <th colspan="7">Porodówka</th>
-        <th class="poleOceny, PdfTableHeader" rowspan="4">Ocena prosiąt urodzonych(1-5)</th>
       </tr>
       <tr>
         <th rowspan="3">Nr miotu</th>
@@ -38,15 +37,6 @@
       </tr>
     </tbody>
   </table>
-
-  <div class="addColumnButtonBackground">
-    <button class="addColumnButton" @click="addColumn">Dodaj kolumnę</button>
-  </div>
-
-  <div class="addColumnButtonBackground">
-    <button class="addColumnButton" @click="addRow">Dodaj wiersz</button>
-  </div>
-
 </div>
 </template>
 <script setup>
@@ -55,28 +45,50 @@
 
   let colspanValue = ref(1);
   let tableData = ref([['1 (rasa kn.)']]);
-  let rowData = ref([['test','test 1','test','test','test','test','test','test','test','test']]);
-  let row = rowData;
+  let maxKryc=0;
   const miotyStore = useMiotyStore();
   const mioty = miotyStore.mioty;
-  const nrLochy = miotyStore.nrLochy;
+  let rowData = ref([[]]);
+  let test = 0;
   
-  
-
-  const addColumn = () => {
+  for(let miot = 0; miot < mioty.length; miot++)
+  {
+    if(maxKryc < mioty[miot].datyKrycia.length)
+      maxKryc = mioty[miot].datyKrycia.length;
+  };
+  console.log("maxKryc", maxKryc)
+  for(let krycie = 1; krycie < maxKryc; krycie++)
+  {
     colspanValue.value += 1;
-    tableData.value.forEach(row => {
-      row.push(colspanValue.value + ' (rasa kn.)')
-    })
-    row.value[0].splice(colspanValue.value, 0, 'test ' + colspanValue.value);
-  }
-  
-  const addRow = () => {
-    console.log(mioty);
-    console.log(nrLochy);
-    //row.value.push(rowData.value[0]);
-  }
-
+    tableData.value.forEach(row => {row.push(colspanValue.value + ' (rasa kn.)')})
+  };
+  for(let miot = 0; miot < mioty.length; miot++)
+  {
+    let spliceIndex = 1;
+    rowData.value[miot] = ([miot+1, 
+                        mioty[miot].dataPrzewidywanegoProszenia,
+                        mioty[miot].dataProszenia,
+                        mioty[miot].dataOdsadzenia,
+                        mioty[miot].urodzoneZywe,
+                        mioty[miot].urodzoneMartwe,
+                        mioty[miot].przygniecone,
+                        mioty[miot].odsadzone,
+                        ]);
+    for(let dataKrycia = 0; dataKrycia < maxKryc; dataKrycia++)
+    {
+      test++;
+      if(mioty[miot].datyKrycia[dataKrycia] !== undefined)
+      {
+        rowData.value[miot].splice(spliceIndex, 0, mioty[miot].datyKrycia[dataKrycia]);
+      }
+      else
+      {
+        rowData.value[miot].splice(spliceIndex,0,'');
+      }
+      spliceIndex++;
+      console.log(rowData.value);
+    };         
+  };
 </script>
 <style>
   .addColumnButtonBackground {

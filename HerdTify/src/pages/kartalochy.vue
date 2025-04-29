@@ -88,6 +88,7 @@
   import EditMiot from "@/components/EditMiot.vue";
 
 
+  const pobraneLochy = ref([]);
   const Lochy = ref([]);
   const numeryLoch = ref([]);
   const Mioty = ref([]);
@@ -213,19 +214,21 @@ const getData = async () => {
   try {
     const response = await apiClient.get("/Locha");
     console.log("Dane lochy:", response.data); // Debugowanie
-    Lochy.value = Array.isArray(response.data) ? response.data : [];
-    numeryLoch.value = Lochy.value
+    pobraneLochy.value = Array.isArray(response.data) ? response.data : [];
+    Lochy.value = pobraneLochy.value
       .filter(locha => 
         locha.status == "Karmiaca" || 
         locha.status == "Wolna" || 
         locha.status == "Pokryta"
-      )
+      );
+      numeryLoch.value = Lochy.value
       .map(locha => ({
         numerLochy: locha.numerLochy,
         statusLochy: locha.status
       }))
-      .sort((a, b) => a - b); // Dopasuj klucz do struktury danych
-    console.log("Numery loch:", numeryLoch.value);
+      .sort((a, b) => a.numerLochy - b.numerLochy); // Dopasuj klucz do struktury danych
+    console.log("Dane lochy2 ", Lochy.value); //Debugowanie
+    console.log("Numery loch:", numeryLoch.value); // Debugowanie
   } catch (e) {
     console.error("Błąd podczas pobierania danych:", e);
     error.value = e;
