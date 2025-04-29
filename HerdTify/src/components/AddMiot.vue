@@ -1,7 +1,7 @@
 <template>
     <v-dialog
       :model-value="addMiotDialog"
-      @update:model-value="updateDialog"
+      @update:model-value="addMiotDialog"
       max-width="400"
       persistent
     >
@@ -86,11 +86,11 @@ addMiotDialog: {
 },
 idLochy: {
     type: Number,
-    required: true
+    required: false
 },
 krycieId: {
     type: Number,
-    required: true
+    required: false
 }
 });
 const { idLochy, krycieId } = toRefs(props);

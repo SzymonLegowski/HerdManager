@@ -1,7 +1,7 @@
 <template>
     <v-dialog
       :model-value="editLochaDialog"
-      @update:model-value="updateDialog"
+      @update:model-value="editLochaDialog"
       max-width="400"
       persistent
     >
@@ -67,11 +67,11 @@ import apiClient from '@/plugins/axios';
 const props = defineProps({
 editLochaDialog: {
   type: Boolean,
-  required: true
+  required: false
 },
 locha: {
   type: Object,
-  required: true
+  required: false
 }
 });
 

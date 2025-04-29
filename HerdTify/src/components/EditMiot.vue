@@ -1,7 +1,7 @@
 <template>
     <v-dialog
       :model-value="editMiotDialog"
-      @update:model-value="updateDialog"
+      @update:model-value="editMiotDialog"
       max-width="400"
       persistent
     >
@@ -108,7 +108,7 @@ editMiotDialog: {
 },
 miot: {
     type: Object,
-    required: true
+    required: false
 }
 });
 

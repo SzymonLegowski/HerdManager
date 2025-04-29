@@ -1,7 +1,7 @@
 <template>
     <v-dialog
       :model-value="editWydarzenieDialog"
-      @update:model-value="updateDialog"
+      @update:model-value="editWydarzenieDialog"
       max-width="600"
       persistent
     >
@@ -42,24 +42,16 @@
               ></v-text-field>
             <v-textarea label="Uwagi" v-model="editedWydarzenie.uwagi" style="width: 100%;"></v-textarea>
           
-            <v-btn class="AddButton" variant="outlined" text="Wybierz lochy" @click="selectLochy"></v-btn>
             <v-col>
-              <h5 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left: 10px;">Wybrane lochy:{{ editedWydarzenie.numeryLoch }}</h5>
+            <v-btn variant="outlined" text="Wybierz lochy" @click="selectLochy"></v-btn>
+            </v-col>
+            <v-col>
+              <h4 @click="wybraneLochyEmpty" style="margin-top: 1%;">Wybrane lochy:{{ editedWydarzenie.numeryLoch }}</h4>
             </v-col>
                         
           </v-row>
           <v-row dense>
-            <v-text-field
-            hint="[1,2,3]"
-            label="Wpisz mioty"
-            v-model="editedWydarzenie.miotyId"
-          ></v-text-field>
-          </v-row>
-          
-          
-
-          <h5 @click="wybraneMiotyEmpty" style="margin-top: 3%;">Wybrane mioty:{{ editedWydarzenie.miotyId }}</h5>
-
+         </v-row>
           <small class="text-caption text-medium-emphasis">*wymagane</small>
           <v-spacer></v-spacer>
           <small class="text-caption text-medium-emphasis">wydarzenie musi zawierać chociaż 1 miot/lochę</small>
@@ -101,7 +93,7 @@ editWydarzenieDialog: {
 },
 wydarzenie: {
     type: Object,
-    required: true
+    required: false
 }
 });
 

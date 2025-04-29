@@ -1,7 +1,7 @@
 <template>
     <v-dialog
       :model-value="addLochaDialog"
-      @update:model-value="updateDialog"
+      @update:model-value="addLochaDialog"
       max-width="400"
       persistent
     >

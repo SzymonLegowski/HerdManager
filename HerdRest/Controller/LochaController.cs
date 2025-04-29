@@ -38,14 +38,15 @@ namespace HerdRest.Controller
 
             var lochaCreate = _lochaRepository.MapToModel(lochaCreateDto);
 
-            if(!_lochaRepository.CreateLocha(lochaCreate, lochaCreateDto.WydarzeniaLochyId))
+            var createOutput = _lochaRepository.CreateLocha(lochaCreate, lochaCreateDto.WydarzeniaLochyId);
+            if(!createOutput.Item1)
             {
                 ModelState.AddModelError("e", "Coś poszło nie tak przy zapisywaniu.");
                 return StatusCode(500, ModelState);
             }
 
 
-            return Ok("Dodano pomyślnie!");
+            return Ok(createOutput.Item2);
         }
         [HttpPost("import")]
         public IActionResult ImportLochyFromFile(IFormFile file)

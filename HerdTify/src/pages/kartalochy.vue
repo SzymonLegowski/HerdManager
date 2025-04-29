@@ -1,6 +1,6 @@
 <template>
   
-  <LochyGrid v-if="showGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLocha"/>
+  <LochyGrid v-if="showGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLocha" @quickAdd:newLochaId="quickAddLocha"/>
   <AddMiot :addMiotDialog="addMiotDialog" :idLochy="idLochy" :krycieId="ostatnieKrycieId" @update:addMiotDialog="addMiotDialog = $event"/>
   <EditMiot :editMiotDialog="editMiotDialog" :miot="selectedMiot" @update:editMiotDialog="editMiotDialog = $event" />
   
@@ -131,6 +131,31 @@
   
   const headers = ref(JSON.parse(JSON.stringify(baseHeaders)));
 
+  const getData = async () => {
+  try {
+    const response = await apiClient.get("/Locha");
+    console.log("Dane lochy:", response.data); // Debugowanie
+    pobraneLochy.value = Array.isArray(response.data) ? response.data : [];
+    Lochy.value = pobraneLochy.value
+      .filter(locha => 
+        locha.status == "Karmiaca" || 
+        locha.status == "Wolna" || 
+        locha.status == "Pokryta"
+      );
+      numeryLoch.value = Lochy.value
+      .map(locha => ({
+        idLochy: locha.id,
+        numerLochy: locha.numerLochy,
+        statusLochy: locha.status
+      }))
+      .sort((a, b) => a.numerLochy - b.numerLochy); // Dopasuj klucz do struktury danych
+    console.log("Dane lochy2 ", Lochy.value); //Debugowanie
+    console.log("Numery loch:", numeryLoch.value); // Debugowanie
+  } catch (e) {
+    console.error("Błąd podczas pobierania danych:", e);
+    error.value = e;
+  }
+};
   onMounted(async () => {
     getData();
 });
@@ -210,30 +235,7 @@ watch(selectedLocha, async (newValue, oldValue) => {
   }
 });
 
-const getData = async () => {
-  try {
-    const response = await apiClient.get("/Locha");
-    console.log("Dane lochy:", response.data); // Debugowanie
-    pobraneLochy.value = Array.isArray(response.data) ? response.data : [];
-    Lochy.value = pobraneLochy.value
-      .filter(locha => 
-        locha.status == "Karmiaca" || 
-        locha.status == "Wolna" || 
-        locha.status == "Pokryta"
-      );
-      numeryLoch.value = Lochy.value
-      .map(locha => ({
-        numerLochy: locha.numerLochy,
-        statusLochy: locha.status
-      }))
-      .sort((a, b) => a.numerLochy - b.numerLochy); // Dopasuj klucz do struktury danych
-    console.log("Dane lochy2 ", Lochy.value); //Debugowanie
-    console.log("Numery loch:", numeryLoch.value); // Debugowanie
-  } catch (e) {
-    console.error("Błąd podczas pobierania danych:", e);
-    error.value = e;
-  }
-};
+
 
 const gridButtonClick = () => {
   console.log("Grid button clicked");
@@ -243,6 +245,17 @@ const gridButtonClick = () => {
 const updateSelectedLocha = (number) => {
   selectedLocha.value = number;
   showGrid.value = !showGrid.value;
+};
+
+const quickAddLocha = async (newLochaId) => {
+  console.log("quickAddNewLocha", newLochaId)
+  let newLocha = await apiClient.get('/Locha/' + newLochaId);
+  Lochy.value.push(newLocha.data);
+  numeryLoch.value.push({idLochy: newLocha.data.id,
+                         numerLochy: newLocha.data.numerLochy,
+                         statusLochy: newLocha.data.status});
+  console.log(Lochy.value,"QuickAdd1");
+  console.log(numeryLoch.value, "QuickAdd2");
 };
 
 const addItem = () => {

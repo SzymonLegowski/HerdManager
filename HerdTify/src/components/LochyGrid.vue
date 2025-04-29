@@ -42,9 +42,9 @@ import apiClient from '@/plugins/axios';
   }
 };
   
-  const emit = defineEmits(['update:selectedLocha']);
+  const emit = defineEmits(['update:selectedLocha','quickAdd:newLochaId']);
   
-  const handleClick = (number) => {
+  const handleClick = async (number) => {
     
     if(props.items.map(locha => locha.numerLochy).includes(number))
       {
@@ -52,14 +52,14 @@ import apiClient from '@/plugins/axios';
       } 
     else
       {
-        const newLocha = {numerLochy: number,
+        let newLocha = {numerLochy: number,
                         status: "Wolna",
                         wydarzeniaLochyId: [],
                         miotyId: []
         };
-        console.log(props.items,"test"); //Debugowanie
-        props.items.push({numerLochy: number, statusLochy: "Wolna"})
-        //apiClient.post('/Locha', newLocha);
+        let response = await apiClient.post('/Locha', newLocha);
+        console.log(response.data);
+        emit('quickAdd:newLochaId', response.data);
       }
   };
   </script>

@@ -3,6 +3,7 @@ using HerdRest.Dto;
 using HerdRest.Enums;
 using HerdRest.Interfaces;
 using HerdRest.Model;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace HerdRest.Repository
@@ -41,7 +42,7 @@ namespace HerdRest.Repository
             Mioty = _context.Mioty.Where(m => m.Locha.Id == lochaDto.Id).ToList() ?? [],
             WydarzeniaLochy = _context.WydarzeniaLochy.Where(w => w.LochaId == lochaDto.Id).ToList() ?? []
         };
-        public bool CreateLocha(Locha locha, List<int>? wydarzenieId)
+        public (bool, int) CreateLocha(Locha locha, List<int>? wydarzenieId)
         {
             if(wydarzenieId != null)
             {
@@ -58,7 +59,7 @@ namespace HerdRest.Repository
                 }
             }
             _context.Add(locha);
-            return Save();
+            return (Save(), locha.Id);
         }
 
         public bool ImportLochyFromFile(string FilePath)
