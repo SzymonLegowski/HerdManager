@@ -13,11 +13,14 @@ namespace HerdRest.Model
         public int Przygniecone { get; set; }
         public int Odsadzone { get; set; }
         public int Ocena { get; set;}
+        public DateOnly DataPrzewidywanegoProszenia { get; set;}
+        public DateOnly? DataProszenia { get; set; }
+        public DateOnly? DataOdsadzenia { get; set; }
         [Column(TypeName = "timestamp without time zone")]
         public DateTime DataCzasUtworzenia { get; set; }
         [Column(TypeName = "timestamp without time zone")]
         public DateTime DataCzasModyfikacji { get; set; }
         public Locha Locha {get; set;}
-        public ICollection<WydarzenieMiot>? WydarzeniaMiotu { get; set; }
+        public ICollection<WydarzenieMiot> WydarzeniaMiotu { get; set; }
     }
 }

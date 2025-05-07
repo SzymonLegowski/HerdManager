@@ -4,7 +4,7 @@ namespace HerdRest.Model
     {
         public int LochaId { get; set; }
         public int WydarzenieId { get; set; }
-        public Locha Locha { get; set; }
-        public Wydarzenie Wydarzenie { get; set; }
+        public virtual required Locha Locha { get; set; }
+        public virtual required Wydarzenie Wydarzenie { get; set; }
     }
 }

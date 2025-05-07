@@ -8,10 +8,12 @@ namespace HerdRest.Interfaces
         LochaDto MapToDto(Locha locha);
         List<LochaDto> MapToDtoList(List<Locha> lochy);
         Locha MapToModel(LochaDto lochaDto);
-        bool CreateLocha(Locha locha);
+        bool CreateLocha(Locha locha, List<int>? wydarzenieId);
+        bool ImportLochyFromFile(string FilePath);
         ICollection<Locha> GetLochy();
+        ICollection<Locha> GetLochyByStatus(int status);
         Locha GetLocha(int lochaId);
-        bool UpdateLocha(Locha locha);
+        bool UpdateLocha(Locha locha, List<int>? wydarzenieId);
         bool DeleteLocha(Locha locha);
         bool Save();
         bool LochaExists(int lochaId);

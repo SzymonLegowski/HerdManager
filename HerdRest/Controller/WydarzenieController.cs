@@ -1,44 +1,50 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using HerdRest.Dto;
 using HerdRest.Interfaces;
-using HerdRest.Model;
+using HerdRest.PublicClasses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HerdRest.Controller
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class WydarzenieController : ControllerBase
+    public class WydarzenieController(IWydarzenieRepository wydarzenieRepository) : ControllerBase
     {
-        private readonly IWydarzenieRepository _wydarzenieRepository;
-        private readonly ILochaRepository _lochaRepository;
-        public WydarzenieController(IWydarzenieRepository wydarzenieRepository, ILochaRepository lochaRepository)
-        {
-            _wydarzenieRepository = wydarzenieRepository;
-            _lochaRepository = lochaRepository;
-        }
-         [HttpPost]
+        private readonly IWydarzenieRepository _wydarzenieRepository = wydarzenieRepository;
+
+        [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateWydarzenie([FromBody] Wydarzenie wydarzenieCreate, int? miotId, int? lochaId)
+        public IActionResult CreateWydarzenie([FromBody] WydarzenieDto wydarzenieCreateDto)
         {
-            if(wydarzenieCreate == null)
+            if((wydarzenieCreateDto.LochyId == null && wydarzenieCreateDto.MiotyId == null) || (wydarzenieCreateDto.LochyId?.Count == 0 && wydarzenieCreateDto.MiotyId?.Count == 0))
+                return BadRequest("Wydarzenie musi być przypisane do co najmniej jednej lochy lub miotu.");
+
+            if(wydarzenieCreateDto == null)
                 return BadRequest(ModelState);
 
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if(!_wydarzenieRepository.CreateWydarzenie(wydarzenieCreate, miotId, lochaId))
+            var wydarzenieCreate = _wydarzenieRepository.MapToModel(wydarzenieCreateDto);
+
+            if(!_wydarzenieRepository.CreateWydarzenie(wydarzenieCreate, wydarzenieCreateDto.MiotyId, wydarzenieCreateDto.LochyId))
             {
                 ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu.");
                 return StatusCode(500, ModelState);
             }
 
-
             return Ok("Dodano pomyślnie!");
+        }
+        [HttpPost("import")]
+        public IActionResult ImportWydarzeniaFromFile(IFormFile file)
+        {
+            string uploadOutput = new UploadHandler().Upload(file);
+            if(!_wydarzenieRepository.ImportWydarzeniaFromFile(Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Wydarzenia.csv")))
+            {
+                ModelState.AddModelError("", "Coś poszło nie tak przy importowaniu danych.");
+                return StatusCode(500, ModelState);
+            }
+            return Ok(uploadOutput + " i zaimportowany pomyślnie!");
         }
 
         [HttpGet]
@@ -75,12 +81,15 @@ namespace HerdRest.Controller
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateWydarzenie(int wydarzenieId, [FromBody]Wydarzenie updatedWydarzenie)
+        public IActionResult UpdateWydarzenie(int wydarzenieId, [FromBody]WydarzenieDto updatedWydarzenieDto)
         {
-            if(updatedWydarzenie == null)
+             if((updatedWydarzenieDto.LochyId == null && updatedWydarzenieDto.MiotyId == null) || (updatedWydarzenieDto.LochyId?.Count == 0 && updatedWydarzenieDto.MiotyId?.Count == 0))
+                return BadRequest("Wydarzenie musi być przypisane do co najmniej jednej lochy lub miotu.");
+
+            if(updatedWydarzenieDto == null)
                 return BadRequest(ModelState);
 
-            if(wydarzenieId != updatedWydarzenie.Id)
+            if(wydarzenieId != updatedWydarzenieDto.Id)
                 return BadRequest(ModelState);
 
             if(!_wydarzenieRepository.WydarzenieExists(wydarzenieId))
@@ -89,7 +98,9 @@ namespace HerdRest.Controller
             if(!ModelState.IsValid)
                 return BadRequest();
             
-            if(!_wydarzenieRepository.UpdateWydarzenie(updatedWydarzenie))
+            var updatedWydarzenie = _wydarzenieRepository.MapToModel(updatedWydarzenieDto);
+
+            if(!_wydarzenieRepository.UpdateWydarzenie(updatedWydarzenie, updatedWydarzenieDto.MiotyId, updatedWydarzenieDto.LochyId))
                 {
                     ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu zmian.");
                     return StatusCode(500, ModelState);

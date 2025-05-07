@@ -12,12 +12,21 @@ namespace HerdRest.Model
         public int Id { get; set; }
         public int NumerLochy { get; set; } 
         public StatusLochy Status { get; set; }
-        public int IndeksProdukcji365Dni { get; set; }
+        public string? Uwagi { get; set; }
+        [NotMapped]
+        public int IndeksProdukcji365Dni
+        {
+            get
+            {
+                return Mioty?.Sum(m => m.Odsadzone) ?? 0;
+            }
+        }
         [Column(TypeName = "timestamp without time zone")]
-        public DateTime? DataCzasUtworzenia { get; set; }
+        public DateTime DataCzasUtworzenia { get; set; }
         [Column(TypeName = "timestamp without time zone")]
-        public DateTime? DataCzasModyfikacji { get; set; }
+        public DateTime DataCzasModyfikacji { get; set; }
+        public DateOnly DataBrakowania { get; set; }
         public ICollection<Miot>? Mioty { get; set; }
-        public ICollection<WydarzenieLocha>? WydarzeniaLoch { get; set; }
+        public ICollection<WydarzenieLocha>? WydarzeniaLochy { get; set; }
     }
 }

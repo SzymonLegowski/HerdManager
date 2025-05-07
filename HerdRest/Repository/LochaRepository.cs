@@ -1,9 +1,9 @@
 using HerdRest.Data;
 using HerdRest.Dto;
+using HerdRest.Enums;
 using HerdRest.Interfaces;
 using HerdRest.Model;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.Internal;
 
 namespace HerdRest.Repository
 {
@@ -15,58 +15,126 @@ namespace HerdRest.Repository
         {
             _context = context;
         }
-        public LochaDto MapToDto(Locha locha)
+        public LochaDto MapToDto(Locha locha) => new()
         {
-            return new LochaDto
-            {   
-                Id = locha.Id,
-                NumerLochy = locha.NumerLochy,
-                Status = locha.Status,
-                IndeksProdukcji365Dni = locha.IndeksProdukcji365Dni,
-                DataCzasUtworzenia = locha.DataCzasUtworzenia,
-                DataCzasModyfikacji = locha.DataCzasModyfikacji,
-                MiotyId = locha.Mioty?.Select(m => m.Id).ToList() ?? [],
-                WydarzeniaLochId = locha.WydarzeniaLoch?.Select(w => w.WydarzenieId).ToList() ?? []
-            };
-        }
+            Id = locha.Id,
+            NumerLochy = locha.NumerLochy,
+            Status = locha.Status,
+            Uwagi = locha.Uwagi,
+            IndeksProdukcji365Dni = locha.IndeksProdukcji365Dni,
+            DataCzasUtworzenia = locha.DataCzasUtworzenia.ToString("yyyy-MM-dd HH:mm:ss"),
+            DataCzasModyfikacji = locha.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
+            MiotyId = locha.Mioty?.Select(m => m.Id).ToList() ?? [],
+            WydarzeniaLochyId = locha.WydarzeniaLochy?.Select(w => w.WydarzenieId).ToList() ?? []
+        };
         public List<LochaDto> MapToDtoList(List<Locha> lochy)
         {
             return lochy.Select(MapToDto).ToList();
         }
-        public Locha MapToModel(LochaDto lochaDto)
+        public Locha MapToModel(LochaDto lochaDto) => new()
         {
-            return new Locha
+            Id = lochaDto.Id,
+            NumerLochy = lochaDto.NumerLochy,
+            Status = lochaDto.Status,
+            Uwagi = lochaDto.Uwagi,
+            DataCzasUtworzenia = DateTime.Now,
+            DataCzasModyfikacji = DateTime.Now,
+            Mioty = _context.Mioty.Where(m => m.Locha.Id == lochaDto.Id).ToList() ?? [],
+            WydarzeniaLochy = _context.WydarzeniaLochy.Where(w => w.LochaId == lochaDto.Id).ToList() ?? []
+        };
+        public bool CreateLocha(Locha locha, List<int>? wydarzenieId)
+        {
+            if(wydarzenieId != null)
             {
-                Id = lochaDto.Id,
-                NumerLochy = lochaDto.NumerLochy,
-                Status = lochaDto.Status,
-                IndeksProdukcji365Dni = lochaDto.IndeksProdukcji365Dni,
-                DataCzasUtworzenia = lochaDto.DataCzasUtworzenia,
-                DataCzasModyfikacji = lochaDto.DataCzasModyfikacji,
-                Mioty = lochaDto.MiotyId?.Select(id => new Miot { Id = id }).ToList(),
-                WydarzeniaLoch = lochaDto.WydarzeniaLochId?.Select(id => new WydarzenieLocha { WydarzenieId = id }).ToList()
-            };
-        }
-        public bool CreateLocha(Locha locha)
-        {
+                foreach(var id in wydarzenieId)
+                {
+                    var wydarzenieLochaEntity = _context.Wydarzenia
+                    .Where(w => w.Id == id).FirstOrDefault();
+                    var wydarzenieLocha = new WydarzenieLocha()
+                    {
+                        Locha = locha,
+                        Wydarzenie = wydarzenieLochaEntity,
+                    };
+                    _context.Add(wydarzenieLocha);
+                }
+            }
             _context.Add(locha);
+            return Save();
+        }
+
+        public bool ImportLochyFromFile(string FilePath)
+        {
+            if(!File.Exists(FilePath))
+                return false;
+
+            List<Locha> lochy = [];
+            string[] lines = File.ReadAllLines(FilePath);
+            foreach(string line in lines){
+                string[] parts = line.Split(';');
+                if(parts.Length == 3){
+                    Locha locha = new()
+                    {
+                        NumerLochy = int.Parse(parts[0]),
+                        Status = (StatusLochy)Enum.Parse(typeof(StatusLochy), parts[1]),
+                        DataCzasUtworzenia = DateTime.Now,
+                        DataCzasModyfikacji = DateTime.Now,
+                        Uwagi = parts[2]
+                    };
+                    lochy.Add(locha);
+                }
+            }
+            _context.AddRange(lochy);
             return Save();
         }
 
         public ICollection<Locha> GetLochy()
         {
-            return _context.Lochy.OrderBy(p => p.Id).ToList();
+            var lochy = _context.Lochy.OrderBy(p => p.Id)
+                        .Include(l => l.Mioty)
+                        .Include(l => l.WydarzeniaLochy)
+                        .AsSingleQuery()
+                        .ToList();
+            return lochy;
+        }
+
+        public ICollection<Locha> GetLochyByStatus(int status)
+        {
+            var lochy = _context.Lochy
+                        .Where(l => l.Status == (StatusLochy)status)
+                        .Include(l => l.Mioty)
+                        .Include(l => l.WydarzeniaLochy)
+                        .ToList();
+            return lochy;
         }
 
         public Locha GetLocha(int lochaId)
         {
-            return _context.Lochy.Where(l => l.Id == lochaId).FirstOrDefault();
+            var locha = _context.Lochy.Include(l => l.Mioty)
+                        .Include(l => l.WydarzeniaLochy)
+                        .FirstOrDefault(l => l.Id == lochaId) ?? throw new InvalidOperationException("Locha nie istnieje.");
+            return locha;
         }
-
-        public bool UpdateLocha(Locha locha)
+        public bool UpdateLocha(Locha locha, List<int>? wydarzenieId)
         {
             locha.DataCzasModyfikacji = DateTime.Now;
-            locha.DataCzasUtworzenia = _context.Lochy.Where(l => l.Id == locha.Id).Select(l => l.DataCzasUtworzenia).FirstOrDefault();
+            locha.DataCzasUtworzenia = _context.Lochy.Where(l => l.Id == locha.Id)
+                .Select(l => l.DataCzasUtworzenia)
+                .FirstOrDefault();
+            
+            if(wydarzenieId != null)
+            {
+                foreach(var id in wydarzenieId)
+                {
+                    var wydarzenieLochaEntity = _context.Wydarzenia
+                    .Where(w => w.Id == id).FirstOrDefault();
+                    var wydarzenieLocha = new WydarzenieLocha()
+                    {
+                        Locha = locha,
+                        Wydarzenie = wydarzenieLochaEntity,
+                    };
+                    _context.Add(wydarzenieLocha);
+                }
+            }
             _context.Update(locha);
             return Save();
         }
@@ -80,7 +148,7 @@ namespace HerdRest.Repository
         public bool Save()
         {
             var Saved = _context.SaveChanges();
-            return Saved > 0 ? true : false;
+            return Saved > 0;
         }
 
         public bool LochaExists(int lochaId)

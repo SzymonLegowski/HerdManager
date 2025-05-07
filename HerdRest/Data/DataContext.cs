@@ -9,6 +9,8 @@ namespace HerdRest.Data
         public DbSet<Miot> Mioty { get; set; }
         public DbSet<Wydarzenie> Wydarzenia { get; set; }
         public DbSet<Locha> Lochy { get; set; }
+        public DbSet<WydarzenieLocha> WydarzeniaLochy { get; set; }
+        public DbSet<WydarzenieMiot> WydarzeniaMiotu { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Locha>()
@@ -23,7 +25,7 @@ namespace HerdRest.Data
             modelBuilder.Entity<Wydarzenie>()
                 .Property(w => w.DataCzasModyfikacji)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
-                .ValueGeneratedOnAddOrUpdate();
+                .ValueGeneratedOnAdd();
             modelBuilder.Entity<Wydarzenie>()
                 .Property(w => w.DataCzasUtworzenia)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
@@ -32,7 +34,7 @@ namespace HerdRest.Data
             modelBuilder.Entity<Miot>()
                 .Property(m => m.DataCzasModyfikacji)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
-                .ValueGeneratedOnAddOrUpdate();
+                .ValueGeneratedOnAdd();
             modelBuilder.Entity<Miot>()
                 .Property(m => m.DataCzasUtworzenia)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Warsaw'")
@@ -46,7 +48,7 @@ namespace HerdRest.Data
                 .HasForeignKey(w => w.WydarzenieId);
             modelBuilder.Entity<WydarzenieLocha>()
                 .HasOne(w => w.Locha)
-                .WithMany(wl => wl.WydarzeniaLoch)
+                .WithMany(wl => wl.WydarzeniaLochy)
                 .HasForeignKey(l => l.LochaId);
 
             modelBuilder.Entity<WydarzenieMiot>()
