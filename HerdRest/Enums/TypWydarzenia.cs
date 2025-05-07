@@ -2,9 +2,7 @@ namespace HerdRest.Enums
 {
     public enum TypWydarzenia
     {
-        Krycie,
-        PrzewidywaneProszenie,
-        Proszenie,
-        Odsadzanie,
+        Krycie = 0,
+        Szczepienie = 1
     }
 }

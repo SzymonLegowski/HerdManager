@@ -6,7 +6,7 @@ namespace HerdRest.Model
     {
         public int MiotId { get; set; }
         public int WydarzenieId { get; set; }
-        public Miot Miot { get; set; }
-        public Wydarzenie Wydarzenie { get; set; }
+        public virtual Miot Miot { get; set; }
+        public virtual Wydarzenie Wydarzenie { get; set; }
     }
 }

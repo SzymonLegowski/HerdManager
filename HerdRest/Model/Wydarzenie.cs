@@ -10,9 +10,8 @@ namespace HerdRest.Model
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public TypWydarzenia TypWydarzenia { get; set; }
-        public string Uwagi { get; set; }
+        public string? Uwagi { get; set; }
         public DateOnly DataWydarzenia { get; set; }
-        public DateOnly DataWykonania { get; set; }
         [Column(TypeName = "timestamp without time zone")]
         public DateTime DataCzasUtworzenia { get; set; }
         [Column(TypeName = "timestamp without time zone")]
