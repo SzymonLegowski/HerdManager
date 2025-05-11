@@ -3,12 +3,10 @@
       :model-value="addMiotDialog"
       @update:model-value="addMiotDialog"
       max-width="400"
-      persistent
-    >
+      persistent>
       <v-card
         prepend-icon="mdi-plus"
-        title="Nowy miot"
-      >
+        title="Nowy miot">
         <v-card-text>
             <v-row>
                 <v-col>
@@ -21,19 +19,12 @@
                         v-model="newMiot.urodzoneMartwe"
                     ></v-text-field>
                     <v-text-field
-                        label="Przygniecone"
-                        v-model="newMiot.przygniecone"
-                    ></v-text-field>
-                    <v-text-field
                         label="Odsadzone"
                         v-model="newMiot.odsadzone"
                     ></v-text-field>
                 </v-col>
                 <v-col>
-                    <v-text-field
-                        label="Ocena"
-                        v-model="newMiot.ocena"
-                    ></v-text-field>
+
                     <v-text-field
                         label="Przygniecone"
                         v-model="newMiot.przygniecone"
@@ -48,9 +39,13 @@
                         v-model="newMiot.dataOdsadzenia"
                         hint="rrrr-mm-dd"
                     ></v-text-field>
-                </v-col>
+                </v-col> 
             </v-row>
-            
+                   <v-text-field
+                        label="Ocena"
+                        v-model="newMiot.ocena"
+                    ></v-text-field>
+            {{ newMiot }}
             <small class="text-caption text-medium-emphasis">*wymagane</small>
         </v-card-text>
 
@@ -93,27 +88,30 @@ krycieId: {
     required: false
 }
 });
-const { idLochy, krycieId } = toRefs(props);
-const newMiot = ref({
-    urodzoneZywe: "",
-    urodzoneMartwe: "",
-    przygniecone: "",
-    odsadzone: "",
-    ocena: "",
-    dataProszenia: "",
-    dataOdsadzenia: "",
-    lochaId: idLochy,
-    wydarzeniaMiotuId: krycieId,
+let {idLochy, krycieId} = toRefs(props);
+let newMiot = ref({
+    urodzoneZywe: 0,
+    urodzoneMartwe: 0,
+    przygniecone: 0,
+    odsadzone: 0,
+    ocena: 0,
+    dataProszenia: null,
+    dataOdsadzenia: null,
+    lochaId: 0,
+    wydarzeniaMiotuId: []
 });
 
-const emit = defineEmits(['update:addMiotDialog', 'save-miot']);
+const emit = defineEmits(['add:addMiotDialog', 'save-miot']);
 
 const closeDialog = () => {
-    emit('update:addMiotDialog', false);
+    emit('add:addMiotDialog', false);
 };
 
-const saveDialog = () => {
-    apiClient.post('/Miot', newMiot.value)
+const saveDialog = async () => {
+    newMiot.value.lochaId = idLochy.value;
+    newMiot.value.wydarzeniaMiotuId = [krycieId.value];
+    console.info(newMiot.value);
+    await apiClient.post('/miot', newMiot.value);
     emit('save-miot', newMiot.value);
 };
 

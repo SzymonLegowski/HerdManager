@@ -28,7 +28,8 @@
     :items="Wydarzenia"
     item-key="id"
     :pageText="'{0}-{1} z {2}'"
-    items-per-page-text="Elementów na stronę"
+    items-per-page-text="Elementów na stronę" 
+    :sort-by="sortBy"
   >
   <template v-slot:item.actions="{ item }">
       <v-btn
@@ -140,13 +141,11 @@ const addItem = () => {
 };
 
 const editItem = (item) => {
-  console.log("Edytuj wydarzenie o id:"); //Debugowanie
   editWydarzenieDialog.value = true;
   selectedWydarzenie.value = item;
 };
 
 const deleteItem = (item) => {
-  console.log("Usuń wydarzenie o id:"); //Debugowanie
   apiClient.delete("/Wydarzenie/" + item.id);
   Wydarzenia.value = Wydarzenia.value.filter((wydarzenie) => wydarzenie.id !== item.id);
 };
@@ -173,6 +172,8 @@ const handleUpdateWydarzenie = (editedWydarzenie) => {
   const index = Wydarzenia.value.findIndex((wydarzenie) => wydarzenie.id === editedWydarzenie.id);
   Wydarzenia.value[index] = editedWydarzenie;
 }
+
+const sortBy = ref([{ key: 'dataWydarzenia', order: 'desc'}]);
 </script>
 <style lang="scss">
 

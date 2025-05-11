@@ -81,7 +81,7 @@ const lochyKarmiace = ref([]);
 const lochy = ref([]);
 const showLochyGrid = ref(false); 
 let noweWydarzenie = ref({
-  typWydarzenia: "",
+  typWydarzenia: "Krycie",
   uwagi: "",
   dataWydarzenia: "",
   dataWykonania: "",

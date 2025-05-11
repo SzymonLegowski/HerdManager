@@ -58,7 +58,7 @@
             <v-text-field
                         label="Ocena"
                         v-model="editedMiot.ocena"
-                    ></v-text-field>
+            ></v-text-field>
             <small class="text-caption text-medium-emphasis">*wymagane</small>
         </v-card-text>
         <v-divider></v-divider>

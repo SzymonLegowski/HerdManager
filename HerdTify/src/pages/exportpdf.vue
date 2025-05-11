@@ -4,11 +4,11 @@
   <table id="Pdf-Table" class="PdfTable">
     <thead class="PdfTableHead">
       <tr>
-        <th :colspan="colspanValue + 7">NR LOCHY</th>
+        <th :colspan="colspanValue + 8">NR LOCHY</th>
         <th > {{ miotyStore.nrLochy }}  </th>
       </tr>
       <tr>
-        <th :colspan="colspanValue + 1">Sektor krycia</th>
+        <th :colspan="colspanValue + 2">Sektor krycia</th>
         <th colspan="7">Porodówka</th>
       </tr>
       <tr>
@@ -16,6 +16,7 @@
         <th :colspan="colspanValue">Data Pokrycia</th>
         <th colspan="3">Data</th>
         <th colspan="4">Liczba Prosiąt</th>
+        <th rowspan="3">Ocena prosiąt urodzonych(1-5)</th>
       </tr>
       <tr v-for="(row, rowIndex) in tableData" :key="rowIndex">
         <th v-for="(cell, cellIndex) in row" :key="cellIndex" rowspan="2">{{ cell }} </th>
@@ -73,6 +74,7 @@
                         mioty[miot].urodzoneMartwe,
                         mioty[miot].przygniecone,
                         mioty[miot].odsadzone,
+                        mioty[miot].ocena,
                         ]);
     for(let dataKrycia = 0; dataKrycia < maxKryc; dataKrycia++)
     {

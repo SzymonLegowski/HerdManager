@@ -1,10 +1,17 @@
 <template>
   
   <LochyGrid v-if="showGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLocha" @quickAdd:newLochaId="quickAddLocha"/>
-  <AddMiot :addMiotDialog="addMiotDialog" :idLochy="idLochy" :krycieId="ostatnieKrycieId" @update:addMiotDialog="addMiotDialog = $event"/>
-  <EditMiot :editMiotDialog="editMiotDialog" :miot="selectedMiot" @update:editMiotDialog="editMiotDialog = $event" />
+  <AddMiot :addMiotDialog="addMiotDialog" :idLochy="idLochy" :krycieId="ostatnieKrycieId" @add:addMiotDialog="addMiotDialog = $event" @save-miot="handleSaveMiot"/>
+  <EditMiot :editMiotDialog="editMiotDialog" :miot="selectedMiot" @update:editMiotDialog="editMiotDialog = $event" @save-miot="handleUpdateMiot"/>
+  <v-alert
+  type="error"
+  variant="tonal"
+  v-model="alert"
+  close-label="Close Alert"
+  closable
+  >Nie znaleziono wolnego krycia aby powiązać je z miotem</v-alert>
+ 
   
-
   <v-navigation-drawer :width="200">
     <v-list-item title="Menedżer stada"></v-list-item>
     <v-divider></v-divider>
@@ -63,7 +70,7 @@
         size="small"
         @click="editItem(item)"
       >
-        <v-icon>mdi-pencil</v-icon>
+      <v-icon>mdi-pencil</v-icon>
       </v-btn>
       <v-btn
         style="min-width: 0; width: 10px; background-color: red;"
@@ -80,27 +87,27 @@
   </template>
   
   <script setup>
-  import { ref, onMounted } from "vue";
+  import { ref, onMounted, watch } from "vue";
   import { useMiotyStore } from "@/stores/miotyStore";
   import apiClient from "@/plugins/axios";
   import LochyGrid from "@/components/LochyGrid.vue";
   import AddMiot from "@/components/AddMiot.vue";
   import EditMiot from "@/components/EditMiot.vue";
 
-
-  const pobraneLochy = ref([]);
-  const Lochy = ref([]);
-  const numeryLoch = ref([]);
-  const Mioty = ref([]);
-  const error = ref(null);
-  const selectedLocha = ref(null);
-  const selectedMiot = ref(null);
-  const showGrid = ref(false);
-  const addMiotDialog = ref(false);
-  const editMiotDialog = ref(false);
-  const ostatnieKrycieId = ref(null);
-  const idLochy = ref(null);
-  const miotyStore = useMiotyStore();
+  let pobraneLochy = ref([]);
+  let Lochy = ref([]);
+  let numeryLoch = ref([]);
+  let Mioty = ref([]);
+  let error = ref(null);
+  let selectedLocha = ref(null);
+  let selectedMiot = ref(null);
+  let showGrid = ref(false);
+  let addMiotDialog = ref(false);
+  let editMiotDialog = ref(false);
+  let ostatnieKrycieId = ref(null);
+  let idLochy = ref(null);
+  let miotyStore = useMiotyStore();
+  let alert = ref(null);
 
   const baseHeaders = [
     {
@@ -126,6 +133,9 @@
         { title: "Odsadzonych", value: "odsadzone" }
       ]
     },
+    {
+      title: "Ocena prosiąt urodzonych (1-5)", value: "ocena",
+    },
     {title: "Działania", key: "actions", sortable: false, align: "center"}
   ];
   
@@ -134,7 +144,6 @@
   const getData = async () => {
   try {
     const response = await apiClient.get("/Locha");
-    console.log("Dane lochy:", response.data); // Debugowanie
     pobraneLochy.value = Array.isArray(response.data) ? response.data : [];
     Lochy.value = pobraneLochy.value
       .filter(locha => 
@@ -149,41 +158,44 @@
         statusLochy: locha.status
       }))
       .sort((a, b) => a.numerLochy - b.numerLochy); // Dopasuj klucz do struktury danych
-    console.log("Dane lochy2 ", Lochy.value); //Debugowanie
-    console.log("Numery loch:", numeryLoch.value); // Debugowanie
   } catch (e) {
     console.error("Błąd podczas pobierania danych:", e);
     error.value = e;
   }
 };
+
   onMounted(async () => {
     getData();
 });
 
-watch(selectedLocha, async (newValue, oldValue) => {
+const loadMioty = async (newValue) => {
   let ostatniIndeksWydarzenia = 0;
   let najwiekszaLiczbaKrycMiotu = 0;
+  let selected;
+  ostatnieKrycieId.value = null;
   Mioty.value = [];
   headers.value = JSON.parse(JSON.stringify(baseHeaders));
   if (newValue !== null) 
   {
     try 
     {
-      const selected = Lochy.value.find(locha => locha.numerLochy === newValue);
+      selected = Lochy.value.find(locha => locha.numerLochy === newValue);
       idLochy.value = selected.id;
+      let response = await apiClient.get("locha/" + idLochy.value);
+      selected = response.data;
         for (let indeksMiotu = 0; indeksMiotu < selected.miotyId.length; indeksMiotu++) 
-        { 
-          const miotId = selected.miotyId[indeksMiotu];
-          const miotResponse = await apiClient.get(`/Miot/${miotId}`);
-          const miot = miotResponse.data;
+        {
+          let miotId = selected.miotyId[indeksMiotu];
+          let miotResponse = await apiClient.get(`/Miot/${miotId}`);
+          let miot = miotResponse.data;
           miot.datyKrycia = [];
           miot.nr = indeksMiotu + 1;
 
           for (let indeksWydarzenia = ostatniIndeksWydarzenia; indeksWydarzenia < selected.wydarzeniaLochyId.length; indeksWydarzenia++) 
           {
-            const wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
-            const wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
-            const wydarzenie = wydarzenieResponse.data;
+            let wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
+            let wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
+            let wydarzenie = wydarzenieResponse.data;
 
             if (new Date(wydarzenie.dataWydarzenia).getTime() < new Date(miot.dataPrzewidywanegoProszenia).getTime()) 
             {
@@ -201,7 +213,6 @@ watch(selectedLocha, async (newValue, oldValue) => {
           }
           Mioty.value.push(miot);
         }
-        ostatnieKrycieId.value = selected.wydarzeniaLochyId[selected.wydarzeniaLochyId.length - 1];
         for (let newHeader = 0; newHeader < najwiekszaLiczbaKrycMiotu; newHeader++) 
         {
           headers.value[1].children.splice(-3, 0, { title: `Krycia nr ${newHeader + 1}`, value: `datyKrycia[${newHeader}]` });
@@ -209,11 +220,11 @@ watch(selectedLocha, async (newValue, oldValue) => {
 
         if (ostatniIndeksWydarzenia < selected.wydarzeniaLochyId.length) 
         {
+          ostatnieKrycieId.value = selected.wydarzeniaLochyId[selected.wydarzeniaLochyId.length - 1];
           Mioty.value.push({nr:Mioty.value.length+1});
           Mioty.value[Mioty.value.length-1].datyKrycia = [];
           if(selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia > 0)
           {
-            console.log("Dodawanie dat krycia dla ostatniego miotu"); // Debugowanie
             for (let newHeader = najwiekszaLiczbaKrycMiotu; newHeader < selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia; newHeader++) 
             {
               headers.value[1].children.splice(-3, 0, { title: `Krycia nr ${newHeader + 1}`, value: `datyKrycia[${newHeader}]` });
@@ -221,24 +232,25 @@ watch(selectedLocha, async (newValue, oldValue) => {
           }
           for (let indeksWydarzenia = ostatniIndeksWydarzenia; indeksWydarzenia < selected.wydarzeniaLochyId.length; indeksWydarzenia++) 
           {
-            const wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
-            const wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
-            const wydarzenie = wydarzenieResponse.data;
+            let wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
+            let wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
+            let wydarzenie = wydarzenieResponse.data;
             Mioty.value[Mioty.value.length-1].datyKrycia.push(wydarzenie.dataWydarzenia);
 
           }
         }
-    } catch (e) {
-      console.error("Błąd podczas pobierania danych wybranej lochy:", e);
-      error.value = e;
+      }catch (e) {
+        console.error("Błąd podczas pobierania danych wybranej lochy:", e);
+        error.value = e;
+      }
     }
-  }
+  };
+
+watch(selectedLocha, async (newValue, oldValue) => {
+  loadMioty(newValue);
 });
 
-
-
 const gridButtonClick = () => {
-  console.log("Grid button clicked");
   showGrid.value = !showGrid.value;
 };
 
@@ -248,18 +260,20 @@ const updateSelectedLocha = (number) => {
 };
 
 const quickAddLocha = async (newLochaId) => {
-  console.log("quickAddNewLocha", newLochaId)
   let newLocha = await apiClient.get('/Locha/' + newLochaId);
   Lochy.value.push(newLocha.data);
   numeryLoch.value.push({idLochy: newLocha.data.id,
                          numerLochy: newLocha.data.numerLochy,
                          statusLochy: newLocha.data.status});
-  console.log(Lochy.value,"QuickAdd1");
-  console.log(numeryLoch.value, "QuickAdd2");
 };
 
 const addItem = () => {
-  addMiotDialog.value = true;
+  if(ostatnieKrycieId.value != null){
+    addMiotDialog.value = true;
+  }
+  else{
+    alert.value = true;
+  }
 };
 
 const editItem = (item) => {
@@ -267,30 +281,24 @@ const editItem = (item) => {
   selectedMiot.value = item;
 };
 
-const deleteItem = (item) => {
+const deleteItem = async (item) => {
   apiClient.delete("/Miot/" + item.id);
-  Mioty.value.splice(Mioty.value.indexOf(item), 1);
+  await getData();
+  loadMioty(selectedLocha.value); 
 };
 
 const exportToPdf = () => {
   miotyStore.setMiotyStore(Mioty, selectedLocha);
   window.open('/exportpdf', '_blank')
-  console.log("Mioty:", miotyStore.mioty); //Debugowanie
-  console.log("NrLochyMiotStore", miotyStore.nrLochy);
 };
 
-const handleSaveMiot = (nowyMiot) => {
-  const teraz = new Date();
-  const padZero = (num) => String(num).padStart(2, '0');
-  const sformatowanaData = 
-    `${teraz.getFullYear()}-${padZero(teraz.getMonth() + 1)}-${padZero(teraz.getDate())} ` +
-    `${padZero(teraz.getHours())}:${padZero(teraz.getMinutes())}:${padZero(teraz.getSeconds())}`;
-  Mioty.value[Mioty.value.length-1].dataCzasUtworzenia = sformatowanaData;
-  Mioty.value[Mioty.value.length-1].dataCzasModyfikacji = sformatowanaData;
-  Mioty.value[Mioty.value.length-1].urodzoneZywe = nowyMiot.urodzoneZywe;
-  Mioty.value[Mioty.value.length-1].urodzoneMartwe = nowyMiot.urodzoneMartwe;
-  Mioty.value[Mioty.value.length-1].przygniecone = nowyMiot.przygniecone;
-  Mioty.value[Mioty.value.length-1].odsadzone = nowyMiot.odsadzone;
+const handleSaveMiot = async () => {
+  loadMioty(selectedLocha.value);
+};
+
+const handleUpdateMiot = async (editedMiot) => {
+  let editedMiotIndex = Mioty.value.findIndex(Miot => Miot.id === editedMiot.id)
+  Mioty.value[editedMiotIndex] = editedMiot;
 };
 
 </script>
