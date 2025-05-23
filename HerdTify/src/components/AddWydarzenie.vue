@@ -3,14 +3,12 @@
         :model-value="addWydarzenieDialog"
         @update:model-value="addWydarzenieDialog"
         max-width="600"
-        persistent
-      >
+        persistent>
         <LochyGrid v-if="showLochyGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLochy" class="lochyGridDialog"/>
         <v-card
           prepend-icon="mdi-plus"
           title="Nowe Wydarzenie"
-          :class="{ 'shift-left': showLochyGrid }"
-        >
+          :class="{ 'shift-left': showLochyGrid }">
           <v-card-text>
             <v-row dense>
               <v-autocomplete
@@ -18,26 +16,22 @@
                   label="Typ"
                   auto-select-first
                   v-model:="noweWydarzenie.typWydarzenia"
-                  style = "margin-right: 10px;"
-                ></v-autocomplete>
+                  variant="outlined"
+                  :rules="[required]"
+                  style = "margin-right: 10px;"/>
               <v-text-field
                   hint="rrrr-mm-dd"
-                  label="Data Wydarzenia*"
+                  label="Data Wydarzenia"
                   v-model="noweWydarzenie.dataWydarzenia"
-                  required
-                  style = "margin-left: 10px;"
-                ></v-text-field>
-              <v-textarea label="Uwagi" v-model="noweWydarzenie.uwagi" style="width: 100%;"></v-textarea>
-            
-              <v-btn variant="outlined" text="Wybierz lochy" @click="selectLochy"></v-btn>
+                  :rules="[required]"
+                  variant="outlined"
+                  style = "margin-left: 10px;"/>
+              <v-textarea label="Uwagi" v-model="noweWydarzenie.uwagi" style="width: 100%; margin-top: 10px;" variant="outlined"/>
+              <v-btn variant="tonal" color="secondary" text="Dodaj lochy" @click="selectLochy"/>
               <v-col>
                 <h5 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left: 10px;">Wybrane lochy:{{ noweWydarzenie.lochyId }}</h5>
               </v-col>
-            </v-row>
-            
-            <small class="text-caption text-medium-emphasis">*wymagane</small>
-            <v-spacer></v-spacer>
-            <small class="text-caption text-medium-emphasis">wydarzenie musi zawierać chociaż 1 lochę</small>
+            </v-row> 
           </v-card-text>
   
           <v-divider></v-divider>
@@ -77,6 +71,7 @@ const props = defineProps({
 const numeryLoch = ref([]);
 const lochyWolne = ref([]);
 const lochyPokryte = ref([]);
+const lochyProsne = ref([]);
 const lochyKarmiace = ref([]);
 const lochy = ref([]);
 const showLochyGrid = ref(false); 
@@ -105,7 +100,7 @@ const emit = defineEmits(['update:addWydarzenieDialog', 'save-wydarzenie']);
 const closeDialog = () => {
   emit('update:addWydarzenieDialog', false);
 };
-
+          
 const saveDialog = () => {
   if(noweWydarzenie.value.dataWykonania === ""){
     noweWydarzenie.value.dataWykonania = noweWydarzenie.value.dataWydarzenia;
@@ -155,11 +150,13 @@ onMounted(async () => {
     const responseA = await apiClient.get(`/Locha/status/0`);
     const responseB = await apiClient.get(`/Locha/status/1`);
     const responseC = await apiClient.get(`/Locha/status/2`);
-    lochyWolne.value = responseA.data
-    lochyPokryte.value = responseB.data
-    lochyKarmiace.value = responseC.data
-    lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyWolne.value);
-    numeryLoch.value = lochy.value.map(locha => ({
+    const responseD = await apiClient.get(`/Locha/status/3`);
+    lochyWolne.value = responseA.data;
+    lochyPokryte.value = responseB.data;
+    lochyProsne.value = responseC.data;
+    lochyKarmiace.value = responseD.data;
+    lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyWolne.value, lochyProsne.value);
+    numeryLoch.value = lochyWolne.value.map(locha => ({
         numerLochy: locha.numerLochy,
         statusLochy: locha.status
       }));
@@ -196,6 +193,8 @@ const mapNoweWydarzenieTemp = () => {
   noweWydarzenieTemp.value.dataWykonania = noweWydarzenie.value.dataWykonania;
 };
 
+const required = (v) => { return !!v || 'Pole jest wymagane' };
+
 </script>
 
 <style scoped>
@@ -210,7 +209,7 @@ const mapNoweWydarzenieTemp = () => {
 
 .lochyGridDialog {
   position: absolute;
-  top: 10%;
+  top: -5%;
   left: 70%;
 }
 h5 {

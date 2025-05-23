@@ -3,12 +3,10 @@
       :model-value="editMiotDialog"
       @update:model-value="editMiotDialog"
       max-width="400"
-      persistent
-    >
+      persistent>
       <v-card
         prepend-icon="mdi-pencil"
-        title="Nowy miot"
-      >
+        title="Edytuj miot">
         <v-card-text>
             <v-row dense>
                 <v-alert
@@ -21,62 +19,56 @@
                 v-if="success"
                 type="success"
                 variant="tonal"
-                style="margin-bottom: 10px;">{{ success }}</v-alert>
+                text="Zapisano pomyślnie!"
+                style="margin-bottom: 10px;"/>
             </v-row>
             <v-row>
                 <v-col>
                     <v-text-field
                         label="Urodzone żywe"
                         v-model="editedMiot.urodzoneZywe"
-                    ></v-text-field>
+                        variant="outlined"/>
                     <v-text-field
                         label="Przygniecone"
                         v-model="editedMiot.przygniecone"
-                    ></v-text-field>
+                        variant="outlined"/>
                     <v-text-field
                         label="Data proszenia"
                         v-model="editedMiot.dataProszenia"
                         hint="rrrr-mm-dd"
-                    ></v-text-field>
+                        variant="outlined"/>
                 </v-col>
                 <v-col>
                     <v-text-field
                         label="Urodzone martwe"
                         v-model="editedMiot.urodzoneMartwe"
-                    ></v-text-field>
+                        variant="outlined"/>
                     <v-text-field
                         label="Odsadzone"
                         v-model="editedMiot.odsadzone"
-                    ></v-text-field>
+                        variant="outlined"/>
                     <v-text-field
                         label="Data odsadzenia"
                         v-model="editedMiot.dataOdsadzenia"
                         hint="rrrr-mm-dd"
-                    ></v-text-field>
+                        variant="outlined"/>
                 </v-col>
             </v-row>
             <v-text-field
-                        label="Ocena"
-                        v-model="editedMiot.ocena"
-            ></v-text-field>
-            <small class="text-caption text-medium-emphasis">*wymagane</small>
+                label="Ocena"
+                v-model="editedMiot.ocena"
+                variant="outlined"/>
         </v-card-text>
-        <v-divider></v-divider>
         <v-card-actions>
-          <v-spacer></v-spacer>
-
           <v-btn
             text="Zamknij"
             variant="plain"
-            @click="closeDialog()"
-          ></v-btn>
-
+            @click="closeDialog()"/>
           <v-btn
             color="primary"
             text="Zapisz"
             variant="tonal"
-            @click="saveDialog()"
-          ></v-btn>
+            @click="saveDialog()"/>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -124,16 +116,15 @@ const saveDialog = () => {
     editedToSent();
     apiClient.put(`/Miot/${editedMiotSent.value.id}`, editedMiotSent.value)
     .then((response) => {
-        emit('save-miot', editedMiot.value);
         success.value = response.data;
         errorMessage.value = "";
+        emit('save-miot', editedMiot.value);
     })
     .catch((e) => {
       console.error("Błąd podczas pobierania danych:", e);
       success.value = "";
       errorMessage.value = "Wystąpił błąd podczas zapisywania zmian w miocie";
     });
-
 };
 
 watch(() => props.miot,(selectedMiot) => {

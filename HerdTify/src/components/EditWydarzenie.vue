@@ -30,37 +30,27 @@
                 :items="['Krycie', 'Szczepienie']"
                 label="Typ"
                 auto-select-first
-                v-model:="editedWydarzenie.typWydarzenia"
+                v-model:="editedWydarzenie.typWydarzenia" 
+                variant="outlined"
+                :rules="[required]"
                 style = "margin-right: 10px;"
               ></v-autocomplete>
             <v-text-field
                 hint="rrrr-mm-dd"
-                label="Data Wydarzenia*"
+                label="Data Wydarzenia"
                 v-model="editedWydarzenie.dataWydarzenia"
-                required
+                variant="outlined"
+                :rules="[required]"
                 style = "margin-left: 10px;"
               ></v-text-field>
-            <v-textarea label="Uwagi" v-model="editedWydarzenie.uwagi" style="width: 100%;"></v-textarea>
-          
+            <v-textarea label="Uwagi" v-model="editedWydarzenie.uwagi" variant="outlined" style="width: 100%; margin-top: 10px"></v-textarea>
+            <v-btn variant="tonal" color="secondary" text="Dodaj lochy" @click="selectLochy"></v-btn>
             <v-col>
-            <v-btn variant="outlined" text="Wybierz lochy" @click="selectLochy"></v-btn>
-            </v-col>
-            <v-col>
-              <h4 @click="wybraneLochyEmpty" style="margin-top: 1%;">Wybrane lochy:{{ editedWydarzenie.numeryLoch }}</h4>
-            </v-col>
-                        
+              <h4 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left:10px;">Wybrane lochy:{{ editedWydarzenie.numeryLoch }}</h4>
+            </v-col>      
           </v-row>
-          <v-row dense>
-         </v-row>
-          <small class="text-caption text-medium-emphasis">*wymagane</small>
-          <v-spacer></v-spacer>
-          <small class="text-caption text-medium-emphasis">wydarzenie musi zawierać chociaż 1 miot/lochę</small>
-        
-        
         </v-card-text>
-
         <v-divider></v-divider>
-
         <v-card-actions>
           <v-spacer></v-spacer>
 
@@ -100,6 +90,7 @@ wydarzenie: {
 const numeryLoch = ref([]);
 const lochyWolne = ref([]);
 const lochyPokryte = ref([]);
+const lochyProsne = ref([]);
 const lochyKarmiace = ref([]);
 const lochy = ref([]);
 const showLochyGrid = ref(false);
@@ -160,10 +151,12 @@ try {
   const responseA = await apiClient.get(`/Locha/status/0`);
   const responseB = await apiClient.get(`/Locha/status/1`);
   const responseC = await apiClient.get(`/Locha/status/2`);
-  lochyWolne.value = responseA.data
-  lochyPokryte.value = responseB.data
-  lochyKarmiace.value = responseC.data
-  lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyWolne.value);
+  const responseD = await apiClient.get(`/Locha/status/3`);
+  lochyWolne.value = responseA.data;
+  lochyPokryte.value = responseB.data;
+  lochyProsne.value = responseC.data;
+  lochyKarmiace.value = responseD.data;
+  lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyWolne.value, lochyProsne.value);
   numeryLoch.value = lochy.value.map(locha => ({
         numerLochy: locha.numerLochy,
         statusLochy: locha.status
@@ -195,6 +188,8 @@ const editedToSent = () => {
     editedWydarzenieSent.value.lochyId = editedWydarzenie.value.lochyId;
     editedWydarzenieSent.value.miotyId = editedWydarzenie.value.miotyId;
 };
+
+const required = (v) => { return !!v || 'Pole jest wymagane' };
 
 </script>
 

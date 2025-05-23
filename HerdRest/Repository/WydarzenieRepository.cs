@@ -40,7 +40,7 @@ namespace HerdRest.Repository
                 WydarzeniaMioty = _context.WydarzeniaMiotu.Where(w => w.WydarzenieId == wydarzenieDto.Id).ToList() ?? []
             };
         }
-        public bool CreateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
+        public (bool, int) CreateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
         {
             wydarzenie.Uwagi ??= "brak";
             if(miotId != null)
@@ -68,45 +68,19 @@ namespace HerdRest.Repository
                         Locha = wydarzenieLochaEntity ?? throw new InvalidOperationException("Locha nie istnieje."),
                         Wydarzenie = wydarzenie,
                     };
+                    if(wydarzenie.TypWydarzenia == TypWydarzenia.Krycie)
+                    {
+                        wydarzenieLochaEntity.Status = StatusLochy.Pokryta;
+                    }
+                    _context.Update(wydarzenieLochaEntity);
                     _context.Add(wydarzenieLocha);
+
                 }
             }
             _context.Add(wydarzenie);
-            return Save();
+            return (Save(), wydarzenie.Id);
         }
 
-        public bool ImportWydarzeniaFromFile(string FilePath)
-        {
-            if(!File.Exists(FilePath))
-                return false;
-
-            List<Wydarzenie> Wydarzenia = [];
-            string[] lines = File.ReadAllLines(FilePath);
-            foreach(string line in lines){
-                string[] parts = line.Split(';');
-                int[] idLoch = Array.ConvertAll(parts[2].Split(','), int.Parse);
-                if(parts.Length == 3){
-                    Wydarzenie Wydarzenie = new()
-                    {
-                        TypWydarzenia = (TypWydarzenia)Enum.Parse(typeof(TypWydarzenia), parts[0]),
-                        DataWydarzenia = DateOnly.Parse(parts[1]),
-                    };
-                    Wydarzenia.Add(Wydarzenie);
-                    foreach(var id in idLoch)
-                    {
-                        var wydarzenieLocha = new WydarzenieLocha()
-                        {
-                            Locha = _context.Lochy.Where(l => l.Id == id).FirstOrDefault() ?? throw new InvalidOperationException("Locha nie istnieje."),
-                            Wydarzenie = Wydarzenie,
-                        };
-                        _context.Add(wydarzenieLocha);
-                    }
-                }
-            }
-            _context.AddRange(Wydarzenia);
-            return Save();
-        }
-        
         public ICollection<Wydarzenie> GetWydarzenia()
         {
             return [.. _context.Wydarzenia
@@ -127,7 +101,7 @@ namespace HerdRest.Repository
                 .FirstOrDefault() ?? throw new InvalidOperationException("Wydarzenie nie istnieje.");
             return wydarzenie;
         }
-        public bool UpdateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
+        public (bool, int) UpdateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
         {
             if(wydarzenie.DataWydarzenia == default)
                 {
@@ -189,7 +163,7 @@ namespace HerdRest.Repository
                 }
             }
             _context.Update(wydarzenie);
-            return Save();
+            return (Save(), wydarzenie.Id);
         }
 
         public bool DeleteWydarzenie(Wydarzenie wydarzenie)

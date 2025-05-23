@@ -1,6 +1,6 @@
 <template>
   
-  <LochyGrid v-if="showGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLocha" @quickAdd:newLochaId="quickAddLocha"/>
+  <LochyGrid v-if="showGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLocha" @quickAdd:newLochaId="quickAddLocha" style="z-index: 1;"/>
   <AddMiot :addMiotDialog="addMiotDialog" :idLochy="idLochy" :krycieId="ostatnieKrycieId" @add:addMiotDialog="addMiotDialog = $event" @save-miot="handleSaveMiot"/>
   <EditMiot :editMiotDialog="editMiotDialog" :miot="selectedMiot" @update:editMiotDialog="editMiotDialog = $event" @save-miot="handleUpdateMiot"/>
   <v-alert
@@ -8,8 +8,7 @@
   variant="tonal"
   v-model="alert"
   close-label="Close Alert"
-  closable
-  >Nie znaleziono wolnego krycia aby powiązać je z miotem</v-alert>
+  closable>Nie znaleziono wolnego krycia aby powiązać je z miotem</v-alert>
  
   
   <v-navigation-drawer :width="200">
@@ -19,7 +18,7 @@
       <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
       <v-list-item :to="{ path: '/wydarzenia' }" link title="Wydarzenia"></v-list-item>
       <v-list-item :to="{ path: '/stado' }" link title="Stado"></v-list-item>
-      <v-list-item :to="{ path: '/import' }" link title="Importuj dane"></v-list-item>
+      <!-- <v-list-item :to="{ path: '/import' }" link title="Importuj dane"></v-list-item> -->
     
   </v-navigation-drawer>
     
@@ -40,17 +39,10 @@
       </v-btn>
       
       <v-btn
-        style="min-width: 0; width: 100px; background-color: blue; margin-right: 40px; "
+        style="min-width: 0; width: 150px; background-color: blue; margin-right: 40px; "
         size="small"
         @click="exportToPdf()"
-      >Eksportuj</v-btn>
-
-      <v-btn
-        style="min-width: 0; width: 100px; background-color: green; margin-right: 40px; "
-        size="small"
-        @click="addItem()"
-      >Dodaj</v-btn>  
-    
+      >Eksportuj do pdf</v-btn>
     </v-app-bar>
     
     <v-data-table
@@ -65,23 +57,30 @@
     
     <template v-slot:item.actions="{ item }">
       <v-btn
+        v-if="item.dataPrzewidywanegoProszenia"
         class="me-2"
         style="min-width: 0; width: 10px; background-color: #d67804;"
         size="small"
-        @click="editItem(item)"
-      >
+        @click="editItem(item)">
       <v-icon>mdi-pencil</v-icon>
       </v-btn>
       <v-btn
+        v-if="item.dataPrzewidywanegoProszenia"
         style="min-width: 0; width: 10px; background-color: red;"
         size="small"
-        @click="deleteItem(item)"
-      >
+        @click="deleteItem(item)">
         <v-icon>mdi-delete</v-icon>
+      </v-btn>
+      <v-btn
+        v-if="!item.dataPrzewidywanegoProszenia"
+        style="min-width: 0; width: 10px; background-color: green;"
+        size="small"
+        @click="addItem()">
+        <v-icon>mdi-plus</v-icon>
       </v-btn>
     </template>
     <template v-slot:no-data></template>
-   
+    
   </v-data-table>
   
   </template>
@@ -148,8 +147,9 @@
     Lochy.value = pobraneLochy.value
       .filter(locha => 
         locha.status == "Karmiaca" || 
-        locha.status == "Wolna" || 
-        locha.status == "Pokryta"
+        locha.status == "Luzna" || 
+        locha.status == "Pokryta" ||
+        locha.status == "Prosna"
       );
       numeryLoch.value = Lochy.value
       .map(locha => ({
@@ -282,7 +282,7 @@ const editItem = (item) => {
 };
 
 const deleteItem = async (item) => {
-  apiClient.delete("/Miot/" + item.id);
+  await apiClient.delete("/Miot/" + item.id);
   await getData();
   loadMioty(selectedLocha.value); 
 };
@@ -292,13 +292,32 @@ const exportToPdf = () => {
   window.open('/exportpdf', '_blank')
 };
 
-const handleSaveMiot = async () => {
-  loadMioty(selectedLocha.value);
+const handleSaveMiot = async (newMiotId) => {
+  // loadMioty(selectedLocha.value);
+  let miot = await apiClient.get("/Miot/" + newMiotId);
+  console.log("Mioty1", Mioty.value[1]);
+  console.log("nowy miot", miot.data);
+  console.log("Mioty", Mioty.value[2]);
+  Object.assign(Mioty.value[Mioty.value.length-1], miot.data)
+  console.log("Mioty2", Mioty.value[2]);
+  numeryLoch.value.forEach(obj => {
+      if( obj.numerLochy === selectedLocha.value){
+        obj.statusLochy = "Prosna";
+    }});
 };
 
 const handleUpdateMiot = async (editedMiot) => {
   let editedMiotIndex = Mioty.value.findIndex(Miot => Miot.id === editedMiot.id)
   Mioty.value[editedMiotIndex] = editedMiot;
+  const indexLochy = numeryLoch.value.findIndex(
+    obj => obj.numerLochy === selectedLocha.value
+  );
+  if (editedMiot.dataProszenia !== null && editedMiot.dataOdsadzenia === null) {
+    numeryLoch.value[indexLochy].statusLochy = "Karmiaca";
+  } else if (editedMiot.dataOdsadzenia !== null) {
+    numeryLoch.value[indexLochy].statusLochy = "Luzna";
+  } 
+   
 };
 
 </script>

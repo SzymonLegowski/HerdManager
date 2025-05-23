@@ -3,7 +3,6 @@ using HerdRest.Dto;
 using HerdRest.Enums;
 using HerdRest.Interfaces;
 using HerdRest.Model;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace HerdRest.Repository
@@ -24,6 +23,7 @@ namespace HerdRest.Repository
             IndeksProdukcji365Dni = locha.IndeksProdukcji365Dni,
             DataCzasUtworzenia = locha.DataCzasUtworzenia.ToString("yyyy-MM-dd HH:mm:ss"),
             DataCzasModyfikacji = locha.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
+            DataBrakowania = locha.DataBrakowania,
             MiotyId = locha.Mioty?.Select(m => m.Id).ToList() ?? [],
             WydarzeniaLochyId = locha.WydarzeniaLochy?.Select(w => w.WydarzenieId).ToList() ?? []
         };
@@ -39,6 +39,7 @@ namespace HerdRest.Repository
             Uwagi = lochaDto.Uwagi,
             DataCzasUtworzenia = DateTime.Now,
             DataCzasModyfikacji = DateTime.Now,
+            DataBrakowania = lochaDto.DataBrakowania,
             Mioty = _context.Mioty.Where(m => m.Locha.Id == lochaDto.Id).ToList() ?? [],
             WydarzeniaLochy = _context.WydarzeniaLochy.Where(w => w.LochaId == lochaDto.Id).ToList() ?? []
         };
@@ -60,31 +61,6 @@ namespace HerdRest.Repository
             }
             _context.Add(locha);
             return (Save(), locha.Id);
-        }
-
-        public bool ImportLochyFromFile(string FilePath)
-        {
-            if(!File.Exists(FilePath))
-                return false;
-
-            List<Locha> lochy = [];
-            string[] lines = File.ReadAllLines(FilePath);
-            foreach(string line in lines){
-                string[] parts = line.Split(';');
-                if(parts.Length == 3){
-                    Locha locha = new()
-                    {
-                        NumerLochy = int.Parse(parts[0]),
-                        Status = (StatusLochy)Enum.Parse(typeof(StatusLochy), parts[1]),
-                        DataCzasUtworzenia = DateTime.Now,
-                        DataCzasModyfikacji = DateTime.Now,
-                        Uwagi = parts[2]
-                    };
-                    lochy.Add(locha);
-                }
-            }
-            _context.AddRange(lochy);
-            return Save();
         }
 
         public ICollection<Locha> GetLochy()
@@ -114,13 +90,13 @@ namespace HerdRest.Repository
                         .FirstOrDefault(l => l.Id == lochaId) ?? throw new InvalidOperationException("Locha nie istnieje.");
             return locha;
         }
-        public bool UpdateLocha(Locha locha, List<int>? wydarzenieId)
+        public (bool, int) UpdateLocha(Locha locha, List<int>? wydarzenieId)
         {
             locha.DataCzasModyfikacji = DateTime.Now;
             locha.DataCzasUtworzenia = _context.Lochy.Where(l => l.Id == locha.Id)
                 .Select(l => l.DataCzasUtworzenia)
                 .FirstOrDefault();
-            
+        
             if(wydarzenieId != null)
             {
                 foreach(var id in wydarzenieId)
@@ -136,7 +112,7 @@ namespace HerdRest.Repository
                 }
             }
             _context.Update(locha);
-            return Save();
+            return (Save(), locha.Id);
         }
 
         public bool DeleteLocha(Locha locha)

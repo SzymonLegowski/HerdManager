@@ -1,6 +1,5 @@
 using HerdRest.Dto;
 using HerdRest.Interfaces;
-using HerdRest.PublicClasses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HerdRest.Controller
@@ -26,27 +25,16 @@ namespace HerdRest.Controller
                 return BadRequest(ModelState);
 
             var wydarzenieCreate = _wydarzenieRepository.MapToModel(wydarzenieCreateDto);
-
-            if(!_wydarzenieRepository.CreateWydarzenie(wydarzenieCreate, wydarzenieCreateDto.MiotyId, wydarzenieCreateDto.LochyId))
+            var createOutput =_wydarzenieRepository.CreateWydarzenie(wydarzenieCreate, wydarzenieCreateDto.MiotyId, wydarzenieCreateDto.LochyId);
+            if(!createOutput.Item1)
             {
                 ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu.");
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Dodano pomyślnie!");
+            return Ok(createOutput.Item2);
         }
-        [HttpPost("import")]
-        public IActionResult ImportWydarzeniaFromFile(IFormFile file)
-        {
-            string uploadOutput = new UploadHandler().Upload(file);
-            if(!_wydarzenieRepository.ImportWydarzeniaFromFile(Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Wydarzenia.csv")))
-            {
-                ModelState.AddModelError("", "Coś poszło nie tak przy importowaniu danych.");
-                return StatusCode(500, ModelState);
-            }
-            return Ok(uploadOutput + " i zaimportowany pomyślnie!");
-        }
-
+       
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<WydarzenieDto>))]
         public IActionResult GetLochy()
@@ -99,14 +87,14 @@ namespace HerdRest.Controller
                 return BadRequest();
             
             var updatedWydarzenie = _wydarzenieRepository.MapToModel(updatedWydarzenieDto);
-
-            if(!_wydarzenieRepository.UpdateWydarzenie(updatedWydarzenie, updatedWydarzenieDto.MiotyId, updatedWydarzenieDto.LochyId))
+            var updateOutput = _wydarzenieRepository.UpdateWydarzenie(updatedWydarzenie, updatedWydarzenieDto.MiotyId, updatedWydarzenieDto.LochyId);
+            if(!updateOutput.Item1)
                 {
                     ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu zmian.");
                     return StatusCode(500, ModelState);
                 }
 
-            return Ok("Zapisano pomyślnie!");
+            return Ok(updateOutput.Item2);
         }
         
         [HttpDelete("{wydarzenieId}")]

@@ -36,8 +36,9 @@ import apiClient from '@/plugins/axios';
   const status = lochyMap.value.get(number);
   switch (status) {
     case 'Karmiaca': return 'bg-karmiaca';
-    case 'Wolna': return 'bg-wolna';
+    case 'Luzna': return 'bg-luzna';
     case 'Pokryta': return 'bg-pokryta';
+    case 'Prosna': return 'bg-prosna';
     default: return 'bg-default'; // Jeśli nie ma statusu, tło domyślne
   }
 };
@@ -53,7 +54,7 @@ import apiClient from '@/plugins/axios';
     else
       {
         let newLocha = {numerLochy: number,
-                        status: "Wolna",
+                        status: "Luzna",
                         wydarzeniaLochyId: [],
                         miotyId: []
         };
@@ -78,14 +79,17 @@ import apiClient from '@/plugins/axios';
     border-color: #740fb7;
   }
 
+  .bg-prosna {
+    background: #ccaa00;
+  }
   .bg-karmiaca {
     background: #ce1212;
   }
-  .bg-wolna {
+  .bg-luzna {
     background: #159719;
   }
   .bg-pokryta {
-    background: #ab6a08;
+    background: #0f8ce5;
   }
   .bg-default {
     background: #353535;

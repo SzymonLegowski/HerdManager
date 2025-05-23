@@ -23,7 +23,7 @@
         <v-btn type="submit" block :to="{ path: '/stado' }" style="min-width: 0; margin: 10px; transform: translate(0px, -10px); background-color: green;">Stado</v-btn>
         <v-btn type="submit" block :to="{ path: '/kartalochy' }" style="min-width: 0; margin: 10px; transform: translate(0px, -10px); background-color: green;">Karta lochy</v-btn>
         <v-btn type="submit" block :to="{ path: '/wydarzenia' }" style="min-width: 0; margin: 10px; transform: translate(0px, -10px); background-color: green;">Wydarzenia</v-btn>
-        <v-btn type="submit" block :to="{ path: '/import' }" style="min-width: 0; margin: 10px; transform: translate(0px, -10px); background-color: green;">Import danych</v-btn>
+        <!-- <v-btn type="submit" block :to="{ path: '/import' }" style="min-width: 0; margin: 10px; transform: translate(0px, -10px); background-color: green;">Import danych</v-btn> -->
     
         </v-form>
     </v-sheet>

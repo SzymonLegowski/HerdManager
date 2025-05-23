@@ -8,45 +8,50 @@
         prepend-icon="mdi-plus"
         title="Nowy miot">
         <v-card-text>
+            <v-alert
+              v-if="alert"
+              type="error"
+              variant="tonal"
+              style="margin-bottom: 10px;">{{ message }}</v-alert>
+            <v-alert
+              v-if="success"
+              type="success"
+              variant="tonal"
+              text="Zapisano pomyślnie!"
+              style="margin-bottom: 10px;"/>
             <v-row>
                 <v-col>
                     <v-text-field
                         label="Urodzone żywe"
-                        v-model="newMiot.urodzoneZywe"
-                    ></v-text-field>
+                        variant="outlined"
+                        v-model="newMiot.urodzoneZywe"/>
                     <v-text-field
                         label="Urodzone martwe"
-                        v-model="newMiot.urodzoneMartwe"
-                    ></v-text-field>
+                        variant="outlined"
+                        v-model="newMiot.urodzoneMartwe"/>
                     <v-text-field
                         label="Odsadzone"
-                        v-model="newMiot.odsadzone"
-                    ></v-text-field>
+                        variant="outlined"
+                        v-model="newMiot.odsadzone"/>
                 </v-col>
                 <v-col>
-
                     <v-text-field
                         label="Przygniecone"
-                        v-model="newMiot.przygniecone"
-                    ></v-text-field>
+                        variant="outlined"
+                        v-model="newMiot.przygniecone"/>
                     <v-text-field
                         label="Data proszenia"
+                        variant="outlined"
                         v-model="newMiot.dataProszenia"
-                        hint="rrrr-mm-dd"
-                    ></v-text-field>
+                        hint="rrrr-mm-dd"/>
                     <v-text-field
                         label="Data odsadzenia"
+                        variant="outlined"
                         v-model="newMiot.dataOdsadzenia"
-                        hint="rrrr-mm-dd"
-                    ></v-text-field>
+                        hint="rrrr-mm-dd"/>
                 </v-col> 
             </v-row>
-                   <v-text-field
-                        label="Ocena"
-                        v-model="newMiot.ocena"
-                    ></v-text-field>
-            {{ newMiot }}
-            <small class="text-caption text-medium-emphasis">*wymagane</small>
+            <v-text-field label="Ocena" variant="outlined" v-model="newMiot.ocena"/>
         </v-card-text>
 
 
@@ -100,19 +105,32 @@ let newMiot = ref({
     lochaId: 0,
     wydarzeniaMiotuId: []
 });
-
+let message = ref(null);
+let alert = ref(false);
+let success = ref(false);
 const emit = defineEmits(['add:addMiotDialog', 'save-miot']);
-
 const closeDialog = () => {
+    success.value=false;
+    alert.value=false;
     emit('add:addMiotDialog', false);
 };
 
-const saveDialog = async () => {
+const saveDialog = () => {
     newMiot.value.lochaId = idLochy.value;
     newMiot.value.wydarzeniaMiotuId = [krycieId.value];
-    console.info(newMiot.value);
-    await apiClient.post('/miot', newMiot.value);
-    emit('save-miot', newMiot.value);
+        console.info(newMiot.value);
+    apiClient.post('/miot', newMiot.value).then((response) => {
+        alert.value = false;
+        success.value = true;
+        emit('save-miot', response.data);
+    }).catch((e) => {
+        success.value = false;
+        let error = JSON.parse(e.response.request.response)
+        console.log(error);
+        // console.log(error.e.errors[0].errorMessage);
+        // message.value = error.e.errors[0].errorMessage;
+        alert.value = true;
+    });
 };
 
 const clearNewMiot = () => {

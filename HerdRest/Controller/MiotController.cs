@@ -1,6 +1,5 @@
 using HerdRest.Dto;
 using HerdRest.Interfaces;
-using HerdRest.PublicClasses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HerdRest.Controller
@@ -29,27 +28,16 @@ namespace HerdRest.Controller
             }
 
             var miotCreate = _miotRepository.MapToModel(miotCreateDto);
+            var createOutput = _miotRepository.CreateMiot(miotCreate, miotCreateDto.WydarzeniaMiotuId.First());
 
-            if (!_miotRepository.CreateMiot(miotCreate, miotCreateDto.WydarzeniaMiotuId.First()))
+            if (!createOutput.Item1)
             {
                 ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu.");
                 return StatusCode(500, ModelState);
             }
 
 
-            return Ok("Dodano pomyślnie!");
-        }
-
-        [HttpPost("import")]
-        public IActionResult ImportMiotyFromFile(IFormFile file)
-        {
-            string uploadOutput = new UploadHandler().Upload(file);
-            if(!_miotRepository.ImportMiotyFromFile(Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Mioty.csv")))
-            {
-                ModelState.AddModelError("", "Coś poszło nie tak przy importowaniu danych.");
-                return StatusCode(500, ModelState);
-            }
-            return Ok(uploadOutput + " i zaimportowany pomyślnie!");
+            return Ok(createOutput.Item2);
         }
 
         [HttpGet]
@@ -101,14 +89,15 @@ namespace HerdRest.Controller
                 return BadRequest();
 
             var updatedMiot = _miotRepository.MapToModel(updatedMiotDto);
+            var updateOutput = _miotRepository.UpdateMiot(updatedMiot, updatedMiotDto.WydarzeniaMiotuId);
 
-            if (!_miotRepository.UpdateMiot(updatedMiot, updatedMiotDto.WydarzeniaMiotuId))
+            if (!updateOutput.Item1)
             {
                 ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu zmian.");
                 return StatusCode(500, ModelState);
             }
 
-            return Ok("Zapisano pomyślnie!");
+            return Ok(updateOutput.Item2);
         }
 
         [HttpDelete("{miotId}")]

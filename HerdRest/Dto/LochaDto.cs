@@ -15,6 +15,7 @@ namespace HerdRest.Dto
         public int IndeksProdukcji365Dni { get; set; }
         public string? DataCzasUtworzenia { get; set; }
         public string? DataCzasModyfikacji { get; set; }
+        public DateOnly? DataBrakowania { get; set; }
         public List<int>? MiotyId { get; set; }
         public List<int>? WydarzeniaLochyId { get; set; }
     }

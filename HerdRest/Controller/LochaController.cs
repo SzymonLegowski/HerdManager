@@ -2,7 +2,6 @@ using HerdRest.Dto;
 using HerdRest.Interfaces;
 using HerdRest.Enums;
 using Microsoft.AspNetCore.Mvc;
-using HerdRest.PublicClasses;
 
 namespace HerdRest.Controller
 {
@@ -22,8 +21,9 @@ namespace HerdRest.Controller
 
             var locha = _lochaRepository.GetLochy()
                 .Where(l => l.NumerLochy == lochaCreateDto.NumerLochy && 
-                                            (l.Status == StatusLochy.Wolna || 
+                                            (l.Status == StatusLochy.Luzna || 
                                              l.Status == StatusLochy.Pokryta || 
+                                             l.Status == StatusLochy.Prosna ||
                                              l.Status == StatusLochy.Karmiaca))
                 .FirstOrDefault();
 
@@ -47,17 +47,6 @@ namespace HerdRest.Controller
 
 
             return Ok(createOutput.Item2);
-        }
-        [HttpPost("import")]
-        public IActionResult ImportLochyFromFile(IFormFile file)
-        {
-            string uploadOutput = new UploadHandler().Upload(file);
-            if(!_lochaRepository.ImportLochyFromFile(Path.Combine(Directory.GetCurrentDirectory(), "Uploads/Lochy.csv")))
-            {
-                ModelState.AddModelError("", "Coś poszło nie tak przy importowaniu danych.");
-                return StatusCode(500, ModelState);
-            }
-            return Ok(uploadOutput + " i zaimportowany pomyślnie!");
         }
 
         [HttpGet]
@@ -122,14 +111,15 @@ namespace HerdRest.Controller
                 return BadRequest();
             
             var updatedLocha = _lochaRepository.MapToModel(updatedLochaDto);
-            
-            if(!_lochaRepository.UpdateLocha(updatedLocha, updatedLochaDto.WydarzeniaLochyId))
+            var updateOutput =_lochaRepository.UpdateLocha(updatedLocha, updatedLochaDto.WydarzeniaLochyId);
+
+            if(!updateOutput.Item1)
                 {
                     ModelState.AddModelError("", "Coś poszło nie tak przy zapisywaniu zmian.");
                     return StatusCode(500, ModelState);
                 }
 
-            return Ok("Zapisano pomyślnie!");
+            return Ok(updateOutput.Item2);
         }
         
         [HttpDelete("{lochaId}")]

@@ -17,76 +17,22 @@
       <v-col cols="12" md="8" lg="6">
         <v-card>
           <v-card-title>
-            Wybierz plik do przesłania
+            Wprowadź dane oddzielone średnikami
           </v-card-title>
           <v-card-text>
-            <v-file-input
-              label="Wybierz plik"
-              outlined
-              dense
-              v-model="selectedFileLochy"
-              accept=".csv"
-            />
+            <v-textarea
+              variant="outlined"
+              v-model="selectedFileLochy"/>
           </v-card-text>
           <v-card-actions>
-            <v-btn :disabled="!selectedFileLochy" color="primary" @click="ImportLochy">
-              Importuj lochy
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
-  <v-container>
-    <v-row justify="center">
-      <v-col cols="12" md="8" lg="6">
-        <v-card>
-          <v-card-title>
-            Wybierz plik do przesłania
-          </v-card-title>
-          <v-card-text>
-            <v-file-input
-              label="Wybierz plik"
-              outlined
-              dense
-              v-model="selectedFileWydarzenia"
-              accept=".csv"
-            />
-          </v-card-text>
-          <v-card-actions>
-            <v-btn :disabled="!selectedFileWydarzenia" color="primary" @click="ImportWydarzenia">
-              Importuj Wydarzenia
+            <v-btn color="primary" @click="ImportLochy">
+              Importuj dane
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
   </v-container> 
-  <v-container>
-    <v-row justify="center">
-      <v-col cols="12" md="8" lg="6">
-        <v-card>
-          <v-card-title>
-            Wybierz plik do przesłania
-          </v-card-title>
-          <v-card-text>
-            <v-file-input
-              label="Wybierz plik"
-              outlined
-              dense
-              v-model="selectedFileMioty"
-              accept=".csv"
-            />
-          </v-card-text>
-          <v-card-actions>
-            <v-btn :disabled="!selectedFileMioty" color="primary" @click="ImportMioty">
-              Importuj mioty
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>  
 </template>
 
 <script setup>
