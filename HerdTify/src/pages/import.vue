@@ -1,105 +1,70 @@
 <template>
-    <v-navigation-drawer :width="200">
-    <v-list-item title="Menedżer stada"></v-list-item>
-    <v-divider></v-divider>
-      
-      <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
-      <v-list-item :to="{ path: '/wydarzenia' }" link title="Wydarzenia"></v-list-item>
-      <v-list-item :to="{ path: '/stado' }" link title="Stado"></v-list-item>
-      <v-list-item :to="{ path: '/import' }" link title="Importuj dane"></v-list-item>
-    
-  </v-navigation-drawer>
-
-  <v-app-bar title="Importuj dane">
-</v-app-bar>
-  <v-container>
-    <v-row justify="center">
-      <v-col cols="12" md="8" lg="6">
-        <v-card>
-          <v-card-title>
-            Wprowadź dane oddzielone średnikami
-          </v-card-title>
-          <v-card-text>
-            <v-textarea
-              variant="outlined"
-              v-model="selectedFileLochy"/>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn color="primary" @click="ImportLochy">
-              Importuj dane
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container> 
+  <NavigationDrawer/>
+  <v-app-bar title="Import danych"/>
+  <div class ="importContainer">
+    <v-alert
+      v-if="errorMessage"
+      type="error"
+      variant="tonal"
+      v-model="errorAlert"
+      style="margin-bottom: 10px;">{{ errorMessage }}</v-alert>
+    <v-alert
+      v-if="success"
+      type="success"
+      variant="tonal"
+      text="Przesłano pomyślnie!"
+      style="margin-bottom: 10px;"/>
+    <h3 style="margin-bottom:20px">Podaj plik w formacie .csv</h3>
+    <v-file-input label="Kliknij aby wybrać plik" variant="outlined" v-model="selectedFile"/>
+    <v-btn color="primary" @click="ImportData">
+      Importuj dane
+    </v-btn>
+  </div>
 </template>
 
 <script setup>
+import NavigationDraver from '@/components/NavigationDrawer.vue';
 import axios from 'axios';
 
-const selectedFileLochy = ref(null);
-const selectedFileMioty = ref(null);
-const selectedFileWydarzenia = ref(null);
+const selectedFile = ref(null);
+let errorMessage = ref(null);
+let success = ref(null);
 
-const ImportLochy = async () => {
-  if (!selectedFileLochy.value) return;
+const ImportData = async () => {
+  if (!selectedFile.value) 
+  {
+    errorMessage.value = "Nie podano pliku";
+    return;
+  }
 
   const formData = new FormData();
-  formData.append("file", selectedFileLochy.value);
+  formData.append("file", selectedFile.value);
 
   try {
-    const response = await axios.post("http://localhost:5039/api/Locha/import", formData, {
+    const response = await axios.post("http://localhost:5039/api/File/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
     console.log("Sukces:", response.data);
-    alert("Plik został przesłany pomyślnie!"); // Możesz użyć innej metody powiadomienia
+    success.value = true;
+    errorMessage = null;
   } catch (error) {
     console.error("Błąd przesyłania pliku:", error);
-    alert("Nie udało się przesłać pliku."); // Możesz użyć innej metody powiadomienia
+    success.value = false;
+    errorMessage.value = "Błąd przesyłania pliku";
   }
 };
 
-const ImportMioty = async () => {
-  if (!selectedFileMioty.value) return;
-
-const formData = new FormData();
-formData.append("file", selectedFileMioty.value);
-
-try {
-  const response = await axios.post("http://localhost:5039/api/Miot/import", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  console.log("Sukces:", response.data);
-  alert("Plik został przesłany pomyślnie!"); // Możesz użyć innej metody powiadomienia
-} catch (error) {
-  console.error("Błąd przesyłania pliku:", error);
-  alert("Nie udało się przesłać pliku."); // Możesz użyć innej metody powiadomienia
-}
-};
-
-const ImportWydarzenia = async () => {
-  if (!selectedFileWydarzenia.value) return;
-
-const formData = new FormData();
-formData.append("file", selectedFileWydarzenia.value);
-
-try {
-  const response = await axios.post("http://localhost:5039/api/Wydarzenie/import", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  console.log("Sukces:", response.data);
-  alert("Plik został przesłany pomyślnie!"); // Możesz użyć innej metody powiadomienia
-} catch (error) {
-  console.error("Błąd przesyłania pliku:", error);
-  alert("Nie udało się przesłać pliku."); // Możesz użyć innej metody powiadomienia
-}
-};
-
 </script>
+<style scoped>
+
+.importContainer{
+  width: 300px;
+  margin: auto;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #222222;
+}
+
+</style>

@@ -18,9 +18,9 @@ namespace HerdRest.Controller
             {
                 return BadRequest("Niepoprawny format pliku, upewnij się że przesyłasz plik .csv lub .txt");
             }
-            CsvLoader DataLoader = new(lochaRepository, miotRepository, wydarzenieRepository, context);
-            DataLoader.LoadDataFromCsv(filePath);
-            return Ok();
+            CsvLoader csvLoader = new(lochaRepository, miotRepository, wydarzenieRepository, context);
+            
+            return Ok(csvLoader.LoadDataFromCsv(filePath));
         }
     }   
 }

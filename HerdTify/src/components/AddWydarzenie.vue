@@ -2,7 +2,7 @@
       <v-dialog
         :model-value="addWydarzenieDialog"
         @update:model-value="addWydarzenieDialog"
-        max-width="600"
+        max-width="500"
         persistent>
         <LochyGrid v-if="showLochyGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLochy" class="lochyGridDialog"/>
         <v-card
@@ -10,47 +10,43 @@
           title="Nowe Wydarzenie"
           :class="{ 'shift-left': showLochyGrid }">
           <v-card-text>
-            <v-row dense>
-              <v-autocomplete
-                  :items="['Krycie', 'Szczepienie']"
-                  label="Typ"
-                  auto-select-first
-                  v-model:="noweWydarzenie.typWydarzenia"
-                  variant="outlined"
-                  :rules="[required]"
-                  style = "margin-right: 10px;"/>
-              <v-text-field
-                  hint="rrrr-mm-dd"
-                  label="Data Wydarzenia"
-                  v-model="noweWydarzenie.dataWydarzenia"
-                  :rules="[required]"
-                  variant="outlined"
-                  style = "margin-left: 10px;"/>
-              <v-textarea label="Uwagi" v-model="noweWydarzenie.uwagi" style="width: 100%; margin-top: 10px;" variant="outlined"/>
+            <v-autocomplete
+              :items="['Krycie', 'Szczepienie']"
+              label="Typ"
+              auto-select-first
+              v-model:="noweWydarzenie.typWydarzenia"
+              variant="outlined"
+              :rules="[required]"/>
+            <v-text-field
+              hint="rrrr-mm-dd"
+              label="Data Wydarzenia"
+              v-model="noweWydarzenie.dataWydarzenia"
+              :rules="[required]"
+              variant="outlined"
+              style="margin-bottom:5px; margin-top: 5px;"/>
+            <v-text-field
+              hint="np. Maximus"
+              label="Rasa kn."
+              v-model="noweWydarzenie.rasa"
+              variant="outlined"/>
+            <v-textarea label="Uwagi" v-model="noweWydarzenie.uwagi" style=" margin-top: 5px; margin-bottom: 10px;" variant="outlined"/>
+            <v-row style="margin-left: 0px;">
               <v-btn variant="tonal" color="secondary" text="Dodaj lochy" @click="selectLochy"/>
-              <v-col>
-                <h5 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left: 10px;">Wybrane lochy:{{ noweWydarzenie.lochyId }}</h5>
-              </v-col>
-            </v-row> 
+              <v-btn variant="tonal" color="secondary" @click="wybraneLochyEmpty" style="margin-left: 10px;">{{ noweWydarzenie.lochyId }}</v-btn>
+            </v-row>
           </v-card-text>
-  
-          <v-divider></v-divider>
-  
+          <v-divider/>
           <v-card-actions>
-            <v-spacer></v-spacer>
-  
+            <v-spacer/>
             <v-btn
               text="Zamknij"
               variant="plain"
-              @click="closeDialog()"
-            ></v-btn>
-  
+              @click="closeDialog()"/>
             <v-btn
               color="primary"
               text="Zapisz"
               variant="tonal"
-              @click="saveDialog()"
-            ></v-btn>
+              @click="saveDialog()"/>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -155,8 +151,8 @@ onMounted(async () => {
     lochyPokryte.value = responseB.data;
     lochyProsne.value = responseC.data;
     lochyKarmiace.value = responseD.data;
-    lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyWolne.value, lochyProsne.value);
-    numeryLoch.value = lochyWolne.value.map(locha => ({
+    lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyProsne.value);
+    numeryLoch.value = lochy.value.map(locha => ({
         numerLochy: locha.numerLochy,
         statusLochy: locha.status
       }));
@@ -180,6 +176,7 @@ const updateSelectedLochy = (number) => {
 const clearNoweWydarzenie = () => {
   noweWydarzenie.value.typWydarzenia = "";
   noweWydarzenie.value.uwagi = "";
+  noweWydarzenie.value.rasa = "";
   noweWydarzenie.value.dataWydarzenia = "";
   noweWydarzenie.value.dataWykonania = "";
   noweWydarzenie.value.lochyId = [];
@@ -189,6 +186,7 @@ const clearNoweWydarzenie = () => {
 const mapNoweWydarzenieTemp = () => {
   noweWydarzenieTemp.value.typWydarzenia = noweWydarzenie.value.typWydarzenia;
   noweWydarzenieTemp.value.uwagi = noweWydarzenie.value.uwagi;
+  noweWydarzenieTemp.value.rasa = noweWydarzenie.value.rasa;
   noweWydarzenieTemp.value.dataWydarzenia = noweWydarzenie.value.dataWydarzenia;
   noweWydarzenieTemp.value.dataWykonania = noweWydarzenie.value.dataWykonania;
 };
@@ -203,8 +201,8 @@ const required = (v) => { return !!v || 'Pole jest wymagane' };
   
 }
 .shift-left {
-  transform: translateX(-220px);
-  transition: transform 0.3s ease-in-out;
+  transform: translateX(-120px);
+  transition: all 0.4s ease-in-out;
 }
 
 .lochyGridDialog {

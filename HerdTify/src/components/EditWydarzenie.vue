@@ -2,17 +2,14 @@
     <v-dialog
       :model-value="editWydarzenieDialog"
       @update:model-value="editWydarzenieDialog"
-      max-width="600"
-      persistent
-    >
+      max-width="500"
+      persistent>
       <LochyGrid v-if="showLochyGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLochy" class="lochyGridDialog"/>
       <v-card
         prepend-icon="mdi-pencil"
         title="Edytuj wydarzenie"
-        :class="{ 'shift-left': showLochyGrid }"
-      >
+        :class="{ 'shift-left': showLochyGrid }">
         <v-card-text>
-            <v-row dense>
               <v-alert
                 v-if="errorMessage"
                 type="error"
@@ -23,32 +20,34 @@
                 v-if="success"
                 type="success"
                 variant="tonal"
-                style="margin-bottom: 10px;">{{ success }}</v-alert>
-            </v-row>
-          <v-row dense>
+                text="Dodano pomyślnie!"
+                style="margin-bottom: 10px;"/>
             <v-autocomplete
-                :items="['Krycie', 'Szczepienie']"
-                label="Typ"
-                auto-select-first
-                v-model:="editedWydarzenie.typWydarzenia" 
-                variant="outlined"
-                :rules="[required]"
-                style = "margin-right: 10px;"
-              ></v-autocomplete>
+              :items="['Krycie', 'Szczepienie']"
+              label="Typ"
+              auto-select-first
+              v-model:="editedWydarzenie.typWydarzenia" 
+              variant="outlined"
+              :rules="[required]"/>
+           <v-text-field
+              hint="rrrr-mm-dd"
+              label="Data Wydarzenia"
+              v-model="editedWydarzenie.dataWydarzenia"
+              :rules="[required]"
+              variant="outlined"
+              style="margin-bottom:5px; margin-top: 5px;"/>
             <v-text-field
-                hint="rrrr-mm-dd"
-                label="Data Wydarzenia"
-                v-model="editedWydarzenie.dataWydarzenia"
-                variant="outlined"
-                :rules="[required]"
-                style = "margin-left: 10px;"
-              ></v-text-field>
+              hint="np. Maximus"
+              label="Rasa"
+              v-model="editedWydarzenie.rasa"
+              variant="outlined"/>
             <v-textarea label="Uwagi" v-model="editedWydarzenie.uwagi" variant="outlined" style="width: 100%; margin-top: 10px"></v-textarea>
-            <v-btn variant="tonal" color="secondary" text="Dodaj lochy" @click="selectLochy"></v-btn>
-            <v-col>
-              <h4 @click="wybraneLochyEmpty" style="margin-top: 1%; margin-left:10px;">Wybrane lochy:{{ editedWydarzenie.numeryLoch }}</h4>
-            </v-col>      
-          </v-row>
+            <v-row style="margin-left: 0px;">
+              <v-btn variant="tonal" color="secondary" text="Dodaj lochy" @click="selectLochy"/>
+              <v-btn variant="tonal" color="secondary" @click="wybraneLochyEmpty" style="margin-left: 10px;">{{ editedWydarzenie.numeryLoch }}</v-btn>
+            </v-row>
+            <div style="margin:20px"></div>
+            {{ editedWydarzenie.lochyId }}
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
@@ -101,6 +100,7 @@ let editedWydarzenieSent = ref({
     id: "",
     typWydarzenia: "",
     uwagi: "",
+    rasa: "",
     dataWydarzenia: "",
     lochyId: [],
     miotyId: []
@@ -115,6 +115,17 @@ errorMessage.value = "";
 };
 
 const saveDialog = () => {
+  for(let lochaNr = 0; lochaNr < editedWydarzenie.value.lochyId.length; lochaNr++)
+    {
+      for(let locha = 0; locha < lochy.value.length; locha++)
+      {
+        if(lochy.value[locha].numerLochy === editedWydarzenie.value.lochyId[lochaNr])
+        {
+          editedWydarzenie.value.numeryLoch.push(lochy.value[locha].numerLochy);
+          editedWydarzenieSent.value.lochyId[lochaNr] = lochy.value[locha].id;
+        }
+      }
+    }
   editedToSent();
   apiClient.put('/Wydarzenie/' + editedWydarzenieSent.value.id, editedWydarzenieSent.value)
   .then(response => {
@@ -168,10 +179,18 @@ try {
 });
 
 const updateSelectedLochy = (number) => {
-    if(!editedWydarzenie.value.numeryLoch.includes(number)){
-        editedWydarzenie.value.numeryLoch.push(number);
-        editedWydarzenie.value.lochyId.push(lochy.value.find(locha => locha.numerLochy === number).id);
-    }
+  let idLochy = lochy.value.find(locha => locha.numerLochy === number)?.id;
+  if(!editedWydarzenie.value.numeryLoch.includes(number)){
+    editedWydarzenie.value.numeryLoch.push(number);
+    editedWydarzenie.value.lochyId.push(idLochy);
+  } else
+  {
+    let nrIdx = editedWydarzenie.value.numeryLoch.indexOf(number);
+    let idIdx = editedWydarzenie.value.lochyId.indexOf(idLochy);
+    editedWydarzenie.value.numeryLoch.splice(nrIdx, 1);
+    editedWydarzenie.value.lochyId.splice(idIdx, 1);
+  }
+  console.log("wybrane lochy:", editedWydarzenie); //Debugowanie  
 };
 
 watch(() => props.wydarzenie,(newWydarzenie) => {
@@ -184,6 +203,7 @@ const editedToSent = () => {
     editedWydarzenieSent.value.id = editedWydarzenie.value.id;
     editedWydarzenieSent.value.typWydarzenia = editedWydarzenie.value.typWydarzenia;
     editedWydarzenieSent.value.uwagi = editedWydarzenie.value.uwagi;
+    editedWydarzenieSent.value.rasa = editedWydarzenie.value.rasa;
     editedWydarzenieSent.value.dataWydarzenia = editedWydarzenie.value.dataWydarzenia;
     editedWydarzenieSent.value.lochyId = editedWydarzenie.value.lochyId;
     editedWydarzenieSent.value.miotyId = editedWydarzenie.value.miotyId;

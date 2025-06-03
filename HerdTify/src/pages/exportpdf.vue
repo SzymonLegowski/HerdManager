@@ -16,7 +16,7 @@
         <th :colspan="colspanValue">Data Pokrycia</th>
         <th colspan="3">Data</th>
         <th colspan="4">Liczba Prosiąt</th>
-        <th rowspan="3">Ocena prosiąt urodzonych(1-5)</th>
+        <th rowspan="3" style="width: 105px;">Ocena prosiąt urodzonych(1-5)</th>
       </tr>
       <tr v-for="(row, rowIndex) in tableData" :key="rowIndex">
         <th v-for="(cell, cellIndex) in row" :key="cellIndex" rowspan="2">{{ cell }} </th>
@@ -102,7 +102,7 @@
     for (let dataKrycia = 0; dataKrycia < maxKryc; dataKrycia++) {
       const krycie = mioty[miot].datyKrycia?.[dataKrycia];
       if (krycie) {
-        datyKryciaCells.push(`${krycie.data}\n${krycie.uwagi ?? ''}`);
+        datyKryciaCells.push(`${krycie.data}\n${krycie.rasa ?? 'brak'}`);
       } else {
         datyKryciaCells.push('');
       }

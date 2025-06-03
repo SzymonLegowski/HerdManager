@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
 using HerdRest.Data;
 using HerdRest.Enums;
 using HerdRest.Interfaces;
 using HerdRest.Model;
-using HerdRest.Repository;
 
 namespace HerdRest.DataImport;
 
@@ -24,6 +21,7 @@ public class CsvLoader(ILochaRepository lochaRepository, IMiotRepository miotRep
         bool Sprzedana = false;
         foreach (string line in File.ReadLines(filePath))
         {
+            if (line == "") return "Pusty plik!";
             if (!line.Contains('/'))
             {
                 Zgon = false;
@@ -81,9 +79,16 @@ public class CsvLoader(ILochaRepository lochaRepository, IMiotRepository miotRep
                             wydarzenie.TypWydarzenia = TypWydarzenia.Krycie;
                             if (SektorKryciaDlugosc - 1 > index)
                             {
-                                if (!DateOnly.TryParse(SektorKrycia[index + 1], out DateOnly NastepnaData))
+                                if (!DateOnly.TryParse(SektorKrycia[index + 1], out _))
                                 {
-                                    wydarzenie.Uwagi = SektorKrycia[index + 1];
+                                    wydarzenie.Rasa = SektorKrycia[index + 1];
+                                }
+                                if (SektorKryciaDlugosc - 1 > index + 2)
+                                {
+                                    if (!DateOnly.TryParse(SektorKrycia[index + 2], out _))
+                                    {
+                                        wydarzenie.Uwagi = SektorKrycia[index + 2];
+                                    }
                                 }
                             }
                             List<int> idLoch = [idLochy];

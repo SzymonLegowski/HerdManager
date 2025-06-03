@@ -1,20 +1,15 @@
 <template>
-
-<AddLocha :addLochaDialog="addLochaDialog" @update:addLochaDialog="addLochaDialog = $event" @save-locha="handleSaveLocha"/>
-
-<EditLocha :editLochaDialog="editLochaDialog" :locha="selectedLocha" @update:editLochaDialog="editLochaDialog = $event" @update-locha="handleUpdateLocha"/>
-
-  <v-navigation-drawer :width="200">  
-    <v-list-item title="Menedżer stada"></v-list-item>
-    <v-divider></v-divider>
-      
-      <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
-      <v-list-item :to="{ path: '/wydarzenia' }" link title="Wydarzenia"></v-list-item>
-      <v-list-item :to="{ path: '/stado' }" link title="Stado"></v-list-item>
-      <!-- <v-list-item :to="{ path: '/import' }" link title="Importuj dane"></v-list-item> -->
-    
-  </v-navigation-drawer>
-
+  <AddLocha 
+    :addLochaDialog="addLochaDialog" 
+    @update:addLochaDialog="addLochaDialog = $event" 
+    @save-locha="handleSaveLocha"/>
+  <EditLocha 
+    :editLochaDialog="editLochaDialog" 
+    :locha="selectedLocha" 
+    @update:editLochaDialog="editLochaDialog = $event" 
+    @update-locha="handleUpdateLocha"/>
+  
+  <NavigationDrawer/>   
   <v-app-bar title="Stado">
     <v-btn
         style="min-width: 0; width: 100px; background-color: green; margin-right: 40px; "
@@ -29,22 +24,19 @@
     :headers="headers"
     :items="Lochy"
     :pageText="'{0}-{1} z {2}'"
-    items-per-page-text="Elementów na stronę"
-  >
+    items-per-page-text="Elementów na stronę">
   <template v-slot:item.actions="{ item }">
       <v-btn
         class="me-2"
         style="min-width: 0; width: 10px; background-color: #d67804;"
         size="small"
-        @click="editItem(item)"
-      >
-        <v-icon>mdi-pencil</v-icon>
+        @click="editItem(item)">
+      <v-icon>mdi-pencil</v-icon>
       </v-btn>
       <v-btn
         style="min-width: 0; width: 10px; background-color: red;"
         size="small"
-        @click="deleteItem(item)"
-      >
+        @click="deleteItem(item)">
         <v-icon>mdi-delete</v-icon>
       </v-btn>
     </template>
@@ -53,6 +45,7 @@
 <script setup>
 import AddLocha from '@/components/AddLocha.vue';
 import EditLocha from '@/components/EditLocha.vue';
+import NavigationDraver from '@/components/NavigationDrawer.vue';
 import apiClient from '@/plugins/axios';
 import { onMounted, ref } from 'vue';
 

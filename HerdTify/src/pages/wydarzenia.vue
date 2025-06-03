@@ -2,17 +2,7 @@
 
   <AddWydarzenie :addWydarzenieDialog="addWydarzenieDialog" @update:addWydarzenieDialog="addWydarzenieDialog = $event" @save-wydarzenie="handleSaveWydarzenie" />
   <EditWydarzenie :editWydarzenieDialog="editWydarzenieDialog" :wydarzenie="selectedWydarzenie" @update:editWydarzenieDialog="editWydarzenieDialog = $event" @update-wydarzenie="handleUpdateWydarzenie" />
-
-    <v-navigation-drawer :width="200">
-      <v-list-item title="Menedżer stada"></v-list-item>
-      <v-divider></v-divider>
-
-      <v-list-item :to="{ path: '/kartalochy' }" link title="Karta lochy"></v-list-item>
-      <v-list-item :to="{ path: '/wydarzenia' }" link title="Wydarzenia"></v-list-item>
-      <v-list-item :to="{ path: '/stado' }" link title="Stado"></v-list-item>
-      <!-- <v-list-item :to="{ path: '/import' }" link title="Importuj dane"></v-list-item> -->
-  
-    </v-navigation-drawer>
+  <NavigationDrawer/>
     <v-app-bar title="Wydarzenia">
 
       <v-btn
@@ -57,6 +47,7 @@ import { ref, onMounted } from "vue";
 import apiClient from "@/plugins/axios";
 import AddWydarzenie from "@/components/AddWydarzenie.vue";
 import EditWydarzenie from "@/components/EditWydarzenie.vue";
+import NavigationDraver from "@/components/NavigationDrawer.vue";
 
 const Wydarzenia = ref([]);
 const error = ref(null);
@@ -73,6 +64,11 @@ const headers = ref(
   {
     title: "Typ",
     value: "typWydarzenia",
+    sortable: true,
+  },
+  {
+    title: "Rasa kn.",
+    value: "rasa",
     sortable: true,
   },
   {
