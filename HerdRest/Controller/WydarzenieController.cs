@@ -24,6 +24,14 @@ namespace HerdRest.Controller
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var CzyIstnieje = _wydarzenieRepository.GetWydarzenia().Where(w => w.DataWydarzenia == wydarzenieCreateDto.DataWydarzenia && w.TypWydarzenia == wydarzenieCreateDto.TypWydarzenia).FirstOrDefault();
+
+            if (CzyIstnieje != null)
+            {
+                ModelState.AddModelError("e", "Istnieje już krycie o podanej dacie.");
+                return StatusCode(422, ModelState);
+            }
+
             var wydarzenieCreate = _wydarzenieRepository.MapToModel(wydarzenieCreateDto);
             var createOutput =_wydarzenieRepository.CreateWydarzenie(wydarzenieCreate, wydarzenieCreateDto.MiotyId, wydarzenieCreateDto.LochyId);
             if(!createOutput.Item1)

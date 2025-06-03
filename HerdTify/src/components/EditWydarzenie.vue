@@ -156,7 +156,7 @@ try {
   lochyPokryte.value = responseB.data;
   lochyProsne.value = responseC.data;
   lochyKarmiace.value = responseD.data;
-  lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyWolne.value, lochyProsne.value);
+  lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyProsne.value);
   numeryLoch.value = lochy.value.map(locha => ({
         numerLochy: locha.numerLochy,
         statusLochy: locha.status

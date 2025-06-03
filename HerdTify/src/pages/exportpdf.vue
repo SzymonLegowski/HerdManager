@@ -34,7 +34,15 @@
     </thead>
     <tbody class="PdfTableBody">
       <tr v-for="(row, rowIndex) in rowData" :key="rowIndex">
-        <td class="PdfTableData" v-for="(cell, cellIndex) in row" :key="cellIndex">{{ cell }}</td>
+        <!-- <td class="PdfTableData" v-for="(cell, cellIndex) in row" :key="cellIndex">{{ cell }}</td> -->
+        <td class="PdfTableData" v-for="(cell, cellIndex) in row" :key="cellIndex">
+          <template v-if="typeof cell === 'string' && cell.includes('\n')">
+            <div v-for="line in cell.split('\n')" :key="line">{{ line }}</div>
+          </template>
+          <template v-else>
+            {{ cell }}
+          </template>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -65,31 +73,52 @@
   };
   for(let miot = 0; miot < mioty.length; miot++)
   {
-    let spliceIndex = 1;
-    rowData.value[miot] = ([miot+1, 
-                        mioty[miot].dataPrzewidywanegoProszenia,
-                        mioty[miot].dataProszenia,
-                        mioty[miot].dataOdsadzenia,
-                        mioty[miot].urodzoneZywe,
-                        mioty[miot].urodzoneMartwe,
-                        mioty[miot].przygniecone,
-                        mioty[miot].odsadzone,
-                        mioty[miot].ocena,
-                        ]);
-    for(let dataKrycia = 0; dataKrycia < maxKryc; dataKrycia++)
-    {
-      test++;
-      if(mioty[miot].datyKrycia[dataKrycia] !== undefined)
-      {
-        rowData.value[miot].splice(spliceIndex, 0, mioty[miot].datyKrycia[dataKrycia]);
+    // let spliceIndex = 1;
+    // rowData.value[miot] = ([miot+1, 
+    //                     mioty[miot].dataPrzewidywanegoProszenia,
+    //                     mioty[miot].dataProszenia,
+    //                     mioty[miot].dataOdsadzenia,
+    //                     mioty[miot].urodzoneZywe,
+    //                     mioty[miot].urodzoneMartwe,
+    //                     mioty[miot].przygniecone,
+    //                     mioty[miot].odsadzone,
+    //                     mioty[miot].ocena,
+    //                     ]);
+    // for(let dataKrycia = 0; dataKrycia < maxKryc; dataKrycia++)
+    // {
+    //   test++;
+    //   if(mioty[miot].datyKrycia[dataKrycia] !== undefined)
+    //   {
+    //     rowData.value[miot].splice(spliceIndex, 0, mioty[miot].datyKrycia[dataKrycia]);
+    //   }
+    //   else
+    //   {
+    //     rowData.value[miot].splice(spliceIndex,0,'');
+    //   }
+    //   spliceIndex++;
+    //   console.log(rowData.value);
+    // };         
+    let datyKryciaCells = [];
+    for (let dataKrycia = 0; dataKrycia < maxKryc; dataKrycia++) {
+      const krycie = mioty[miot].datyKrycia?.[dataKrycia];
+      if (krycie) {
+        datyKryciaCells.push(`${krycie.data}\n${krycie.uwagi ?? ''}`);
+      } else {
+        datyKryciaCells.push('');
       }
-      else
-      {
-        rowData.value[miot].splice(spliceIndex,0,'');
-      }
-      spliceIndex++;
-      console.log(rowData.value);
-    };         
+    }
+    rowData.value[miot] = [
+      miot + 1,
+      ...datyKryciaCells,
+      mioty[miot].dataPrzewidywanegoProszenia ?? '',
+      mioty[miot].dataProszenia ?? '',
+      mioty[miot].dataOdsadzenia ?? '',
+      mioty[miot].urodzoneZywe ?? '',
+      mioty[miot].urodzoneMartwe ?? '',
+      mioty[miot].przygniecone ?? '',
+      mioty[miot].odsadzone ?? '',
+      mioty[miot].ocena ?? ''
+    ];
   };
 </script>
 <style>

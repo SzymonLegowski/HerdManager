@@ -43,9 +43,9 @@ namespace HerdRest.Repository
         public (bool, int) CreateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
         {
             wydarzenie.Uwagi ??= "brak";
-            if(miotId != null)
+            if (miotId != null)
             {
-                foreach(var id in miotId)
+                foreach (var id in miotId)
                 {
                     var wydarzenieMiotEntity = _context.Mioty.Where(a => a.Id == id).FirstOrDefault();
                     var wydarzenieMiot = new WydarzenieMiot()

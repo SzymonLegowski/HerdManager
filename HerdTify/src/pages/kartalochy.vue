@@ -54,7 +54,17 @@
       :pageText="'{0}-{1} z {2}'"
       items-per-page-text="Elementów na stronę"
     >
-    
+
+    <template
+      v-for="(header, index) in headers[1].children.filter(h => h.value.startsWith('datyKrycia'))"
+      :key="header.value"
+       #[`item.${header.value}`]="{ item }">
+      <div v-if="item.datyKrycia?.[index]">
+        <div>{{ item.datyKrycia[index].data }}</div>
+        <div style="color: gray;">{{ item.datyKrycia[index].uwagi }}</div>
+      </div>
+    </template>
+
     <template v-slot:item.actions="{ item }">
       <v-btn
         v-if="item.dataPrzewidywanegoProszenia"
@@ -199,7 +209,10 @@ const loadMioty = async (newValue) => {
 
             if (new Date(wydarzenie.dataWydarzenia).getTime() < new Date(miot.dataPrzewidywanegoProszenia).getTime()) 
             {
-              miot.datyKrycia.push(wydarzenie.dataWydarzenia);
+              // miot.datyKrycia.push(`${wydarzenie.dataWydarzenia}`);
+              console.log("headers", headers.value[1].children); //Debugowanie
+              miot.datyKrycia.push({data: wydarzenie.dataWydarzenia, uwagi: wydarzenie.uwagi});
+              console.log("miot", miot); //Debugowanie
               ostatniIndeksWydarzenia++;
               if (najwiekszaLiczbaKrycMiotu < miot.datyKrycia.length) 
               {
@@ -235,7 +248,7 @@ const loadMioty = async (newValue) => {
             let wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
             let wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
             let wydarzenie = wydarzenieResponse.data;
-            Mioty.value[Mioty.value.length-1].datyKrycia.push(wydarzenie.dataWydarzenia);
+            Mioty.value[Mioty.value.length-1].datyKrycia.push({data: wydarzenie.dataWydarzenia, uwagi: wydarzenie.uwagi});
 
           }
         }

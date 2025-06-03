@@ -1,18 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace HerdRest.Dto
 {
     public class MiotDto
     {
         public int Id { get; set; }
-        public int UrodzoneZywe { get; set; }
-        public int UrodzoneMartwe { get; set; }
-        public int Przygniecone { get; set; }
-        public int Odsadzone { get; set; }
-        public int Ocena { get; set;}
+        public int? UrodzoneZywe { get; set; }
+        public int? UrodzoneMartwe { get; set; }
+        public int? Przygniecone { get; set; }
+        public int? Odsadzone { get; set; }
+        public int? Ocena { get; set;}
         public DateOnly DataPrzewidywanegoProszenia { get; set; }
         public DateOnly? DataProszenia { get; set; }
         public DateOnly? DataOdsadzenia { get; set; }

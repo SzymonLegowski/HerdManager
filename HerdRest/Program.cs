@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using HerdRest.Data;
 using HerdRest.Interfaces;
 using HerdRest.Repository;
-using HerdRest;
 
 var builder = WebApplication.CreateBuilder(args);
 
