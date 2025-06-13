@@ -20,14 +20,15 @@ namespace HerdRest.Controller
                 return BadRequest(ModelState);
 
             var locha = _lochaRepository.GetLochy()
-                .Where(l => l.NumerLochy == lochaCreateDto.NumerLochy && 
-                                            (l.Status == StatusLochy.Luzna || 
-                                             l.Status == StatusLochy.Pokryta || 
-                                             l.Status == StatusLochy.Prosna ||
-                                             l.Status == StatusLochy.Karmiaca))
-                .FirstOrDefault();
+                .Where(l => l.NumerLochy == lochaCreateDto.NumerLochy &&
+                                            l.Status != StatusLochy.Zgon &&
+                                            l.Status != StatusLochy.Sprzedana)
+                                            .FirstOrDefault();
 
-            if(locha != null)
+            if(locha != null && (lochaCreateDto.Status == StatusLochy.Luzna ||
+                                lochaCreateDto.Status == StatusLochy.Prosna ||
+                                lochaCreateDto.Status == StatusLochy.Pokryta ||
+                                lochaCreateDto.Status == StatusLochy.Karmiaca))
             {
                 ModelState.AddModelError("e", "Istnieje już aktywna locha o podanym numerze.");
                 return StatusCode(422, ModelState);
@@ -109,7 +110,22 @@ namespace HerdRest.Controller
 
             if(!ModelState.IsValid)
                 return BadRequest();
-            
+
+            var locha = _lochaRepository.GetLochy()
+                .Where(l => l.NumerLochy == updatedLochaDto.NumerLochy &&
+                                            l.Status != StatusLochy.Zgon &&
+                                            l.Status != StatusLochy.Sprzedana)
+                                            .FirstOrDefault();
+
+            if(locha != null && (updatedLochaDto.Status == StatusLochy.Luzna ||
+                                updatedLochaDto.Status == StatusLochy.Prosna ||
+                                updatedLochaDto.Status == StatusLochy.Pokryta ||
+                                updatedLochaDto.Status == StatusLochy.Karmiaca))
+            {
+                ModelState.AddModelError("e", "Istnieje już aktywna locha o podanym numerze.");
+                return StatusCode(422, ModelState);
+            }
+
             var updatedLocha = _lochaRepository.MapToModel(updatedLochaDto);
             var updateOutput =_lochaRepository.UpdateLocha(updatedLocha, updatedLochaDto.WydarzeniaLochyId);
 

@@ -39,6 +39,11 @@
             v-model="editedLocha.uwagi" 
             variant="outlined"
             style="width: 100%;"/>
+          <v-text-field
+            hint="rrrr-mm-dd"
+            label="Data Brakowania"
+            v-model="editedLocha.dataBrakowania"
+            variant="outlined"/>
           </v-card-text>
           <v-card-actions>
           <v-btn

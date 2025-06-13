@@ -10,7 +10,7 @@
     @update-locha="handleUpdateLocha"/>
   
   <NavigationDrawer/>   
-  <v-app-bar title="Stado">
+  <v-app-bar title="Stado" class="appBar">
     <v-btn
         style="min-width: 0; width: 100px; background-color: green; margin-right: 40px; "
         size="small"
@@ -48,6 +48,7 @@ import EditLocha from '@/components/EditLocha.vue';
 import NavigationDraver from '@/components/NavigationDrawer.vue';
 import apiClient from '@/plugins/axios';
 import { onMounted, ref } from 'vue';
+import "@/styles/appBar.scss"
 
 const error = ref(null);
 const Lochy = ref([]);
@@ -121,10 +122,15 @@ const editItem = (item) => {
   editLochaDialog.value = true;
 };
 
-const deleteItem = (item) => {
+const deleteItem = async (item) => {
   console.log("Usuń lochę o id:"); //Debugowanie
-  apiClient.delete("/Locha/" + item.id);
-  Lochy.value = Lochy.value.filter((locha) => locha.id !== item.id);
+  
+  try {
+    await apiClient.delete(`/Locha/${item.id}`);
+    Lochy.value = Lochy.value.filter((locha) => locha.id !== item.id);
+  } catch (error) {
+    console.error("Błąd podczas usuwania lochy:", error);
+  }
 };
 
 const handleSaveLocha = (locha) => {
@@ -136,7 +142,6 @@ const handleSaveLocha = (locha) => {
   locha.dataCzasUtworzenia = sformatowanaData;
   locha.dataCzasModyfikacji = sformatowanaData;
   locha.indeksProdukcji365Dni = 0;
-  locha.id = Lochy.value[Lochy.value.length-1].id + 1;
   Lochy.value.push(locha);
 };
 
@@ -151,6 +156,7 @@ const handleUpdateLocha = (locha) => {
   selectedLocha.value.numerLochy = locha.numerLochy;
   selectedLocha.value.dataCzasModyfikacji = locha.dataCzasModyfikacji;
   selectedLocha.value.uwagi = locha.uwagi;
+  selectedLocha.value.dataBrakowania = locha.dataBrakowania;
 }
 
 onMounted(async () => {

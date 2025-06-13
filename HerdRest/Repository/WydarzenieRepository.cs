@@ -11,7 +11,7 @@ namespace HerdRest.Repository
     {
         private readonly DataContext _context = context;
 
-        public WydarzenieDto MapToDto(Wydarzenie wydarzenie) => new WydarzenieDto
+        public WydarzenieDto MapToDto(Wydarzenie wydarzenie) => new()
         {
             Id = wydarzenie.Id,
             TypWydarzenia = wydarzenie.TypWydarzenia,
@@ -25,7 +25,7 @@ namespace HerdRest.Repository
         };
         public List<WydarzenieDto> MapToDtoList(List<Wydarzenie> wydarzenia)
         {
-            return wydarzenia.Select(MapToDto).ToList();
+            return [.. wydarzenia.Select(MapToDto)];
         }
         public Wydarzenie MapToModel(WydarzenieDto wydarzenieDto)
         {
@@ -61,22 +61,56 @@ namespace HerdRest.Repository
 
             if(lochaId != null)
             {
-               foreach(var id in lochaId)
+                foreach (var id in lochaId)
                 {
-                    var wydarzenieLochaEntity = _context.Lochy
-                    .Where(a => a.Id == id).FirstOrDefault();
+                    var locha = _context.Lochy
+                    .Where(a => a.Id == id)
+                    .Include(l => l.Mioty)
+                    .ThenInclude(m => m.WydarzeniaMiotu)
+                    .FirstOrDefault();
                     var wydarzenieLocha = new WydarzenieLocha()
                     {
-                        Locha = wydarzenieLochaEntity ?? throw new InvalidOperationException("Locha nie istnieje."),
+                        Locha = locha ?? throw new InvalidOperationException("Locha nie istnieje."),
                         Wydarzenie = wydarzenie,
                     };
-                    if(wydarzenie.TypWydarzenia == TypWydarzenia.Krycie)
+                    if (wydarzenie.TypWydarzenia == TypWydarzenia.Krycie)
                     {
-                        wydarzenieLochaEntity.Status = StatusLochy.Pokryta;
+                        locha.Status = StatusLochy.Pokryta;
+                        var wolnyMiot = locha.Mioty?.FirstOrDefault(m => m.DataProszenia == null);
+                        if (wolnyMiot == null)
+                        {
+                            Miot miot = new(locha, [])
+                            {
+                                DataPrzewidywanegoProszenia = wydarzenie.DataWydarzenia.AddDays(114)
+                            };
+                            var wydarzenieMiot = new WydarzenieMiot()
+                            {
+                                Wydarzenie = wydarzenie,
+                                Miot = miot
+                            };
+                            miot.WydarzeniaMiotu.Add(wydarzenieMiot);
+                            _context.Add(miot);
+                            _context.Add(wydarzenieMiot);
+                        }
+                        else
+                        {
+                            wolnyMiot.DataPrzewidywanegoProszenia = wydarzenie.DataWydarzenia.AddDays(114);
+                            var wydarzenieMiotToRemove = wolnyMiot.WydarzeniaMiotu
+                            .FirstOrDefault(w => w.Wydarzenie.TypWydarzenia == TypWydarzenia.Krycie);
+                            wolnyMiot.WydarzeniaMiotu.Remove(wydarzenieMiotToRemove);
+                            _context.Remove(wydarzenieMiotToRemove);
+                            var wydarzenieMiot = new WydarzenieMiot()
+                            {
+                                Wydarzenie = wydarzenie,
+                                Miot = wolnyMiot
+                            };
+                            wolnyMiot.WydarzeniaMiotu.Add(wydarzenieMiot);
+                            _context.Update(wolnyMiot);
+                            _context.Add(wydarzenieMiot);
+                        }
+                        _context.Update(locha);
                     }
-                    _context.Update(wydarzenieLochaEntity);
                     _context.Add(wydarzenieLocha);
-
                 }
             }
             _context.Add(wydarzenie);
@@ -93,6 +127,16 @@ namespace HerdRest.Repository
                 .OrderBy(w => w.Id)];
         }
 
+        public ICollection<Wydarzenie> GetWydarzeniaMiesiaca(int miesiac, int rok)
+        {
+            return [.. _context.Wydarzenia
+                .Where(w => w.DataWydarzenia.Month == miesiac && w.DataWydarzenia.Year == rok)
+                .Include(w => w.WydarzeniaLoch)
+                .ThenInclude(wl => wl.Locha)
+                .Include(w => w.WydarzeniaMioty)
+                .ThenInclude(wm => wm.Miot)
+                .OrderBy(w => w.DataWydarzenia)];
+        }
         public Wydarzenie GetWydarzenie(int wydarzenieId)
         {
             var wydarzenie = _context.Wydarzenia.Where(w => w.Id == wydarzenieId)
@@ -111,7 +155,7 @@ namespace HerdRest.Repository
                     .Select(l => l.DataWydarzenia)
                     .FirstOrDefault();
                 }
-            wydarzenie.Uwagi ??= "brak";
+            wydarzenie.Uwagi ??= "";
             wydarzenie.DataCzasModyfikacji = DateTime.Now;
             wydarzenie.DataCzasUtworzenia = _context.Wydarzenia.Where(l => l.Id == wydarzenie.Id)
                 .Select(l => l.DataCzasUtworzenia)
@@ -137,10 +181,10 @@ namespace HerdRest.Repository
                 {
                     if(_context.WydarzeniaMiotu.Where(wm => wm.MiotId == id && wm.WydarzenieId == wydarzenie.Id).FirstOrDefault() == null)
                         {
-                        var wydarzenieMiotEntity = _context.Mioty.Where(a => a.Id == id).FirstOrDefault();
+                        var Miot = _context.Mioty.Where(a => a.Id == id).FirstOrDefault();
                         var wydarzenieMiot = new WydarzenieMiot()
                         {
-                            Miot = wydarzenieMiotEntity,
+                            Miot = Miot,
                             Wydarzenie = wydarzenie,
                         };
                         _context.Add(wydarzenieMiot);
@@ -154,12 +198,51 @@ namespace HerdRest.Repository
                 {
                     if(_context.WydarzeniaLochy.Where(wl => wl.LochaId == id && wl.WydarzenieId == wydarzenie.Id).FirstOrDefault() == null)
                     {
-                        var wydarzenieLochaEntity = _context.Lochy.Where(a => a.Id == id).FirstOrDefault();
+                        var locha = _context.Lochy.Where(a => a.Id == id)
+                        .Include(l => l.Mioty)
+                        .ThenInclude(m => m.WydarzeniaMiotu)
+                        .FirstOrDefault();
                         var wydarzenieLocha = new WydarzenieLocha()
                         {
-                            Locha = wydarzenieLochaEntity ?? throw new InvalidOperationException("Locha nie istnieje."),
+                            Locha = locha ?? throw new InvalidOperationException("Locha nie istnieje."),
                             Wydarzenie = wydarzenie,
                         };
+                        if (wydarzenie.TypWydarzenia == TypWydarzenia.Krycie)
+                        {
+                            locha.Status = StatusLochy.Pokryta;
+                            var wolnyMiot = locha.Mioty?.FirstOrDefault(m => m.DataProszenia == null);
+                            if (wolnyMiot == null)
+                            {
+                                Miot miot = new(locha, [])
+                                {
+                                    DataPrzewidywanegoProszenia = wydarzenie.DataWydarzenia.AddDays(114)
+                                };
+                                var wydarzenieMiot = new WydarzenieMiot()
+                                {
+                                    Wydarzenie = wydarzenie,
+                                    Miot = miot
+                                };
+                                miot.WydarzeniaMiotu.Add(wydarzenieMiot);
+                                _context.Add(miot);
+                                _context.Add(wydarzenieMiot);
+                            }
+                            else
+                            {
+                                wolnyMiot.DataPrzewidywanegoProszenia = wydarzenie.DataWydarzenia.AddDays(114);
+                                var wydarzenieMiotToRemove = wolnyMiot.WydarzeniaMiotu
+                                .FirstOrDefault(w => w.Wydarzenie.TypWydarzenia == TypWydarzenia.Krycie);
+                                _context.Remove(wydarzenieMiotToRemove);
+                                var wydarzenieMiot = new WydarzenieMiot()
+                                {
+                                    Wydarzenie = wydarzenie,
+                                    Miot = wolnyMiot
+                                };
+                                wolnyMiot.WydarzeniaMiotu.Add(wydarzenieMiot);
+                                _context.Update(wolnyMiot);
+                                _context.Add(wydarzenieMiot);
+                            }
+                            _context.Update(locha);
+                        }
                         _context.Add(wydarzenieLocha);
                     }
                 }
@@ -170,7 +253,6 @@ namespace HerdRest.Repository
 
         public bool DeleteWydarzenie(Wydarzenie wydarzenie)
         {
-            
             _context.Remove(wydarzenie);
             return Save();
         }

@@ -95,11 +95,11 @@ krycieId: {
 });
 let {idLochy, krycieId} = toRefs(props);
 let newMiot = ref({
-    urodzoneZywe: 0,
-    urodzoneMartwe: 0,
-    przygniecone: 0,
-    odsadzone: 0,
-    ocena: 0,
+    urodzoneZywe: null,
+    urodzoneMartwe: null,
+    przygniecone: null,
+    odsadzone: null,
+    ocena: null,
     dataProszenia: null,
     dataOdsadzenia: null,
     lochaId: 0,
@@ -144,7 +144,7 @@ const clearNewMiot = () => {
         dataOdsadzenia: "",
         ocena: "",
         lochaId: "",
-        wydarzeniaMiotuId: "",
+        wydarzeniaMiotuId: [],
     };
 };
 

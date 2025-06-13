@@ -10,6 +10,17 @@
           title="Nowe Wydarzenie"
           :class="{ 'shift-left': showLochyGrid }">
           <v-card-text>
+            <v-alert
+              v-if="alert"
+              type="error"
+              variant="tonal"
+              style="margin-bottom: 10px;">{{ message }}</v-alert>
+            <v-alert
+              v-if="success"
+              type="success"
+              variant="tonal"
+              text="Dodano pomyślnie!"
+              style="margin-bottom: 10px;"/>
             <v-autocomplete
               :items="['Krycie', 'Szczepienie']"
               label="Typ"
@@ -64,6 +75,9 @@ const props = defineProps({
   }
 });
 
+let message = ref(null);
+let alert = ref(false);
+let success = ref(false);
 const numeryLoch = ref([]);
 const lochyWolne = ref([]);
 const lochyPokryte = ref([]);
@@ -83,7 +97,7 @@ let noweWydarzenieTemp = ref({
   id: "",
   typWydarzenia: "",
   uwagi: "",
-  dataWydarzenia: "",
+  dataWydarzenia: "Krycie",
   dataWykonania: "",
   dataCzasUtworzenia: "",
   dataCzasModyfikacji: "",
@@ -94,10 +108,12 @@ let noweWydarzenieTemp = ref({
 const emit = defineEmits(['update:addWydarzenieDialog', 'save-wydarzenie']);
 
 const closeDialog = () => {
+  alert.value = false;
+  success.value = false;
   emit('update:addWydarzenieDialog', false);
 };
           
-const saveDialog = () => {
+const saveDialog = async () => {
   if(noweWydarzenie.value.dataWykonania === ""){
     noweWydarzenie.value.dataWykonania = noweWydarzenie.value.dataWydarzenia;
   }
@@ -113,16 +129,28 @@ const saveDialog = () => {
     }
   }
   console.log("noweWydarzenie", noweWydarzenie); //Debugowanie
-  apiClient.post('/Wydarzenie', noweWydarzenie.value)
-    .then(() => {
-      closeDialog();
+  await apiClient.post('/Wydarzenie', noweWydarzenie.value)
+    .then((response) => {
+      alert.value = false;
+      success.value = true;
       mapNoweWydarzenieTemp();
       clearNoweWydarzenie();
+      noweWydarzenieTemp.value.id = response.data;
+      emit('save-wydarzenie', noweWydarzenieTemp.value);
     })
     .catch((e) => {
+      success.value = false;
       console.error(e);
+      if(noweWydarzenie.value.lochyId.length === 0) 
+      message.value = "Wydarzenie musi zawierać przynajmniej 1 lochę"; 
+      else if (noweWydarzenie.value.dataWydarzenia === "")
+      message.value = "Nie podano daty wydarzenia";
+      else if (e.response.data.e.errors[0].errorMessage !== null)
+      message.value = e.response.data.e.errors[0].errorMessage;
+      else
+      message.value = "Błąd podczas dodawania wydarzenia";
+      alert.value = true;
     });
-  emit('save-wydarzenie', noweWydarzenieTemp.value);
 };
 
 const selectLochy = () => {

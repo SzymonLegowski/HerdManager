@@ -37,11 +37,15 @@
               v-model="newLocha.uwagi" 
               variant="outlined"
               style="width: 100%;"/>
+            <v-text-field
+              hint="rrrr-mm-dd"
+              label="Data Brakowania"
+              v-model="newLocha.dataBrakowania"
+              variant="outlined"/>
         </v-card-text>
-        <v-divider></v-divider>
+        <v-divider/>
         <v-card-actions>
-          <v-spacer></v-spacer>
-
+          <v-spacer/>
           <v-btn
             text="Zamknij"
             variant="plain"
@@ -62,6 +66,7 @@ import apiClient from '@/plugins/axios';
 let newLocha = ref({
     numerLochy: "",
     status: "",
+    dataBrakowania: null,
     wydarzeniaLochyId: [],
     miotyId: []
 });
@@ -80,33 +85,34 @@ addLochaDialog: {
 const emit = defineEmits(['update:addLochaDialog', 'save-locha']);
 
 const closeDialog = () => {
-  success = false;
+  success.value = false;
   emit('update:addLochaDialog', false);
 };
 
-const saveDialog = () => {
-apiClient.post('/Locha', newLocha.value)
-    .then(() => {
+const saveDialog = async () => {
+await apiClient.post('/Locha', newLocha.value)
+    .then((response) => {
       alert.value = false;
       success.value = true;
+      console.log(response);
+      newLocha.value.id = response.data;
       emit('save-locha', newLocha.value);
       clearNowaLocha();
     })
     .catch((e) => {
       success.value = false;
-      let error = JSON.parse(e.response.request.response)
       console.log(e);
-      console.error(error.e.errors[0].errorMessage);
-      message.value = error.e.errors[0].errorMessage;
+      message.value = "Błąd podczas dodawania lochy";
       alert.value = true;
     });
  
 };
 
-const clearNowaLocha = () => {
+function clearNowaLocha () {
     newLocha.value = {
         numerLochy: "",
         status: "",
+        dataBrakowania: null,
         wydarzeniaLochyId: [],
         miotyId: []
     };

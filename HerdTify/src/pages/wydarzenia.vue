@@ -3,7 +3,7 @@
   <AddWydarzenie :addWydarzenieDialog="addWydarzenieDialog" @update:addWydarzenieDialog="addWydarzenieDialog = $event" @save-wydarzenie="handleSaveWydarzenie" />
   <EditWydarzenie :editWydarzenieDialog="editWydarzenieDialog" :wydarzenie="selectedWydarzenie" @update:editWydarzenieDialog="editWydarzenieDialog = $event" @update-wydarzenie="handleUpdateWydarzenie" />
   <NavigationDrawer/>
-    <v-app-bar title="Wydarzenia">
+    <v-app-bar title="Wydarzenia" class="appBar">
 
       <v-btn
           style="min-width: 0; width: 100px; background-color: green; margin-right: 40px; "
@@ -47,7 +47,8 @@ import { ref, onMounted } from "vue";
 import apiClient from "@/plugins/axios";
 import AddWydarzenie from "@/components/AddWydarzenie.vue";
 import EditWydarzenie from "@/components/EditWydarzenie.vue";
-import NavigationDraver from "@/components/NavigationDrawer.vue";
+import NavigationDrawer from "@/components/NavigationDrawer.vue";
+import "@/styles/appBar.scss"
 
 const Wydarzenia = ref([]);
 const error = ref(null);
@@ -67,6 +68,11 @@ const headers = ref(
     sortable: true,
   },
   {
+    title: "Data wydarzenia",
+    value: "dataWydarzenia",
+    sortable: true,
+  },
+  {
     title: "Rasa kn.",
     value: "rasa",
     sortable: true,
@@ -74,11 +80,6 @@ const headers = ref(
   {
     title: "Uwagi",
     value: "uwagi",
-  },
-  {
-    title: "Data wydarzenia",
-    value: "dataWydarzenia",
-    sortable: true,
   },
   {
     title: "Data dodania",
@@ -111,7 +112,6 @@ onMounted(async () => {
   try {
     const response = await apiClient.get("/Wydarzenie");
     Wydarzenia.value = response.data;
-    
     for (let indeksWydarzenia = 0; indeksWydarzenia < Wydarzenia.value.length; indeksWydarzenia++)
     {
       const numeryLochWydarzenia = [];
@@ -122,15 +122,12 @@ onMounted(async () => {
         const responseLocha = await apiClient.get("/Locha/" + Wydarzenia.value[indeksWydarzenia].lochyId[indeksLochy]);
         numeryLochWydarzenia.push(responseLocha.data.numerLochy);
       }
-      
       Wydarzenia.value[indeksWydarzenia].numeryLoch = numeryLochWydarzenia;
     }
-
   } catch (err) {
     error.value = err;
   }
 });
-
 
 const addItem = () => {
   addWydarzenieDialog.value = true;
@@ -154,7 +151,6 @@ const handleSaveWydarzenie = (noweWydarzenie) => {
     `${padZero(teraz.getHours())}:${padZero(teraz.getMinutes())}:${padZero(teraz.getSeconds())}`;
   noweWydarzenie.dataCzasUtworzenia = sformatowanaData;
   noweWydarzenie.dataCzasModyfikacji = sformatowanaData;
-  noweWydarzenie.id = Wydarzenia.value[Wydarzenia.value.length-1].id + 1;
   Wydarzenia.value.push(noweWydarzenie);
 };
 

@@ -5,6 +5,16 @@ namespace HerdRest.Model
 {
     public class Miot
     {
+        public Miot(Locha locha, ICollection<WydarzenieMiot> wydarzeniaMiotu)
+        {
+            Locha = locha;
+            WydarzeniaMiotu = wydarzeniaMiotu;
+            DataCzasModyfikacji = DateTime.Now;
+            DataCzasUtworzenia = DateTime.Now;
+        }
+
+        public Miot() { }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }

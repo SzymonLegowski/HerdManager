@@ -29,7 +29,7 @@ namespace HerdRest.Repository
         };
         public List<LochaDto> MapToDtoList(List<Locha> lochy)
         {
-            return lochy.Select(MapToDto).ToList();
+            return [.. lochy.Select(MapToDto)];
         }
         public Locha MapToModel(LochaDto lochaDto) => new()
         {

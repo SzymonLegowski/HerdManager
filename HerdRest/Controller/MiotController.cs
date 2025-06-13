@@ -70,6 +70,18 @@ namespace HerdRest.Controller
             return Ok(dto);
         }
 
+        [HttpGet("{year}/{month}")]
+        public IActionResult GetMiotyWDanymMiesiacu(int year, int month)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var mioty = _miotRepository.GetMiotyWDanymMiesiacu(year, month).ToList();
+            var dto = _miotRepository.MapToDtoList(mioty);            
+
+            return Ok(dto);
+        }
+
         [HttpPut("{miotId}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]

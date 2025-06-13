@@ -10,6 +10,7 @@ namespace HerdRest.Interfaces
         Wydarzenie MapToModel(WydarzenieDto wydarzenieDto);
         (bool, int) CreateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId);
         ICollection<Wydarzenie> GetWydarzenia();
+        ICollection<Wydarzenie> GetWydarzeniaMiesiaca(int miesiac, int rok);
         Wydarzenie GetWydarzenie(int wydarzenieId);
         (bool, int) UpdateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId);
         bool DeleteWydarzenie(Wydarzenie wydarzenie);

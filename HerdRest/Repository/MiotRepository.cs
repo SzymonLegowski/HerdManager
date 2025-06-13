@@ -89,11 +89,30 @@ namespace HerdRest.Repository
                 .ToList();
             return mioty;
         }
+
+        public ICollection<Miot> GetMiotyWDanymMiesiacu(int rok, int miesiac)
+        {
+            return [.. _context.Mioty
+                .Include(m => m.Locha)
+                .Include(m => m.WydarzeniaMiotu)
+                .Where(m => 
+                    (m.DataPrzewidywanegoProszenia.Year == rok &&
+                     m.DataPrzewidywanegoProszenia.Month == miesiac) ||
+                    (m.DataProszenia.HasValue &&
+                     m.DataProszenia.Value.Year == rok &&
+                     m.DataProszenia.Value.Month == miesiac) ||
+                    (m.DataOdsadzenia.HasValue &&
+                     m.DataOdsadzenia.Value.Year == rok &&
+                     m.DataOdsadzenia.Value.Month == miesiac)
+    )
+];
+
+        }
         public Miot GetMiot(int miotId)
         {
             var miot = _context.Mioty.Include(m => m.Locha)
                 .Include(m => m.WydarzeniaMiotu)
-                .ThenInclude(m => m.Wydarzenie)
+                .ThenInclude(l => l.Wydarzenie)
                 .FirstOrDefault(m => m.Id == miotId) ?? throw new InvalidOperationException("Miot nie istnieje.");
             return miot;
         }

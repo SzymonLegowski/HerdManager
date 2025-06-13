@@ -1,6 +1,6 @@
 <template>
   <NavigationDrawer/>
-  <v-app-bar title="Import danych"/>
+  <v-app-bar title="Import danych" class="appBar"/>
   <div class ="importContainer">
     <v-alert
       v-if="errorMessage"
@@ -23,8 +23,9 @@
 </template>
 
 <script setup>
-import NavigationDraver from '@/components/NavigationDrawer.vue';
+import NavigationDrawer from '@/components/NavigationDrawer.vue';
 import axios from 'axios';
+import "@/styles/appBar.scss"
 
 const selectedFile = ref(null);
 let errorMessage = ref(null);

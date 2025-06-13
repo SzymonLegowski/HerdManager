@@ -14,6 +14,7 @@ namespace HerdRest.Interfaces
         Miot MapToModel(MiotDto miotDto);
         (bool, int) CreateMiot(Miot miot, int wydarzenieKrycie);
         ICollection<Miot> GetMioty();
+        ICollection<Miot> GetMiotyWDanymMiesiacu(int rok, int miesiac);
         Miot GetMiot(int miotId);
         (bool, int) UpdateMiot(Miot miot, List<int> wydarzeniaMiotuId);
         bool DeleteMiot(Miot miot);

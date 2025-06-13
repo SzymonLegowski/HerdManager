@@ -90,6 +90,7 @@
   import LochyGrid from "@/components/LochyGrid.vue";
   import AddMiot from "@/components/AddMiot.vue";
   import EditMiot from "@/components/EditMiot.vue";
+  import "@/styles/appBar.scss"
 
   let pobraneLochy = ref([]);
   let Lochy = ref([]);
@@ -217,27 +218,31 @@ const loadMioty = async (newValue) => {
           headers.value[1].children.splice(-3, 0, { title: `Krycia nr ${newHeader + 1}`, value: `datyKrycia[${newHeader}]` });
         }
 
-        if (ostatniIndeksWydarzenia < selected.wydarzeniaLochyId.length) 
-        {
-          ostatnieKrycieId.value = selected.wydarzeniaLochyId[selected.wydarzeniaLochyId.length - 1];
-          Mioty.value.push({nr:Mioty.value.length+1});
-          Mioty.value[Mioty.value.length-1].datyKrycia = [];
-          if(selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia > 0)
-          {
-            for (let newHeader = najwiekszaLiczbaKrycMiotu; newHeader < selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia; newHeader++) 
-            {
-              headers.value[1].children.splice(-3, 0, { title: `Krycia nr ${newHeader + 1}`, value: `datyKrycia[${newHeader}]` });
-            }
-          }
-          for (let indeksWydarzenia = ostatniIndeksWydarzenia; indeksWydarzenia < selected.wydarzeniaLochyId.length; indeksWydarzenia++) 
-          {
-            let wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
-            let wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
-            let wydarzenie = wydarzenieResponse.data;
-            Mioty.value[Mioty.value.length-1].datyKrycia.push({data: wydarzenie.dataWydarzenia, rasa: wydarzenie.rasa});
-
-          }
-        }
+        // if (ostatniIndeksWydarzenia < selected.wydarzeniaLochyId.length) 
+        // {
+        //   ostatnieKrycieId.value = selected.wydarzeniaLochyId[selected.wydarzeniaLochyId.length - 1];
+        //   Mioty.value.push({nr:Mioty.value.length+1});
+        //   Mioty.value[Mioty.value.length-1].datyKrycia = [];
+        //   if(selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia > 0)
+        //   {
+        //     for (let newHeader = najwiekszaLiczbaKrycMiotu; newHeader < selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia; newHeader++) 
+        //     {
+        //       headers.value[1].children.splice(-3, 0, { title: `Krycia nr ${newHeader + 1}`, value: `datyKrycia[${newHeader}]` });
+        //     }
+        //   }
+        //   for (let indeksWydarzenia = ostatniIndeksWydarzenia; indeksWydarzenia < selected.wydarzeniaLochyId.length; indeksWydarzenia++) 
+        //   {
+        //     let wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
+        //     let wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
+        //     let wydarzenie = wydarzenieResponse.data;
+        //     Mioty.value[Mioty.value.length-1].datyKrycia.push({data: wydarzenie.dataWydarzenia, rasa: wydarzenie.rasa});
+        //   }
+        //     let ostatniMiotIdx = Mioty.value.length-1;
+        //     let ostatnieKrycie = Mioty.value[ostatniMiotIdx].datyKrycia[Mioty.value[ostatniMiotIdx].datyKrycia.length-1].data;
+        //     let ostatnieKrycieData = new Date(ostatnieKrycie);
+        //     ostatnieKrycieData.setDate(ostatnieKrycieData.getDate() + 114);
+        //     Mioty.value[ostatniMiotIdx].dataPrzewidywanegoProszenia = ostatnieKrycieData.toISOString().split("T")[0];
+        // }
       }catch (e) {
         console.error("Błąd podczas pobierania danych wybranej lochy:", e);
         error.value = e;

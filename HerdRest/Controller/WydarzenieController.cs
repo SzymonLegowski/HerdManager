@@ -45,7 +45,7 @@ namespace HerdRest.Controller
        
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<WydarzenieDto>))]
-        public IActionResult GetLochy()
+        public IActionResult GetWydarzenia()
         {
             var wydarzenia = _wydarzenieRepository.GetWydarzenia().ToList();
             var dtos = _wydarzenieRepository.MapToDtoList(wydarzenia);
@@ -71,6 +71,15 @@ namespace HerdRest.Controller
                 return BadRequest(ModelState);
 
             return Ok(dto);
+        }
+
+        [HttpGet("month/{rok}/{miesiac}")]
+        public IActionResult GetWydarzeniaMiesiaca(int miesiac, int rok)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            return Ok(_wydarzenieRepository.MapToDtoList([.. _wydarzenieRepository.GetWydarzeniaMiesiaca(miesiac, rok)]));
         }
 
         [HttpPut("{wydarzenieId}")]
