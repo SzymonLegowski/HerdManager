@@ -1,8 +1,21 @@
 <template>
-  
-  <LochyGrid v-if="showGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLocha" @quickAdd:newLochaId="quickAddLocha" style="z-index: 1;"/>
-  <AddMiot :addMiotDialog="addMiotDialog" :idLochy="idLochy" :krycieId="ostatnieKrycieId" @add:addMiotDialog="addMiotDialog = $event" @save-miot="handleSaveMiot"/>
-  <EditMiot :editMiotDialog="editMiotDialog" :miot="selectedMiot" @update:editMiotDialog="editMiotDialog = $event" @save-miot="handleUpdateMiot"/>
+  <LochyGrid 
+    v-if="showGrid" 
+    :numeryLoch="numeryLoch"
+    :lochy="Lochy" 
+    @update:selectedLocha="updateSelectedLocha" 
+    style="z-index: 1;"/>
+  <AddMiot 
+    :addMiotDialog="addMiotDialog" 
+    :idLochy="idLochy" 
+    :krycieId="ostatnieKrycieId" 
+    @add:addMiotDialog="addMiotDialog = $event" 
+    @save-miot="handleSaveMiot"/>
+  <EditMiot 
+    :editMiotDialog="editMiotDialog" 
+    :miot="selectedMiot" 
+    @update:editMiotDialog="editMiotDialog = $event" 
+    @save-miot="handleUpdateMiot"/>
   <v-alert
   type="error"
   variant="tonal"
@@ -198,7 +211,6 @@ const loadMioty = async (newValue) => {
 
             if (new Date(wydarzenie.dataWydarzenia).getTime() < new Date(miot.dataPrzewidywanegoProszenia).getTime()) 
             {
-              // miot.datyKrycia.push(`${wydarzenie.dataWydarzenia}`);
               miot.datyKrycia.push({data: wydarzenie.dataWydarzenia, rasa: wydarzenie.rasa});
               ostatniIndeksWydarzenia++;
               if (najwiekszaLiczbaKrycMiotu < miot.datyKrycia.length) 
@@ -217,33 +229,9 @@ const loadMioty = async (newValue) => {
         {
           headers.value[1].children.splice(-3, 0, { title: `Krycia nr ${newHeader + 1}`, value: `datyKrycia[${newHeader}]` });
         }
-
-        // if (ostatniIndeksWydarzenia < selected.wydarzeniaLochyId.length) 
-        // {
-        //   ostatnieKrycieId.value = selected.wydarzeniaLochyId[selected.wydarzeniaLochyId.length - 1];
-        //   Mioty.value.push({nr:Mioty.value.length+1});
-        //   Mioty.value[Mioty.value.length-1].datyKrycia = [];
-        //   if(selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia > 0)
-        //   {
-        //     for (let newHeader = najwiekszaLiczbaKrycMiotu; newHeader < selected.wydarzeniaLochyId.length - ostatniIndeksWydarzenia; newHeader++) 
-        //     {
-        //       headers.value[1].children.splice(-3, 0, { title: `Krycia nr ${newHeader + 1}`, value: `datyKrycia[${newHeader}]` });
-        //     }
-        //   }
-        //   for (let indeksWydarzenia = ostatniIndeksWydarzenia; indeksWydarzenia < selected.wydarzeniaLochyId.length; indeksWydarzenia++) 
-        //   {
-        //     let wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
-        //     let wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
-        //     let wydarzenie = wydarzenieResponse.data;
-        //     Mioty.value[Mioty.value.length-1].datyKrycia.push({data: wydarzenie.dataWydarzenia, rasa: wydarzenie.rasa});
-        //   }
-        //     let ostatniMiotIdx = Mioty.value.length-1;
-        //     let ostatnieKrycie = Mioty.value[ostatniMiotIdx].datyKrycia[Mioty.value[ostatniMiotIdx].datyKrycia.length-1].data;
-        //     let ostatnieKrycieData = new Date(ostatnieKrycie);
-        //     ostatnieKrycieData.setDate(ostatnieKrycieData.getDate() + 114);
-        //     Mioty.value[ostatniMiotIdx].dataPrzewidywanegoProszenia = ostatnieKrycieData.toISOString().split("T")[0];
-        // }
-      }catch (e) {
+      }
+      catch (e) 
+      {
         console.error("Błąd podczas pobierania danych wybranej lochy:", e);
         error.value = e;
       }
@@ -261,14 +249,6 @@ const gridButtonClick = () => {
 const updateSelectedLocha = (number) => {
   selectedLocha.value = number;
   showGrid.value = !showGrid.value;
-};
-
-const quickAddLocha = async (newLochaId) => {
-  let newLocha = await apiClient.get('/Locha/' + newLochaId);
-  Lochy.value.push(newLocha.data);
-  numeryLoch.value.push({idLochy: newLocha.data.id,
-                         numerLochy: newLocha.data.numerLochy,
-                         statusLochy: newLocha.data.status});
 };
 
 const addItem = () => {
@@ -325,9 +305,7 @@ const handleUpdateMiot = async (editedMiot) => {
 };
 
 </script>
-  
-  <style lang="scss">
-  
+<style lang="scss">
   .autocompleteNrLochy {
     min-width: 130px;
     position: absolute;

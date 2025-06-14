@@ -18,7 +18,11 @@ import apiClient from '@/plugins/axios';
 
   
   const props = defineProps({
-    items: {
+    numeryLoch: {
+      type: Array,
+      required: true
+    },
+    lochy: {
       type: Array,
       required: true
     }
@@ -26,7 +30,7 @@ import apiClient from '@/plugins/axios';
 
   const lochyMap = computed(() => {
   const map = new Map();
-  props.items.forEach(locha => {
+  props.numeryLoch.forEach(locha => {
     map.set(locha.numerLochy, locha.statusLochy);
   });
   return map;
@@ -47,7 +51,7 @@ import apiClient from '@/plugins/axios';
   
   const handleClick = async (number) => {
     
-    if(props.items.map(locha => locha.numerLochy).includes(number))
+    if(props.numeryLoch.map(locha => locha.numerLochy).includes(number))
       {
         emit('update:selectedLocha', number);
       } 
@@ -59,13 +63,21 @@ import apiClient from '@/plugins/axios';
                         miotyId: []
         };
         let response = await apiClient.post('/Locha', newLocha);
-        console.log(response.data);
-        emit('quickAdd:newLochaId', response.data);
+        quickAddLocha(response.data);
+        // emit('quickAdd:newLochaId', response.data);
       }
   };
-  </script>
+
+  const quickAddLocha = async (newLochaId) => {
+    let newLocha = await apiClient.get('/Locha/' + newLochaId);
+    props.lochy.push(newLocha.data);
+    props.numeryLoch.push({idLochy: newLocha.data.id,
+                          numerLochy: newLocha.data.numerLochy,
+                          statusLochy: newLocha.data.status});
+  }; 
+</script>
   
-  <style scoped>
+<style scoped>
   .grid-container {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
@@ -103,4 +115,4 @@ import apiClient from '@/plugins/axios';
     min-width: 0;
     min-height: 40px;
     }
-  </style>
+</style>

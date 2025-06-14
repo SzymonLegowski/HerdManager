@@ -4,7 +4,12 @@
         @update:model-value="addWydarzenieDialog"
         max-width="500"
         persistent>
-        <LochyGrid v-if="showLochyGrid" :items="numeryLoch" @update:selectedLocha="updateSelectedLochy" class="lochyGridDialog"/>
+        <LochyGrid 
+          v-if="showLochyGrid" 
+          :numeryLoch="numeryLoch"
+          :lochy="lochy" 
+          @update:selectedLocha="updateSelectedLochy" 
+          class="lochyGridDialog"/>
         <v-card
           prepend-icon="mdi-plus"
           title="Nowe Wydarzenie"
@@ -22,7 +27,7 @@
               text="Dodano pomyślnie!"
               style="margin-bottom: 10px;"/>
             <v-autocomplete
-              :items="['Krycie', 'Szczepienie']"
+              :items="['Krycie', 'Odsadzanie']"
               label="Typ"
               auto-select-first
               v-model:="noweWydarzenie.typWydarzenia"
@@ -41,9 +46,10 @@
               v-model="noweWydarzenie.rasa"
               variant="outlined"/>
             <v-textarea label="Uwagi" v-model="noweWydarzenie.uwagi" style=" margin-top: 5px; margin-bottom: 10px;" variant="outlined"/>
-            <v-row style="margin-left: 0px;">
+            <div class="numeryLoch-container"><div class="numeryLoch-container-label">Wybrane lochy</div> {{ noweWydarzenie.lochyId.join(", ") }} </div>
+            <v-row style="margin-left: 0px; justify-content: space-between;">
               <v-btn variant="tonal" color="secondary" text="Dodaj lochy" @click="selectLochy"/>
-              <v-btn variant="tonal" color="secondary" @click="wybraneLochyEmpty" style="margin-left: 10px;">{{ noweWydarzenie.lochyId }}</v-btn>
+              <v-btn variant="tonal" class="wybraneLochyEmpty-btn" @click="wybraneLochyEmpty">Wyczyść</v-btn>
             </v-row>
           </v-card-text>
           <v-divider/>
@@ -119,6 +125,8 @@ const saveDialog = async () => {
   }
   for(let lochaNr = 0; lochaNr < noweWydarzenie.value.lochyId.length; lochaNr++)
   {
+    const znaleziony = numeryLoch.value.find(obj => obj.numerLochy === noweWydarzenie.value.lochyId[lochaNr]);
+    znaleziony.statusLochy = "Pokryta";
     for(let locha = 0; locha < lochy.value.length; locha++)
     {
       if(lochy.value[locha].numerLochy === noweWydarzenie.value.lochyId[lochaNr])
@@ -181,10 +189,12 @@ onMounted(async () => {
     lochyKarmiace.value = responseD.data;
     lochy.value = lochyWolne.value.concat(lochyPokryte.value, lochyKarmiace.value, lochyProsne.value);
     numeryLoch.value = lochy.value.map(locha => ({
+        idLochy: locha.id,
         numerLochy: locha.numerLochy,
         statusLochy: locha.status
       }));
-    console.log("numeryLoch", numeryLoch); //Debugowanie
+    console.log("lochy ",lochy.value)
+    console.log("numeryLoch ",numeryLoch.value)
   } catch (e) {
     console.error(e);
   }
@@ -226,19 +236,35 @@ const required = (v) => { return !!v || 'Pole jest wymagane' };
 <style scoped>
 .addButton {
   margin-bottom: 30px;
-  
 }
 .shift-left {
   transform: translateX(-120px);
   transition: all 0.4s ease-in-out;
 }
-
 .lochyGridDialog {
   position: absolute;
-  top: -5%;
+  top: 0%;
   left: 70%;
 }
-h5 {
-  cursor: pointer; /* Wskazuje, że element jest klikalny */
+.numeryLoch-container{
+  padding: 11px 13px;
+  margin-bottom:30px;
+  border: 1.5px;
+  border-radius: 4px;
+  height: 50px;
+  border-style: solid;
+  border-color: #777777;
+}
+.numeryLoch-container-label{
+  position: absolute;
+  transform: translate(0, -21px);
+  background-color: #222222;
+  color:#bbbbbb;
+  font-size:12px;
+  padding: 0 5px;
+}
+.wybraneLochyEmpty-btn{
+  background-color: rgb(255, 0, 0);
+  margin-right:12px ;
 }
 </style>
