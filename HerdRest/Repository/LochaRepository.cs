@@ -14,7 +14,7 @@ namespace HerdRest.Repository
         {
             _context = context;
         }
-        public LochaDto MapToDto(Locha locha) => new()
+        public LochaDto MapToDto(Locha locha, bool sortWydarzenia) => new()
         {
             Id = locha.Id,
             NumerLochy = locha.NumerLochy,
@@ -25,11 +25,19 @@ namespace HerdRest.Repository
             DataCzasModyfikacji = locha.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
             DataBrakowania = locha.DataBrakowania,
             MiotyId = locha.Mioty?.Select(m => m.Id).ToList() ?? [],
-            WydarzeniaLochyId = locha.WydarzeniaLochy?.Select(w => w.WydarzenieId).ToList() ?? []
+            WydarzeniaLochyId = sortWydarzenia
+                ? locha.WydarzeniaLochy?
+                    .Where(wl => wl.Wydarzenie != null)
+                    .OrderBy(wl => wl.Wydarzenie.DataWydarzenia)
+                    .Select(w => w.WydarzenieId)
+                    .ToList() ?? []
+                : locha.WydarzeniaLochy?
+                    .Select(wl => wl.WydarzenieId)
+                    .ToList() ?? []
         };
         public List<LochaDto> MapToDtoList(List<Locha> lochy)
         {
-            return [.. lochy.Select(MapToDto)];
+            return [.. lochy.Select(locha => MapToDto(locha, false))];
         }
         public Locha MapToModel(LochaDto lochaDto) => new()
         {
@@ -87,6 +95,7 @@ namespace HerdRest.Repository
         {
             var locha = _context.Lochy.Include(l => l.Mioty)
                         .Include(l => l.WydarzeniaLochy)
+                        .ThenInclude(wl => wl.Wydarzenie)
                         .FirstOrDefault(l => l.Id == lochaId) ?? throw new InvalidOperationException("Locha nie istnieje.");
             return locha;
         }

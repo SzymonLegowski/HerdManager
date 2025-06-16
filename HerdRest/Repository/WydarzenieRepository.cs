@@ -44,7 +44,7 @@ namespace HerdRest.Repository
         }
         public (bool, int) CreateWydarzenie(Wydarzenie wydarzenie, List<int>? miotId, List<int>? lochaId)
         {
-            wydarzenie.Uwagi ??= "brak";
+            wydarzenie.Uwagi ??= "-";
             if (miotId != null)
             {
                 foreach (var id in miotId)
@@ -113,6 +113,29 @@ namespace HerdRest.Repository
                     _context.Add(wydarzenieLocha);
                 }
             }
+            _context.Add(wydarzenie);
+            return (Save(), wydarzenie.Id);
+        }
+
+        public (bool, int) CreateWydarzenieFromCsv(Wydarzenie wydarzenie, int lochaId)
+        {
+            wydarzenie.Uwagi ??= "-";
+            if(lochaId != null)
+            {
+                    var locha = _context.Lochy
+                    .Where(a => a.Id == lochaId)
+                    .Include(l => l.Mioty)
+                    .ThenInclude(m => m.WydarzeniaMiotu)
+                    .FirstOrDefault();
+                    var wydarzenieLocha = new WydarzenieLocha()
+                    {
+                        Locha = locha ?? throw new InvalidOperationException("Locha nie istnieje."),
+                        Wydarzenie = wydarzenie,
+                    };
+                        locha.Status = StatusLochy.Pokryta;
+                        _context.Update(locha);
+                    _context.Add(wydarzenieLocha);
+                }
             _context.Add(wydarzenie);
             return (Save(), wydarzenie.Id);
         }

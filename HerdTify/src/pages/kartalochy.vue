@@ -195,6 +195,7 @@ const loadMioty = async (newValue) => {
       idLochy.value = selected.id;
       let response = await apiClient.get("locha/" + idLochy.value);
       selected = response.data;
+      console.log(selected.wydarzeniaLochyId);
         for (let indeksMiotu = 0; indeksMiotu < selected.miotyId.length; indeksMiotu++) 
         {
           let miotId = selected.miotyId[indeksMiotu];
@@ -202,15 +203,19 @@ const loadMioty = async (newValue) => {
           let miot = miotResponse.data;
           miot.datyKrycia = [];
           miot.nr = indeksMiotu + 1;
+          // console.log("Miot ", miot.nr, " ", miot); //Debug
 
           for (let indeksWydarzenia = ostatniIndeksWydarzenia; indeksWydarzenia < selected.wydarzeniaLochyId.length; indeksWydarzenia++) 
           {
             let wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
             let wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
             let wydarzenie = wydarzenieResponse.data;
+            console.log(wydarzenie); //Debug
+            // console.log("wydarzenie.dataWydarzenia ", wydarzenie.dataWydarzenia, " miot.dataPrzewidywanegoProszenia ", miot.dataPrzewidywanegoProszenia) //Debug
 
             if (new Date(wydarzenie.dataWydarzenia).getTime() < new Date(miot.dataPrzewidywanegoProszenia).getTime()) 
             {
+              // console.log("test",indeksWydarzenia); //Debug
               miot.datyKrycia.push({data: wydarzenie.dataWydarzenia, rasa: wydarzenie.rasa});
               ostatniIndeksWydarzenia++;
               if (najwiekszaLiczbaKrycMiotu < miot.datyKrycia.length) 
@@ -235,6 +240,7 @@ const loadMioty = async (newValue) => {
         console.error("Błąd podczas pobierania danych wybranej lochy:", e);
         error.value = e;
       }
+      console.log(headers.value[1]);
     }
   };
 

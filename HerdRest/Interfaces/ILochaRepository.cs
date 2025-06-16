@@ -5,7 +5,7 @@ namespace HerdRest.Interfaces
 {
     public interface ILochaRepository
     {
-        LochaDto MapToDto(Locha locha);
+        LochaDto MapToDto(Locha locha, bool sortWydarzenia);
         List<LochaDto> MapToDtoList(List<Locha> lochy);
         Locha MapToModel(LochaDto lochaDto);
         (bool, int) CreateLocha(Locha locha, List<int>? wydarzenieId);

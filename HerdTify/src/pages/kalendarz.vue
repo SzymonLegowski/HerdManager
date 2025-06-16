@@ -51,7 +51,7 @@ import NavigationDrawer from '@/components/NavigationDrawer.vue'
 import apiClient from '@/plugins/axios';
 import "@/styles/appBar.scss"
 const weekdays = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela']
-const today = ref(new Date(2025, 8, 1));
+const today = ref(new Date());
 const daysInMonth = ref([]);
 const firstWeekday = ref(0);
 const monthName = ref('');

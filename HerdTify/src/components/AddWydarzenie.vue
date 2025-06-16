@@ -120,45 +120,57 @@ const closeDialog = () => {
 };
           
 const saveDialog = async () => {
-  if(noweWydarzenie.value.dataWykonania === ""){
-    noweWydarzenie.value.dataWykonania = noweWydarzenie.value.dataWydarzenia;
-  }
-  for(let lochaNr = 0; lochaNr < noweWydarzenie.value.lochyId.length; lochaNr++)
+  if(noweWydarzenie.value.typWydarzenia === "Odsadzanie")
   {
-    const znaleziony = numeryLoch.value.find(obj => obj.numerLochy === noweWydarzenie.value.lochyId[lochaNr]);
-    znaleziony.statusLochy = "Pokryta";
-    for(let locha = 0; locha < lochy.value.length; locha++)
+    noweWydarzenie.value.dataWykonania = noweWydarzenie.value.dataWydarzenia;
+    noweWydarzenie.value.lochyId.forEach(lochaId => {
+        const znaleziona = lochy.value.find(obj => obj.numerLochy === lochaId);
+        console.log(znaleziona.miotyId.join(", "));
+    });
+    console.log(noweWydarzenie.value.lochyId);
+  }
+  else
+  {
+    if(noweWydarzenie.value.dataWykonania === ""){
+        noweWydarzenie.value.dataWykonania = noweWydarzenie.value.dataWydarzenia;
+      }
+    for(let lochaNr = 0; lochaNr < noweWydarzenie.value.lochyId.length; lochaNr++)
     {
-      if(lochy.value[locha].numerLochy === noweWydarzenie.value.lochyId[lochaNr])
+      const znaleziony = numeryLoch.value.find(obj => obj.numerLochy === noweWydarzenie.value.lochyId[lochaNr]);
+      znaleziony.statusLochy = "Pokryta";
+      for(let locha = 0; locha < lochy.value.length; locha++)
       {
-        noweWydarzenieTemp.value.numeryLoch.push(lochy.value[locha].numerLochy);
-        noweWydarzenie.value.lochyId[lochaNr] = lochy.value[locha].id;
+        if(lochy.value[locha].numerLochy === noweWydarzenie.value.lochyId[lochaNr])
+        {
+          noweWydarzenieTemp.value.numeryLoch.push(lochy.value[locha].numerLochy);
+          noweWydarzenie.value.lochyId[lochaNr] = lochy.value[locha].id;
+        }
       }
     }
+    console.log("noweWydarzenie", noweWydarzenie); //Debugowanie
+    await apiClient.post('/Wydarzenie', noweWydarzenie.value)
+      .then((response) => {
+        alert.value = false;
+        success.value = true;
+        mapNoweWydarzenieTemp();
+        clearNoweWydarzenie();
+        noweWydarzenieTemp.value.id = response.data;
+        emit('save-wydarzenie', noweWydarzenieTemp.value);
+      })
+      .catch((e) => {
+        success.value = false;
+        console.error(e);
+        if(noweWydarzenie.value.lochyId.length === 0) 
+        message.value = "Wydarzenie musi zawierać przynajmniej 1 lochę"; 
+        else if (noweWydarzenie.value.dataWydarzenia === "")
+        message.value = "Nie podano daty wydarzenia";
+        else if (e.response.data.e.errors[0].errorMessage !== null)
+        message.value = e.response.data.e.errors[0].errorMessage;
+        else
+        message.value = "Błąd podczas dodawania wydarzenia";
+        alert.value = true;
+      });
   }
-  console.log("noweWydarzenie", noweWydarzenie); //Debugowanie
-  await apiClient.post('/Wydarzenie', noweWydarzenie.value)
-    .then((response) => {
-      alert.value = false;
-      success.value = true;
-      mapNoweWydarzenieTemp();
-      clearNoweWydarzenie();
-      noweWydarzenieTemp.value.id = response.data;
-      emit('save-wydarzenie', noweWydarzenieTemp.value);
-    })
-    .catch((e) => {
-      success.value = false;
-      console.error(e);
-      if(noweWydarzenie.value.lochyId.length === 0) 
-      message.value = "Wydarzenie musi zawierać przynajmniej 1 lochę"; 
-      else if (noweWydarzenie.value.dataWydarzenia === "")
-      message.value = "Nie podano daty wydarzenia";
-      else if (e.response.data.e.errors[0].errorMessage !== null)
-      message.value = e.response.data.e.errors[0].errorMessage;
-      else
-      message.value = "Błąd podczas dodawania wydarzenia";
-      alert.value = true;
-    });
 };
 
 const selectLochy = () => {
@@ -208,7 +220,6 @@ const updateSelectedLochy = (number) => {
     let index = noweWydarzenie.value.lochyId.indexOf(number);
     noweWydarzenie.value.lochyId.splice(index, 1);
   }
-  console.log("wybrane lochy:", noweWydarzenie); //Debugowanie  
 };
 
 const clearNoweWydarzenie = () => {

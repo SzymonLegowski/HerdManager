@@ -91,17 +91,28 @@ public class CsvLoader(ILochaRepository lochaRepository, IMiotRepository miotRep
                                     }
                                 }
                             }
-                            List<int> idLoch = [idLochy];
-                            var createOutput = _wydarzenieRepository.CreateWydarzenie(wydarzenie, null, idLoch);
-                            if (!createOutput.Item1)
+                            if (SektorPorodowki[0] == "")
                             {
-                                return $"Wystąpił problem przy zapisie krycia z datą {wydarzenie.DataWydarzenia}";
+                                var createOutput = _wydarzenieRepository.CreateWydarzenie(wydarzenie, null, [idLochy]);
+                                if (!createOutput.Item1)
+                                {
+                                    return $"Wystąpił problem przy zapisie krycia z datą {wydarzenie.DataWydarzenia}";
+                                }
+                                idWydarzenia = createOutput.Item2;
                             }
-                            idWydarzenia = createOutput.Item2;
+                            else
+                            {
+                                var createOutput = _wydarzenieRepository.CreateWydarzenieFromCsv(wydarzenie, idLochy);
+                                if (!createOutput.Item1)
+                                {
+                                    return $"Wystąpił problem przy zapisie krycia z datą {wydarzenie.DataWydarzenia}";
+                                }
+                                idWydarzenia = createOutput.Item2;
+                            }
                         }
                     }
                 }
-                if (SektorPorodowkiDlugosc > 0 && SektorPorodowki[0] != "")
+                if (SektorPorodowki[0] != "")
                 {
                     Miot miot = new();
                     miot.Locha = _context.Lochy.Where(l => l.Id == idLochy).FirstOrDefault();

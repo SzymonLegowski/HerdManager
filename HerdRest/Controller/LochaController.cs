@@ -85,7 +85,7 @@ namespace HerdRest.Controller
                 return NotFound();
             
             var locha = _lochaRepository.GetLocha(lochaId);
-            var dto = _lochaRepository.MapToDto(locha);
+            var dto = _lochaRepository.MapToDto(locha, true);
 
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
