@@ -19,7 +19,7 @@
               v-if="alert"
               type="error"
               variant="tonal"
-              style="margin-bottom: 10px;">{{ message }}</v-alert>
+              style="margin-bottom: 15px;">{{ message }}</v-alert>
             <v-alert
               v-if="success"
               type="success"
@@ -39,17 +39,23 @@
               v-model="noweWydarzenie.dataWydarzenia"
               :rules="[required]"
               variant="outlined"
-              style="margin-bottom:5px; margin-top: 5px;"/>
+              style="margin-bottom:10px; margin-top: 5px;"/>
             <v-text-field
+              v-if="noweWydarzenie.typWydarzenia=='Krycie'"
               hint="np. Maximus"
               label="Rasa kn."
               v-model="noweWydarzenie.rasa"
               variant="outlined"/>
-            <v-textarea label="Uwagi" v-model="noweWydarzenie.uwagi" style=" margin-top: 5px; margin-bottom: 10px;" variant="outlined"/>
+            <v-textarea 
+              v-if="noweWydarzenie.typWydarzenia=='Krycie'"
+              label="Uwagi" 
+              v-model="noweWydarzenie.uwagi" 
+              style=" margin-top: 5px; margin-bottom: 10px;" 
+              variant="outlined"/>
             <div class="numeryLoch-container"><div class="numeryLoch-container-label">Wybrane lochy</div> {{ noweWydarzenie.lochyId.join(", ") }} </div>
             <v-row style="margin-left: 0px; justify-content: space-between;">
               <v-btn variant="tonal" color="secondary" text="Dodaj lochy" @click="selectLochy"/>
-              <v-btn variant="tonal" class="wybraneLochyEmpty-btn" @click="wybraneLochyEmpty">Wyczyść</v-btn>
+              <v-btn variant="tonal" class="wybraneLochyEmpty-btn" @click="wybraneLochyEmpty">Usuń lochy</v-btn>
             </v-row>
           </v-card-text>
           <v-divider/>
@@ -70,7 +76,7 @@
   </template>
 
 <script setup>
-import { onMounted, ref} from 'vue';
+import { onMounted, ref, watch} from 'vue';
 import apiClient from "@/plugins/axios";
 import LochyGrid from './LochyGrid.vue';
 
@@ -103,7 +109,7 @@ let noweWydarzenieTemp = ref({
   id: "",
   typWydarzenia: "",
   uwagi: "",
-  dataWydarzenia: "Krycie",
+  dataWydarzenia: "",
   dataWykonania: "",
   dataCzasUtworzenia: "",
   dataCzasModyfikacji: "",
@@ -122,12 +128,25 @@ const closeDialog = () => {
 const saveDialog = async () => {
   if(noweWydarzenie.value.typWydarzenia === "Odsadzanie")
   {
-    noweWydarzenie.value.dataWykonania = noweWydarzenie.value.dataWydarzenia;
+    let najstarszeMioty = [];
     noweWydarzenie.value.lochyId.forEach(lochaId => {
         const znaleziona = lochy.value.find(obj => obj.numerLochy === lochaId);
-        console.log(znaleziona.miotyId.join(", "));
+        najstarszeMioty.push(Math.max(...znaleziona.miotyId));
     });
-    console.log(noweWydarzenie.value.lochyId);
+    const odsadzenie = {miotyId: najstarszeMioty, dataOdsadzenia: noweWydarzenie.value.dataWydarzenia};
+    await apiClient.put("/Miot/weaning", odsadzenie)
+      .then((response) => {
+        alert.value = false;
+        success.value = true;
+      }).catch((e) => {
+        success.value = false;
+        console.log(odsadzenie);
+        if(noweWydarzenie.dataOdsadzenia === null)
+          message.value = "Nie podano daty.";
+        else if(najstarszeMioty.length === 0)
+          message.value = "Nie podano loch.";
+        alert.value = true;
+      });
   }
   else
   {
@@ -153,7 +172,6 @@ const saveDialog = async () => {
         alert.value = false;
         success.value = true;
         mapNoweWydarzenieTemp();
-        clearNoweWydarzenie();
         noweWydarzenieTemp.value.id = response.data;
         emit('save-wydarzenie', noweWydarzenieTemp.value);
       })
@@ -207,19 +225,26 @@ onMounted(async () => {
       }));
     console.log("lochy ",lochy.value)
     console.log("numeryLoch ",numeryLoch.value)
+    clearNoweWydarzenie();
   } catch (e) {
     console.error(e);
   }
 });
 
 const updateSelectedLochy = (number) => {
+  const typ = noweWydarzenie.value.typWydarzenia;
+  const locha = numeryLoch.value.find(locha => locha.numerLochy === number);
+  const status = locha?.statusLochy;
+  if(typ === "") return;
+  if(typ === "Odsadzanie" && status !== "Karmiaca") return;
+  if(typ === "Krycie" && status === "Karmiaca") return;
   if(!noweWydarzenie.value.lochyId.includes(number)){
-    noweWydarzenie.value.lochyId.push(number);
-  } else
-  {
-    let index = noweWydarzenie.value.lochyId.indexOf(number);
-    noweWydarzenie.value.lochyId.splice(index, 1);
-  }
+      noweWydarzenie.value.lochyId.push(number);
+    } else
+    {
+      let index = noweWydarzenie.value.lochyId.indexOf(number);
+      noweWydarzenie.value.lochyId.splice(index, 1);
+    }
 };
 
 const clearNoweWydarzenie = () => {
@@ -242,6 +267,13 @@ const mapNoweWydarzenieTemp = () => {
 
 const required = (v) => { return !!v || 'Pole jest wymagane' };
 
+watch(
+  () => noweWydarzenie.value.typWydarzenia,
+  () => {
+    console.log("test");
+    noweWydarzenie.value.lochyId = [];
+  }
+);
 </script>
 
 <style scoped>

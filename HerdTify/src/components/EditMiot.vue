@@ -24,21 +24,26 @@
             </v-row>
             <v-row>
                 <v-col>
-                    <v-text-field
-                        label="Urodzone żywe"
-                        v-model="editedMiot.urodzoneZywe"
-                        variant="outlined"/>
-                    <v-text-field
-                        label="Przygniecone"
-                        v-model="editedMiot.przygniecone"
-                        variant="outlined"/>
-                    <v-text-field
+                     <v-text-field
                         label="Data proszenia"
                         v-model="editedMiot.dataProszenia"
                         hint="rrrr-mm-dd"
                         variant="outlined"/>
+                    <v-text-field
+                        label="Urodzone żywe"
+                        v-model="editedMiot.urodzoneZywe"
+                        variant="outlined"/>
+                     <v-text-field
+                        label="Przygniecone"
+                        v-model="editedMiot.przygniecone"
+                        variant="outlined"/>                 
                 </v-col>
                 <v-col>
+                    <v-text-field
+                        label="Data odsadzenia"
+                        v-model="editedMiot.dataOdsadzenia"
+                        hint="rrrr-mm-dd"
+                        variant="outlined"/>
                     <v-text-field
                         label="Urodzone martwe"
                         v-model="editedMiot.urodzoneMartwe"
@@ -46,12 +51,7 @@
                     <v-text-field
                         label="Odsadzone"
                         v-model="editedMiot.odsadzone"
-                        variant="outlined"/>
-                    <v-text-field
-                        label="Data odsadzenia"
-                        v-model="editedMiot.dataOdsadzenia"
-                        hint="rrrr-mm-dd"
-                        variant="outlined"/>
+                        variant="outlined"/> 
                 </v-col>
             </v-row>
             <v-text-field

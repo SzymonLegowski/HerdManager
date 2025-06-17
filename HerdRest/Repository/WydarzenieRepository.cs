@@ -276,6 +276,12 @@ namespace HerdRest.Repository
 
         public bool DeleteWydarzenie(Wydarzenie wydarzenie)
         {
+            if (wydarzenie.WydarzeniaMioty != null) {
+                foreach (var wydarzenieMiot in wydarzenie.WydarzeniaMioty)
+                {
+                    _context.Remove(wydarzenieMiot.Miot);
+                }
+            }
             _context.Remove(wydarzenie);
             return Save();
         }

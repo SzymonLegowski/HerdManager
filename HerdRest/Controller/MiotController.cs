@@ -112,6 +112,29 @@ namespace HerdRest.Controller
             return Ok(updateOutput.Item2);
         }
 
+        [HttpPut("weaning")]
+        public IActionResult OdsadzenieWielu([FromBody] OdsadzanieDto odsadzanieDto)
+        {
+            if (odsadzanieDto == null)
+            {
+                ModelState.AddModelError("Empty", "Nie przesłano danych");
+                return BadRequest(ModelState);
+            }
+            foreach (int miotId in odsadzanieDto.MiotyId)
+            {
+                if (!_miotRepository.MiotExists(miotId))
+                    return NotFound("Nie odnaleziono miotu jednej z podanych loch");
+            }
+
+            if (!ModelState.IsValid)
+                return BadRequest("Niepoprawne dane");
+
+            if (!_miotRepository.AddOdsadzenia(odsadzanieDto))
+                return BadRequest("Błąd przy próbie dodania odsadzeń");
+
+            return Ok("Dodano odsadzenia pomyślnie");
+        }
+
         [HttpDelete("{miotId}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]

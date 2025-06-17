@@ -21,25 +21,7 @@
               style="margin-bottom: 10px;"/>
             <v-row>
                 <v-col>
-                    <v-text-field
-                        label="Urodzone żywe"
-                        variant="outlined"
-                        v-model="newMiot.urodzoneZywe"/>
-                    <v-text-field
-                        label="Urodzone martwe"
-                        variant="outlined"
-                        v-model="newMiot.urodzoneMartwe"/>
-                    <v-text-field
-                        label="Odsadzone"
-                        variant="outlined"
-                        v-model="newMiot.odsadzone"/>
-                </v-col>
-                <v-col>
-                    <v-text-field
-                        label="Przygniecone"
-                        variant="outlined"
-                        v-model="newMiot.przygniecone"/>
-                    <v-text-field
+                     <v-text-field
                         label="Data proszenia"
                         variant="outlined"
                         v-model="newMiot.dataProszenia"
@@ -48,7 +30,25 @@
                         label="Data odsadzenia"
                         variant="outlined"
                         v-model="newMiot.dataOdsadzenia"
-                        hint="rrrr-mm-dd"/>
+                        hint="rrrr-mm-dd"/>                   
+                    <v-text-field
+                        label="Urodzone żywe"
+                        variant="outlined"
+                        v-model="newMiot.urodzoneZywe"/>
+                </v-col>
+                <v-col>
+                     <v-text-field
+                        label="Urodzone martwe"
+                        variant="outlined"
+                        v-model="newMiot.urodzoneMartwe"/>
+                    <v-text-field
+                        label="Przygniecone"
+                        variant="outlined"
+                        v-model="newMiot.przygniecone"/>
+                    <v-text-field
+                        label="Odsadzone"
+                        variant="outlined"
+                        v-model="newMiot.odsadzone"/>                   
                 </v-col> 
             </v-row>
             <v-text-field label="Ocena" variant="outlined" v-model="newMiot.ocena"/>

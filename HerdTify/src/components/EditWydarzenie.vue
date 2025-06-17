@@ -50,7 +50,7 @@
             <div class="numeryLoch-container"><div class="numeryLoch-container-label">Wybrane lochy</div> {{ editedWydarzenie.numeryLoch.join(", ") }} </div>
             <v-row style="margin-left: 0px; justify-content: space-between;">
               <v-btn variant="tonal" color="secondary" text="Dodaj lochy" @click="selectLochy"/>
-              <v-btn variant="tonal" class="wybraneLochyEmpty-btn" @click="wybraneLochyEmpty">Wyczyść</v-btn>
+              <v-btn variant="tonal" class="wybraneLochyEmpty-btn" @click="wybraneLochyEmpty">Usuń lochy</v-btn>
             </v-row>
         </v-card-text>
         <v-divider></v-divider>

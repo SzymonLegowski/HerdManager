@@ -120,6 +120,7 @@ namespace HerdRest.Repository
                     _context.Add(wydarzenieLocha);
                 }
             }
+            _context.ChangeTracker.Clear();
             _context.Update(locha);
             return (Save(), locha.Id);
         }

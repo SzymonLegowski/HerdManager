@@ -24,7 +24,8 @@
     :headers="headers"
     :items="Lochy"
     :pageText="'{0}-{1} z {2}'"
-    items-per-page-text="Elementów na stronę">
+    items-per-page-text="Elementów na stronę"
+    :sort-by="sortBy">
   <template v-slot:item.actions="{ item }">
       <v-btn
         class="me-2"
@@ -168,4 +169,5 @@ onMounted(async () => {
     }
 })
 
+const sortBy = ref([{ key: 'id', order: 'desc'}]);
 </script>

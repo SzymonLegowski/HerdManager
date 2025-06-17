@@ -117,15 +117,18 @@ namespace HerdRest.Controller
                                             l.Status != StatusLochy.Sprzedana)
                                             .FirstOrDefault();
 
-            if(locha != null && (updatedLochaDto.Status == StatusLochy.Luzna ||
+            if(locha != null)
+            {
+                if(locha.Id != lochaId && (updatedLochaDto.Status == StatusLochy.Luzna ||
                                 updatedLochaDto.Status == StatusLochy.Prosna ||
                                 updatedLochaDto.Status == StatusLochy.Pokryta ||
                                 updatedLochaDto.Status == StatusLochy.Karmiaca))
-            {
-                ModelState.AddModelError("e", "Istnieje już aktywna locha o podanym numerze.");
-                return StatusCode(422, ModelState);
+                {
+                    ModelState.AddModelError("e", "Istnieje już aktywna locha o podanym numerze.");
+                    return StatusCode(422, ModelState);
+                }
             }
-
+            
             var updatedLocha = _lochaRepository.MapToModel(updatedLochaDto);
             var updateOutput =_lochaRepository.UpdateLocha(updatedLocha, updatedLochaDto.WydarzeniaLochyId);
 

@@ -58,7 +58,6 @@
 
     <template
       v-for="(header, index) in headers[1].children.filter(h => h.value.startsWith('datyKrycia'))"
-      
        #[`item.${header.value}`]="{ item }">
       <div v-if="item.datyKrycia?.[index]">
         <div>{{ item.datyKrycia[index].data }}</div>
@@ -68,7 +67,7 @@
 
     <template v-slot:item.actions="{ item }">
       <v-btn
-        v-if="item.dataPrzewidywanegoProszenia"
+        v-if="item.datyKrycia.length > 0"
         class="me-2"
         style="min-width: 0; width: 10px; background-color: #d67804;"
         size="small"
@@ -76,18 +75,11 @@
       <v-icon>mdi-pencil</v-icon>
       </v-btn>
       <v-btn
-        v-if="item.dataPrzewidywanegoProszenia"
+        v-if="item.datyKrycia.length == 0"
         style="min-width: 0; width: 10px; background-color: red;"
         size="small"
         @click="deleteItem(item)">
         <v-icon>mdi-delete</v-icon>
-      </v-btn>
-      <v-btn
-        v-if="!item.dataPrzewidywanegoProszenia"
-        style="min-width: 0; width: 10px; background-color: green;"
-        size="small"
-        @click="addItem()">
-        <v-icon>mdi-plus</v-icon>
       </v-btn>
     </template>
     <template v-slot:no-data></template>
@@ -195,7 +187,6 @@ const loadMioty = async (newValue) => {
       idLochy.value = selected.id;
       let response = await apiClient.get("locha/" + idLochy.value);
       selected = response.data;
-      console.log(selected.wydarzeniaLochyId);
         for (let indeksMiotu = 0; indeksMiotu < selected.miotyId.length; indeksMiotu++) 
         {
           let miotId = selected.miotyId[indeksMiotu];
@@ -203,19 +194,15 @@ const loadMioty = async (newValue) => {
           let miot = miotResponse.data;
           miot.datyKrycia = [];
           miot.nr = indeksMiotu + 1;
-          // console.log("Miot ", miot.nr, " ", miot); //Debug
 
           for (let indeksWydarzenia = ostatniIndeksWydarzenia; indeksWydarzenia < selected.wydarzeniaLochyId.length; indeksWydarzenia++) 
           {
             let wydarzenieId = selected.wydarzeniaLochyId[indeksWydarzenia];
             let wydarzenieResponse = await apiClient.get(`/Wydarzenie/${wydarzenieId}`);
             let wydarzenie = wydarzenieResponse.data;
-            console.log(wydarzenie); //Debug
-            // console.log("wydarzenie.dataWydarzenia ", wydarzenie.dataWydarzenia, " miot.dataPrzewidywanegoProszenia ", miot.dataPrzewidywanegoProszenia) //Debug
 
             if (new Date(wydarzenie.dataWydarzenia).getTime() < new Date(miot.dataPrzewidywanegoProszenia).getTime()) 
             {
-              // console.log("test",indeksWydarzenia); //Debug
               miot.datyKrycia.push({data: wydarzenie.dataWydarzenia, rasa: wydarzenie.rasa});
               ostatniIndeksWydarzenia++;
               if (najwiekszaLiczbaKrycMiotu < miot.datyKrycia.length) 
@@ -240,7 +227,6 @@ const loadMioty = async (newValue) => {
         console.error("Błąd podczas pobierania danych wybranej lochy:", e);
         error.value = e;
       }
-      console.log(headers.value[1]);
     }
   };
 
@@ -283,7 +269,6 @@ const exportToPdf = () => {
 };
 
 const handleSaveMiot = async (newMiotId) => {
-  // loadMioty(selectedLocha.value);
   let miot = await apiClient.get("/Miot/" + newMiotId);
   console.log("Mioty1", Mioty.value[1]);
   console.log("nowy miot", miot.data);

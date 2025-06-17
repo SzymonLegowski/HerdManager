@@ -37,25 +37,22 @@ namespace HerdRest.Repository
             return mioty.Select(MapToDto).ToList();
         }
 
-        public Miot MapToModel(MiotDto miotDto)
+        public Miot MapToModel(MiotDto miotDto) => new()
         {
-            return new Miot
-            {
-                Id = miotDto.Id,
-                UrodzoneZywe = miotDto.UrodzoneZywe,
-                UrodzoneMartwe = miotDto.UrodzoneMartwe,
-                Przygniecone = miotDto.Przygniecone,
-                Odsadzone = miotDto.Odsadzone,
-                Ocena = miotDto.Ocena,
-                DataPrzewidywanegoProszenia = miotDto.DataPrzewidywanegoProszenia,
-                DataProszenia = miotDto.DataProszenia,
-                DataOdsadzenia = miotDto.DataOdsadzenia,
-                DataCzasUtworzenia = miotDto.DataCzasUtworzenia,
-                DataCzasModyfikacji = miotDto.DataCzasModyfikacji,
-                Locha = _context.Lochy.Where(l => l.Id == miotDto.LochaId).FirstOrDefault() ?? throw new InvalidOperationException("Podany Miot nie ma lochy."),
-                WydarzeniaMiotu = [.. _context.WydarzeniaMiotu.Where(w => w.MiotId == miotDto.Id)]
-            };
-        }
+            Id = miotDto.Id,
+            UrodzoneZywe = miotDto.UrodzoneZywe,
+            UrodzoneMartwe = miotDto.UrodzoneMartwe,
+            Przygniecone = miotDto.Przygniecone,
+            Odsadzone = miotDto.Odsadzone,
+            Ocena = miotDto.Ocena,
+            DataPrzewidywanegoProszenia = miotDto.DataPrzewidywanegoProszenia,
+            DataProszenia = miotDto.DataProszenia,
+            DataOdsadzenia = miotDto.DataOdsadzenia,
+            DataCzasUtworzenia = miotDto.DataCzasUtworzenia,
+            DataCzasModyfikacji = miotDto.DataCzasModyfikacji,
+            Locha = _context.Lochy.Where(l => l.Id == miotDto.LochaId).FirstOrDefault() ?? throw new InvalidOperationException("Podany Miot nie ma lochy."),
+            WydarzeniaMiotu = [.. _context.WydarzeniaMiotu.Where(w => w.MiotId == miotDto.Id)]
+        };
 
         public (bool, int) CreateMiot(Miot miot, int wydarzenieKrycieId)
         {
@@ -161,6 +158,17 @@ namespace HerdRest.Repository
             _context.Update(miot.Locha);
             _context.Update(miot);
             return (Save(), miot.Id);
+        }
+        public bool AddOdsadzenia(OdsadzanieDto odsadzanieDto)
+        {
+            foreach (int miotId in odsadzanieDto.MiotyId)
+            {
+                var miot = GetMiot(miotId);
+                miot.DataOdsadzenia = odsadzanieDto.DataOdsadzenia;
+                miot.Locha.Status = StatusLochy.Luzna;
+                _context.Update(miot);
+            }
+            return Save();
         }
         public bool DeleteMiot(Miot miot)
         {
