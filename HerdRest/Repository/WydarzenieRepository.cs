@@ -20,6 +20,7 @@ namespace HerdRest.Repository
             DataWydarzenia = wydarzenie.DataWydarzenia,
             DataCzasUtworzenia = wydarzenie.DataCzasUtworzenia.ToString("yyyy-MM-dd HH:mm:ss"),
             DataCzasModyfikacji = wydarzenie.DataCzasModyfikacji.ToString("yyyy-MM-dd HH:mm:ss"),
+            NumeryLoch = wydarzenie.WydarzeniaLoch?.Select(l => l.Locha.NumerLochy).ToList() ?? [],
             LochyId = wydarzenie.WydarzeniaLoch?.Select(l => l.LochaId).ToList() ?? [],
             MiotyId = wydarzenie.WydarzeniaMioty?.Select(m => m.MiotId).ToList() ?? []
         };
@@ -184,18 +185,14 @@ namespace HerdRest.Repository
                 .Select(l => l.DataCzasUtworzenia)
                 .FirstOrDefault();
 
-            foreach(var wydarzenieMiot in wydarzenie.WydarzeniaMioty)
-            {
-                if(miotId == null || !miotId.Contains(wydarzenieMiot.MiotId))
-                {
-                    _context.Remove(wydarzenieMiot);
-                }
-            }
             foreach(var wydarzenieLocha in wydarzenie.WydarzeniaLoch)
             {
-                if(lochaId == null || !lochaId.Contains(wydarzenieLocha.LochaId))
+                if (lochaId == null || !lochaId.Contains(wydarzenieLocha.LochaId))
                 {
                     _context.Remove(wydarzenieLocha);
+                    var locha = _context.Lochy.Where(l => l.Id == wydarzenieLocha.LochaId).Include(l => l.Mioty).FirstOrDefault();
+                    var miot = locha?.Mioty?.OrderByDescending(m => m.Id).First();
+                    if (miot != null) { _context.Remove(miot); }
                 }
             }
             if(miotId != null)

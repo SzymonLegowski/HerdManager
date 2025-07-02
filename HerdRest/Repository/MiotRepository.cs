@@ -27,10 +27,9 @@ namespace HerdRest.Repository
                 DataCzasUtworzenia = miot.DataCzasUtworzenia,
                 DataCzasModyfikacji = miot.DataCzasModyfikacji,
                 LochaId = miot.Locha.Id,
+                NumerLochy = miot.Locha.NumerLochy,
                 WydarzeniaMiotuId = miot.WydarzeniaMiotu.Select(wm => wm.WydarzenieId).ToList() ?? []
-                
             };
-
         }
         public List<MiotDto> MapToDtoList(List<Miot> mioty)
         {
@@ -100,10 +99,7 @@ namespace HerdRest.Repository
                      m.DataProszenia.Value.Month == miesiac) ||
                     (m.DataOdsadzenia.HasValue &&
                      m.DataOdsadzenia.Value.Year == rok &&
-                     m.DataOdsadzenia.Value.Month == miesiac)
-    )
-];
-
+                     m.DataOdsadzenia.Value.Month == miesiac))];
         }
         public Miot GetMiot(int miotId)
         {

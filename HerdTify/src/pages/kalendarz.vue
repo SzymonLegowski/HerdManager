@@ -100,18 +100,12 @@ async function init() {
     Wydarzenia.value = responseWydarzenia.data;
     Wydarzenia.value.forEach(element => {
         element.dataWydarzenia = new Date(element.dataWydarzenia);
-        element.numeryLoch = [];
-        element.lochyId.forEach(async id => {
-            const response = await apiClient.get(`/Locha/${id}`);
-            element.numeryLoch.push(response.data.numerLochy);
-        })
     });
     Mioty.value = responseMioty.data;
     console.log(Mioty.value[0]);
     daysInMonth.value.forEach( day => {
       let currentDay = new Date( year, month, day.date);
       Mioty.value.forEach(async miot => {
-        miot.numerLochy = ((await apiClient.get(`/Locha/${miot.lochaId}`)).data.numerLochy);
         if(miot.dataPrzewidywanegoProszenia !== null)
         {
           miot.dataPrzewidywanegoProszenia = new Date(miot.dataPrzewidywanegoProszenia);

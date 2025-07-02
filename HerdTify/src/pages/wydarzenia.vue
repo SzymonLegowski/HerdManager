@@ -112,18 +112,6 @@ onMounted(async () => {
   try {
     const response = await apiClient.get("/Wydarzenie");
     Wydarzenia.value = response.data;
-    for (let indeksWydarzenia = 0; indeksWydarzenia < Wydarzenia.value.length; indeksWydarzenia++)
-    {
-      const numeryLochWydarzenia = [];
-      Wydarzenia.value[indeksWydarzenia].numeryLoch = [];
-      
-      for (let indeksLochy = 0; indeksLochy < Wydarzenia.value[indeksWydarzenia].lochyId.length; indeksLochy++)
-      {
-        const responseLocha = await apiClient.get("/Locha/" + Wydarzenia.value[indeksWydarzenia].lochyId[indeksLochy]);
-        numeryLochWydarzenia.push(responseLocha.data.numerLochy);
-      }
-      Wydarzenia.value[indeksWydarzenia].numeryLoch = numeryLochWydarzenia;
-    }
   } catch (err) {
     error.value = err;
   }
