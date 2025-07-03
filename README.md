@@ -1,2 +1,3 @@
 # HerdManager
 App for Herd managing.
+Work in progress, gotta refactor code and all...
